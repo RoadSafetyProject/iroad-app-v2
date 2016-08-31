@@ -4,7 +4,7 @@ import { StatusBar } from 'ionic-native';
 
 import { HomePage } from './pages/home/home';
 import { ReportAccidentPage } from './pages/report-accident/report-accident';
-import { ReportOffensePage } from './pages/report-offense/report-offense';
+import { ReportOffencePage } from './pages/report-offence/report-offence';
 import { DriverVerificationPage } from './pages/driver-verification/driver-verification';
 import { VehicleVerificationPage } from './pages/vehicle-verification/vehicle-verification';
 
@@ -25,7 +25,7 @@ class MyApp {
     this.pages = [
       { title: 'Home', component: HomePage },
       { title: 'Report Accident', component: ReportAccidentPage},
-      { title: 'Report Offense', component: ReportOffensePage },
+      { title: 'Report Offence', component: ReportOffencePage },
       { title: 'Driver Verification', component: DriverVerificationPage},
       { title: 'Vehicle Verification', component: VehicleVerificationPage}
     ];
