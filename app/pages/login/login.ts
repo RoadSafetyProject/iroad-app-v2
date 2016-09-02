@@ -3,6 +3,9 @@ import { NavController ,Nav} from 'ionic-angular';
 
 import { HomePage } from '../home/home';
 
+
+import { App } from '../../providers/app/app';
+
 /*
   Generated class for the LoginPage page.
 
@@ -11,15 +14,22 @@ import { HomePage } from '../home/home';
 */
 @Component({
   templateUrl: 'build/pages/login/login.html',
+  providers: [App]
 })
 export class LoginPage {
 
-  constructor(private navCtrl: NavController,private nav: Nav) {
+  loginData : any ={};
 
+
+  constructor(private navCtrl: NavController,public app : App) {
+    this.loginData.logoUrl = 'img/logo.png';
   }
 
   login(){
-    this.nav.setRoot(HomePage);
-    //this.navCtrl.push(HomePage);
+    console.log(this.loginData);
+    this.app.getFormattedBaseUrl(this.loginData.serveUrl)
+      .then(data => {
+        console.log(data);
+      });
   }
 }

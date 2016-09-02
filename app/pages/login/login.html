@@ -13,9 +13,48 @@
 <!--</ion-header>-->
 
 
-<ion-content padding>
-  <button (click)="login()">
-    Login
-  </button>
+<ion-content padding class="login">
+  <ion-grid>
+
+    <ion-row>
+      <ion-col class="topSLogan" width-100 >
+        <h4 >iRoad 2.0 Mobile application</h4>
+        <img [src]="loginData.logoUrl" >
+      </ion-col>
+
+    </ion-row>
+
+    <ion-row >
+      <ion-col width-100 style="background-color:#ffffff;">
+
+        <ion-list>
+
+          <ion-item>
+            <ion-input [(ngModel)]="loginData.serveUrl" type="url" placeholder="Enter server URL"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-input [(ngModel)]="loginData.username" type="text" placeholder="Enter username"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-input [(ngModel)]="loginData.password" type="password" placeholder="Enter password"></ion-input>
+          </ion-item>
+
+        </ion-list>
+
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col width-5></ion-col>
+      <ion-col width-90>
+        <button (click)="login()" full>
+          Login
+        </button>
+      </ion-col>
+      <ion-col width-5></ion-col>
+    </ion-row>
+  </ion-grid>
 
 </ion-content>
