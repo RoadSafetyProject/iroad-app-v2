@@ -26,10 +26,10 @@ export class LoginPage {
   }
 
   login(){
-    console.log(this.loginData);
     this.app.getFormattedBaseUrl(this.loginData.serveUrl)
-      .then(data => {
-        console.log(data);
+      .then(formattedBaseUrl => {
+        this.loginData.serveUrl = formattedBaseUrl;
+        console.log(this.loginData);
       });
   }
 }
