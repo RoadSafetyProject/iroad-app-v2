@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { NavController,Storage, LocalStorage } from 'ionic-angular';
+
+import {HttpClient} from '../../providers/http-client/http-client';
+import {User } from '../../providers/user/user';
 
 /*
   Generated class for the HomePage page.
@@ -9,11 +12,20 @@ import { NavController } from 'ionic-angular';
 */
 @Component({
   templateUrl: 'build/pages/home/home.html',
+  providers : [HttpClient,User]
 })
 export class HomePage {
 
-  constructor(private navCtrl: NavController) {
+  private localStorage : any;
+  constructor(private navCtrl: NavController,private httpClient:HttpClient,private user : User) {
+    this.localStorage = new Storage(LocalStorage);
+    this.getCurrentUser();
+  }
 
+  getCurrentUser(){
+    this.user.getCurrentUser().then(user=>{
+      console.log(user);
+    })
   }
 
 }
