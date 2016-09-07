@@ -13,9 +13,35 @@
   </ion-navbar>
 </ion-header>
 
-<ion-content padding>
-  home page<br>
-  {{ currentUser |json }}
-  <hr>
-  {{ userData|json }}
+<ion-content padding class="home">
+
+  <ion-card>
+    <ion-item>
+      <ion-avatar item-left>
+        <img src="img/logo.png">
+      </ion-avatar>
+      <h2>iROAD 2.0 App</h2>
+      <p>Mobile reporting App </p>
+    </ion-item>
+    <ion-card-content>
+      <img src="img/home_page.png"/>
+      <p style="text-align: justify">
+        This is most responsive mobile app for reporting accidents and offenses
+        as well as verify vehicle and driver information instantly at your fingertips
+      </p>
+    </ion-card-content>
+
+  </ion-card>
+  <ion-row>
+    <ion-col width-100>
+      <div *ngFor="let page of pages" >
+        <button full  (click)="openPage(page)" >
+          {{ page.title}}
+        </button>
+      </div>
+
+    </ion-col>
+  </ion-row>
+
+
 </ion-content>

@@ -10,7 +10,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var core_1 = require('@angular/core');
 var ionic_angular_1 = require('ionic-angular');
 var ionic_native_1 = require('ionic-native');
-var login_1 = require('./pages/login/login');
 var home_1 = require('./pages/home/home');
 var report_accident_1 = require('./pages/report-accident/report-accident');
 var report_offence_1 = require('./pages/report-offence/report-offence');
@@ -19,7 +18,7 @@ var vehicle_verification_1 = require('./pages/vehicle-verification/vehicle-verif
 var MyApp = (function () {
     function MyApp(platform) {
         this.platform = platform;
-        this.rootPage = login_1.LoginPage;
+        this.rootPage = home_1.HomePage;
         this.initializeApp();
         // used for an example of ngFor and navigation
         this.pages = [
@@ -41,6 +40,9 @@ var MyApp = (function () {
         // Reset the content nav to have just this page
         // we wouldn't want the back button to show in this scenario
         this.nav.setRoot(page.component);
+    };
+    MyApp.prototype.logOut = function () {
+        console.log('Log out has been clicked');
     };
     __decorate([
         core_1.ViewChild(ionic_angular_1.Nav), 

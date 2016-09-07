@@ -11,6 +11,10 @@ var core_1 = require('@angular/core');
 var ionic_angular_1 = require('ionic-angular');
 var http_client_1 = require('../../providers/http-client/http-client');
 var user_1 = require('../../providers/user/user');
+var report_accident_1 = require('../report-accident/report-accident');
+var report_offence_1 = require('../report-offence/report-offence');
+var driver_verification_1 = require('../driver-verification/driver-verification');
+var vehicle_verification_1 = require('../vehicle-verification/vehicle-verification');
 /*
   Generated class for the HomePage page.
 
@@ -22,8 +26,13 @@ var HomePage = (function () {
         this.navCtrl = navCtrl;
         this.httpClient = httpClient;
         this.user = user;
-        this.localStorage = new ionic_angular_1.Storage(ionic_angular_1.LocalStorage);
-        this.getCurrentUser();
+        //this.getCurrentUser();
+        this.pages = [
+            { title: 'Report Accident', component: report_accident_1.ReportAccidentPage },
+            { title: 'Report Offence', component: report_offence_1.ReportOffencePage },
+            { title: 'Driver Verification', component: driver_verification_1.DriverVerificationPage },
+            { title: 'Vehicle Verification', component: vehicle_verification_1.VehicleVerificationPage }
+        ];
     }
     HomePage.prototype.getCurrentUser = function () {
         var _this = this;
@@ -33,6 +42,9 @@ var HomePage = (function () {
         this.user.getUserData().then(function (userData) {
             _this.userData = JSON.parse(userData);
         });
+    };
+    HomePage.prototype.openPage = function (page) {
+        this.navCtrl.setRoot(page.component);
     };
     HomePage = __decorate([
         core_1.Component({
