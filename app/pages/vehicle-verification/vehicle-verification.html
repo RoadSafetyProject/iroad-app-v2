@@ -14,5 +14,27 @@
 </ion-header>
 
 <ion-content padding>
-  vehicle page
+  <ion-row>
+    <ion-col width-100>
+      <ion-item>
+        <ion-label floating>Vehicle Plate Number</ion-label>
+        <ion-input type="text" [(ngModel)]="vehicle.plateNumber"></ion-input>
+      </ion-item>
+    </ion-col>
+  </ion-row>
+
+
+  <ion-row>
+    <ion-col width-100>
+      <button (click)="verifyVehicle()"  full>
+        Verify Vehicle
+      </button>
+    </ion-col>
+  </ion-row>
+
+  <ion-row>
+    <ion-col width-100>
+      {{ vehicle |json }}
+    </ion-col>
+  </ion-row>
 </ion-content>

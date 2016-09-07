@@ -16,14 +16,46 @@ var ionic_angular_1 = require('ionic-angular');
   Ionic pages and navigation.
 */
 var VehicleVerificationPage = (function () {
-    function VehicleVerificationPage(navCtrl) {
+    function VehicleVerificationPage(navCtrl, toastCtrl) {
         this.navCtrl = navCtrl;
+        this.toastCtrl = toastCtrl;
+        this.vehicle = {};
     }
+    VehicleVerificationPage.prototype.verifyVehicle = function () {
+        if (this.vehicle.plateNumber) {
+            console.log('Hello, verify driver licence');
+            this.loadData();
+        }
+        else {
+            this.setToasterMessage('Please enter Vehicle Plate Number');
+        }
+    };
+    VehicleVerificationPage.prototype.loadData = function () {
+        this.vehicle.response = {
+            owner: "Joseph Chingalo",
+            plateNumber: this.vehicle.plateNumber,
+            date: '2016-06-07'
+        };
+    };
+    VehicleVerificationPage.prototype.setToasterMessage = function (message) {
+        var toast = this.toastCtrl.create({
+            message: message,
+            duration: 3000
+        });
+        toast.present();
+    };
+    VehicleVerificationPage.prototype.setStickToasterMessage = function (message) {
+        var toast = this.toastCtrl.create({
+            message: message,
+            showCloseButton: true
+        });
+        toast.present();
+    };
     VehicleVerificationPage = __decorate([
         core_1.Component({
             templateUrl: 'build/pages/vehicle-verification/vehicle-verification.html',
         }), 
-        __metadata('design:paramtypes', [ionic_angular_1.NavController])
+        __metadata('design:paramtypes', [ionic_angular_1.NavController, ionic_angular_1.ToastController])
     ], VehicleVerificationPage);
     return VehicleVerificationPage;
 })();

@@ -16,14 +16,51 @@ var ionic_angular_1 = require('ionic-angular');
   Ionic pages and navigation.
 */
 var DriverVerificationPage = (function () {
-    function DriverVerificationPage(navCtrl) {
+    function DriverVerificationPage(navCtrl, toastCtrl) {
         this.navCtrl = navCtrl;
+        this.toastCtrl = toastCtrl;
+        this.driver = {};
     }
+    DriverVerificationPage.prototype.scanBarcode = function () {
+        console.log('Hello, scan licence');
+        this.driver.driverLisence = "41000034995";
+        this.loadData();
+    };
+    DriverVerificationPage.prototype.verifyDriver = function () {
+        if (this.driver.driverLisence) {
+            console.log('Hello, verify driver licence');
+            this.loadData();
+        }
+        else {
+            this.setToasterMessage('Please enter driver licence');
+        }
+    };
+    DriverVerificationPage.prototype.loadData = function () {
+        this.driver.response = {
+            name: "Joseph Chingalo",
+            licenceNumber: this.driver.driverLisence,
+            date: '2016-06-07'
+        };
+    };
+    DriverVerificationPage.prototype.setToasterMessage = function (message) {
+        var toast = this.toastCtrl.create({
+            message: message,
+            duration: 3000
+        });
+        toast.present();
+    };
+    DriverVerificationPage.prototype.setStickToasterMessage = function (message) {
+        var toast = this.toastCtrl.create({
+            message: message,
+            showCloseButton: true
+        });
+        toast.present();
+    };
     DriverVerificationPage = __decorate([
         core_1.Component({
             templateUrl: 'build/pages/driver-verification/driver-verification.html',
         }), 
-        __metadata('design:paramtypes', [ionic_angular_1.NavController])
+        __metadata('design:paramtypes', [ionic_angular_1.NavController, ionic_angular_1.ToastController])
     ], DriverVerificationPage);
     return DriverVerificationPage;
 })();
