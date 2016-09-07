@@ -16,6 +16,9 @@ import {User } from '../../providers/user/user';
 })
 export class HomePage {
 
+  public currentUser : any;
+  public userData : any;
+
   private localStorage : any;
   constructor(private navCtrl: NavController,private httpClient:HttpClient,private user : User) {
     this.localStorage = new Storage(LocalStorage);
@@ -24,8 +27,11 @@ export class HomePage {
 
   getCurrentUser(){
     this.user.getCurrentUser().then(user=>{
-      console.log(user);
-    })
+      this.currentUser = JSON.parse(user);
+    });
+    this.user.getUserData().then(userData=>{
+      this.userData = JSON.parse(userData);
+    });
   }
 
 }

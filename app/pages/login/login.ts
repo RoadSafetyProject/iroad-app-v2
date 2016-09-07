@@ -36,17 +36,14 @@ export class LoginPage {
             this.setToasterMessage('Please Enter password');
           }else{
             this.app.getDataBaseName(this.loginData.serverUrl).then(databaseName=>{
-              console.log(databaseName);
               this.user.setCurrentUser(this.loginData).then(user=>{
-                console.log(user);
-                this.httpClient.get('/api/me.json',user).subscribe(
+                let fields = "fields=[:all],userCredentials[userRoles[name,dataSets[id,name],programs[id,name]]";
+                this.httpClient.get('/api/me.json?'+fields,user).subscribe(
                   data => {
-                    console.log('success login');
-                    this.setToasterMessage('success to login ' + JSON.stringify(data));
-                    console.log(data);
-                    console.log('databaseName');
-                    console.log(databaseName);
-                    this.navCtrl.setRoot(HomePage);
+                    this.setStickToasterMessage('success to login ');
+                    this.user.setUserData(data).then(userData=>{
+                      this.navCtrl.setRoot(HomePage);
+                    });
                   },
                   err => {
                     this.setStickToasterMessage('Fail to login Fail to load System information, please checking your network connection');
@@ -55,16 +52,14 @@ export class LoginPage {
                 );
               }).catch(err=>{
                 console.log(err);
+                this.setStickToasterMessage('Fail set current user');
               })
-
             });
-
           }
         });
     }else{
       this.setToasterMessage('Please Enter server url');
     }
-
   }
 
   setToasterMessage(message){

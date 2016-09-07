@@ -23,6 +23,30 @@ export class User {
     return Promise.resolve(user);
   }
 
+  setUserData(userDataResponse){
+    userDataResponse= eval('('+userDataResponse._body+')');
+    let userData ={
+      "Name": userDataResponse.name,
+      "Employer": userDataResponse.employer,
+      "Job Title": userDataResponse.jobTitle,
+      "Education": userDataResponse.education,
+      "Gender": userDataResponse.gender,
+      "Birthday": userDataResponse.birthday,
+      "Nationality": userDataResponse.nationality,
+      "Interests": userDataResponse.interests,
+      "userRoles": userDataResponse.userCredentials.userRoles,
+      "organisationUnits": userDataResponse.organisationUnits
+    };
+
+    this.localStorage.set('userData',JSON.stringify(userData));
+
+    return Promise.resolve(userData);
+  }
+
+  getUserData(){
+    return this.localStorage.get('userData');
+  }
+
   getCurrentUser(){
     return this.localStorage.get('user');
   }

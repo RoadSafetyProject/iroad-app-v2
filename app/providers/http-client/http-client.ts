@@ -24,16 +24,13 @@ export class HttpClient {
     let headers = new Headers();
     headers.append('Authorization', 'Basic ' +
       btoa(user.username + ':' + user.password));
-    console.log(user);
-    console.log(user.serverUrl);
     return this.http.get(user.serverUrl + url, {headers: headers});
   }
 
-  post(url, data,user):Observable<Response> {
+  post(url, data, user):Observable<Response> {
     let headers = new Headers();
     headers.append('Authorization', 'Basic ' +
       btoa(user.username + ':' + user.password));
-    ///let opt = new RequestOptions({headers: headers});
     return this.http.post(user.serverUrl + url, data, {headers: headers});
   }
 
