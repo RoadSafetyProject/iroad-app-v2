@@ -9,26 +9,26 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var core_1 = require('@angular/core');
 var ionic_angular_1 = require('ionic-angular');
-var offense_payment_confirmation_1 = require("../offense-payment-confirmation/offense-payment-confirmation");
+var home_1 = require("../home/home");
 /*
-  Generated class for the ReportOffencePage page.
+  Generated class for the OffensePaymentCodePage page.
 
   See http://ionicframework.com/docs/v2/components/#navigation for more info on
   Ionic pages and navigation.
 */
-var ReportOffencePage = (function () {
-    function ReportOffencePage(navCtrl) {
+var OffensePaymentCodePage = (function () {
+    function OffensePaymentCodePage(navCtrl) {
         this.navCtrl = navCtrl;
     }
-    ReportOffencePage.prototype.goToOffensePaymentConfirmation = function () {
-        this.navCtrl.push(offense_payment_confirmation_1.OffensePaymentConfirmationPage);
+    OffensePaymentCodePage.prototype.goToHome = function () {
+        this.navCtrl.setRoot(home_1.HomePage);
     };
-    ReportOffencePage = __decorate([
+    OffensePaymentCodePage = __decorate([
         core_1.Component({
-            templateUrl: 'build/pages/report-offence/report-offence.html',
+            templateUrl: 'build/pages/offense-payment-code/offense-payment-code.html',
         }), 
         __metadata('design:paramtypes', [ionic_angular_1.NavController])
-    ], ReportOffencePage);
-    return ReportOffencePage;
+    ], OffensePaymentCodePage);
+    return OffensePaymentCodePage;
 })();
-exports.ReportOffencePage = ReportOffencePage;
+exports.OffensePaymentCodePage = OffensePaymentCodePage;

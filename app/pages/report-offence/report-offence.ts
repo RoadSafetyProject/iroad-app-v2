@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
+import {OffensePaymentConfirmationPage} from "../offense-payment-confirmation/offense-payment-confirmation";
 
 /*
   Generated class for the ReportOffencePage page.
@@ -16,4 +17,7 @@ export class ReportOffencePage {
 
   }
 
+  goToOffensePaymentConfirmation(){
+    this.navCtrl.push(OffensePaymentConfirmationPage);
+  }
 }
