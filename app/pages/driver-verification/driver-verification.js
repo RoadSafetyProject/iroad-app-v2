@@ -9,6 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var core_1 = require('@angular/core');
 var ionic_angular_1 = require('ionic-angular');
+var ionic_native_1 = require('ionic-native');
 /*
   Generated class for the DriverVerificationPage page.
 
@@ -22,9 +23,13 @@ var DriverVerificationPage = (function () {
         this.driver = {};
     }
     DriverVerificationPage.prototype.scanBarcode = function () {
-        console.log('Hello, scan licence');
-        this.driver.driverLisence = "41000034995";
-        this.loadData();
+        var _this = this;
+        ionic_native_1.BarcodeScanner.scan().then(function (barcodeData) {
+            _this.driver.driverLisence = barcodeData.text;
+            _this.loadData();
+        }, function () {
+            _this.setStickToasterMessage('Fail to scan barcode');
+        });
     };
     DriverVerificationPage.prototype.verifyDriver = function () {
         if (this.driver.driverLisence) {

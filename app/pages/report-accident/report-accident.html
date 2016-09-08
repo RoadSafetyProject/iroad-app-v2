@@ -13,6 +13,30 @@
   </ion-navbar>
 </ion-header>
 
-<ion-content padding>
-  Accidentpage
+<ion-content padding class="report-accident">
+  <ion-card>
+    <ion-card-header>
+      Media Capture
+    </ion-card-header>
+    <ion-card-content>
+      <ion-row>
+        <ion-col width-33>
+          <button full (click)="takePhoto()">
+            <ion-icon name="camera"></ion-icon>
+          </button>
+        </ion-col>
+        <ion-col width-33>
+          <button full (click)="pickFromGallery()">
+            <ion-icon name="images"></ion-icon>
+          </button>
+        </ion-col>
+        <ion-col width-33>
+          <button full (click)="takeVideo()">
+            <ion-icon name="videocam"></ion-icon>
+          </button>
+        </ion-col>
+      </ion-row>
+      <button full>Report</button>
+    </ion-card-content>
+  </ion-card>
 </ion-content>

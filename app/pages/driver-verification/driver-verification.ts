@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController,ToastController } from 'ionic-angular';
+import { BarcodeScanner } from 'ionic-native';
 
 /*
   Generated class for the DriverVerificationPage page.
@@ -19,10 +20,12 @@ export class DriverVerificationPage {
   }
 
   scanBarcode(){
-    console.log('Hello, scan licence');
-    this.driver.driverLisence="41000034995";
-    this.loadData();
-
+    BarcodeScanner.scan().then((barcodeData) => {
+      this.driver.driverLisence=barcodeData.text;
+      this.loadData();
+    }, () => {
+      this.setStickToasterMessage('Fail to scan barcode');
+    });
   }
 
   verifyDriver(){

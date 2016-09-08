@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
 
+
 /*
   Generated class for the ReportAccidentPage page.
 
@@ -14,6 +15,19 @@ export class ReportAccidentPage {
 
   constructor(private navCtrl: NavController) {
 
+  }
+
+
+  takePhoto(){
+    console.log('takePhoto');
+  }
+
+  pickFromGallery(){
+    console.log('pickFromGallery');
+  }
+
+  takeVideo(){
+    console.log('takeVideo');
   }
 
 }

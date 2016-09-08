@@ -19,6 +19,15 @@ var ReportAccidentPage = (function () {
     function ReportAccidentPage(navCtrl) {
         this.navCtrl = navCtrl;
     }
+    ReportAccidentPage.prototype.takePhoto = function () {
+        console.log('takePhoto');
+    };
+    ReportAccidentPage.prototype.pickFromGallery = function () {
+        console.log('pickFromGallery');
+    };
+    ReportAccidentPage.prototype.takeVideo = function () {
+        console.log('takeVideo');
+    };
     ReportAccidentPage = __decorate([
         core_1.Component({
             templateUrl: 'build/pages/report-accident/report-accident.html',
