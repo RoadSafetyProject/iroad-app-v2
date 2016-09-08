@@ -8,11 +8,11 @@ import {User } from '../../providers/user/user';
 import {HttpClient} from '../../providers/http-client/http-client';
 
 /*
-  Generated class for the LoginPage page.
+ Generated class for the LoginPage page.
 
-  See http://ionicframework.com/docs/v2/components/#navigation for more info on
-  Ionic pages and navigation.
-*/
+ See http://ionicframework.com/docs/v2/components/#navigation for more info on
+ Ionic pages and navigation.
+ */
 @Component({
   templateUrl: 'build/pages/login/login.html',
   providers: [App,HttpClient,User]
@@ -23,6 +23,18 @@ export class LoginPage {
 
   constructor(private navCtrl: NavController,private user: User,private httpClient: HttpClient,private app : App,private toastCtrl: ToastController) {
     this.loginData.logoUrl = 'img/logo.png';
+    this.reAuthenticateUser();
+  }
+
+  reAuthenticateUser(){
+    this.user.getCurrentUser().then(user=>{
+      user = JSON.parse(user);
+      if(user.isLogin){
+        this.navCtrl.setRoot(HomePage);
+      }else if(user.serverUrl){
+        this.loginData.serverUrl = user.serverUrl;
+      }
+    });
   }
 
   login(){
@@ -42,7 +54,10 @@ export class LoginPage {
                   data => {
                     this.setStickToasterMessage('success to login ');
                     this.user.setUserData(data).then(userData=>{
-                      this.navCtrl.setRoot(HomePage);
+                      this.loginData.isLogin = true;
+                      this.user.setCurrentUser(this.loginData).then(user=>{
+                        this.navCtrl.setRoot(HomePage);
+                      })
                     });
                   },
                   err => {

@@ -10,7 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var core_1 = require('@angular/core');
 var ionic_angular_1 = require('ionic-angular');
 var ionic_native_1 = require('ionic-native');
-var ionic_native_2 = require('ionic-native');
+var login_1 = require('./pages/login/login');
 var home_1 = require('./pages/home/home');
 var report_accident_1 = require('./pages/report-accident/report-accident');
 var report_offence_1 = require('./pages/report-offence/report-offence');
@@ -19,7 +19,7 @@ var vehicle_verification_1 = require('./pages/vehicle-verification/vehicle-verif
 var MyApp = (function () {
     function MyApp(platform) {
         this.platform = platform;
-        this.rootPage = home_1.HomePage;
+        this.rootPage = login_1.LoginPage;
         this.initializeApp();
         // used for an example of ngFor and navigation
         this.pages = [
@@ -35,7 +35,7 @@ var MyApp = (function () {
             // Okay, so the platform is ready and our plugins are available.
             // Here you can do any higher level native things you might need.
             ionic_native_1.StatusBar.styleDefault();
-            ionic_native_2.Splashscreen.hide();
+            ionic_native_1.Splashscreen.hide();
         });
     };
     MyApp.prototype.openPage = function (page) {

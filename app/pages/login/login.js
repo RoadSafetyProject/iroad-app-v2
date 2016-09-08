@@ -14,11 +14,11 @@ var app_1 = require('../../providers/app/app');
 var user_1 = require('../../providers/user/user');
 var http_client_1 = require('../../providers/http-client/http-client');
 /*
-  Generated class for the LoginPage page.
+ Generated class for the LoginPage page.
 
-  See http://ionicframework.com/docs/v2/components/#navigation for more info on
-  Ionic pages and navigation.
-*/
+ See http://ionicframework.com/docs/v2/components/#navigation for more info on
+ Ionic pages and navigation.
+ */
 var LoginPage = (function () {
     function LoginPage(navCtrl, user, httpClient, app, toastCtrl) {
         this.navCtrl = navCtrl;
@@ -28,7 +28,20 @@ var LoginPage = (function () {
         this.toastCtrl = toastCtrl;
         this.loginData = {};
         this.loginData.logoUrl = 'img/logo.png';
+        this.reAuthenticateUser();
     }
+    LoginPage.prototype.reAuthenticateUser = function () {
+        var _this = this;
+        this.user.getCurrentUser().then(function (user) {
+            user = JSON.parse(user);
+            if (user.isLogin) {
+                _this.navCtrl.setRoot(home_1.HomePage);
+            }
+            else if (user.serverUrl) {
+                _this.loginData.serverUrl = user.serverUrl;
+            }
+        });
+    };
     LoginPage.prototype.login = function () {
         var _this = this;
         if (this.loginData.serverUrl) {
@@ -48,7 +61,10 @@ var LoginPage = (function () {
                             _this.httpClient.get('/api/me.json?' + fields, user).subscribe(function (data) {
                                 _this.setStickToasterMessage('success to login ');
                                 _this.user.setUserData(data).then(function (userData) {
-                                    _this.navCtrl.setRoot(home_1.HomePage);
+                                    _this.loginData.isLogin = true;
+                                    _this.user.setCurrentUser(_this.loginData).then(function (user) {
+                                        _this.navCtrl.setRoot(home_1.HomePage);
+                                    });
                                 });
                             }, function (err) {
                                 _this.setStickToasterMessage('Fail to login Fail to load System information, please checking your network connection');

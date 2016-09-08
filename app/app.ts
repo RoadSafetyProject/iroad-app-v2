@@ -1,8 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { ionicBootstrap, Platform, Nav } from 'ionic-angular';
-import { StatusBar } from 'ionic-native';
-
-import { Splashscreen } from 'ionic-native';
+import { StatusBar,Splashscreen} from 'ionic-native';
 
 import { LoginPage } from './pages/login/login';
 import { HomePage } from './pages/home/home';
@@ -18,7 +16,8 @@ import { VehicleVerificationPage } from './pages/vehicle-verification/vehicle-ve
 class MyApp {
   @ViewChild(Nav) nav: Nav;
 
-  rootPage:any =HomePage;
+
+  rootPage:any = LoginPage;
 
   pages: Array<{title: string, component: any}>;
 
