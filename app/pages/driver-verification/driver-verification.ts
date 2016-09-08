@@ -44,6 +44,7 @@ export class DriverVerificationPage {
       date : '2016-06-07'
     }
   }
+
   setToasterMessage(message){
     let toast = this.toastCtrl.create({
       message: message,

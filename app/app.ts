@@ -2,6 +2,8 @@ import { Component, ViewChild } from '@angular/core';
 import { ionicBootstrap, Platform, Nav } from 'ionic-angular';
 import { StatusBar } from 'ionic-native';
 
+import { Splashscreen } from 'ionic-native';
+
 import { LoginPage } from './pages/login/login';
 import { HomePage } from './pages/home/home';
 import { ReportAccidentPage } from './pages/report-accident/report-accident';
@@ -39,6 +41,7 @@ class MyApp {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
       StatusBar.styleDefault();
+      Splashscreen.hide();
     });
   }
 

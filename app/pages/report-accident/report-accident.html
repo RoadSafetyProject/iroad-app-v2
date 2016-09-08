@@ -26,7 +26,7 @@
           </button>
         </ion-col>
         <ion-col width-33>
-          <button full (click)="pickFromGallery()">
+          <button full (click)="pickPhotoFromGallery()">
             <ion-icon name="images"></ion-icon>
           </button>
         </ion-col>
@@ -36,7 +36,8 @@
           </button>
         </ion-col>
       </ion-row>
-      <button full>Report</button>
+      <button full (click)="goToAccidentBasicInformation()">Accident Basic Information</button>
     </ion-card-content>
   </ion-card>
+
 </ion-content>
