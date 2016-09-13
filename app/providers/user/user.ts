@@ -24,7 +24,7 @@ export class User {
   }
 
   setUserData(userDataResponse){
-    userDataResponse= eval('('+userDataResponse._body+')');
+    //userDataResponse= eval('('++')');
     let userData ={
       "Name": userDataResponse.name,
       "Employer": userDataResponse.employer,

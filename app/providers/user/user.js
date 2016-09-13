@@ -27,7 +27,7 @@ var User = (function () {
         return Promise.resolve(user);
     };
     User.prototype.setUserData = function (userDataResponse) {
-        userDataResponse = eval('(' + userDataResponse._body + ')');
+        //userDataResponse= eval('('++')');
         var userData = {
             "Name": userDataResponse.name,
             "Employer": userDataResponse.employer,

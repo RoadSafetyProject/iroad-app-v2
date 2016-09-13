@@ -21,7 +21,7 @@ var MyApp = (function () {
     function MyApp(platform, user) {
         this.platform = platform;
         this.user = user;
-        this.rootPage = home_1.HomePage;
+        this.rootPage = login_1.LoginPage;
         this.initializeApp();
         // used for an example of ngFor and navigation
         this.pages = [

@@ -13,6 +13,7 @@ var home_1 = require('../home/home');
 var app_1 = require('../../providers/app/app');
 var user_1 = require('../../providers/user/user');
 var http_client_1 = require('../../providers/http-client/http-client');
+var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
 /*
  Generated class for the LoginPage page.
 
@@ -20,8 +21,9 @@ var http_client_1 = require('../../providers/http-client/http-client');
  Ionic pages and navigation.
  */
 var LoginPage = (function () {
-    function LoginPage(navCtrl, user, httpClient, app, toastCtrl) {
+    function LoginPage(navCtrl, sqlLite, user, httpClient, app, toastCtrl) {
         this.navCtrl = navCtrl;
+        this.sqlLite = sqlLite;
         this.user = user;
         this.httpClient = httpClient;
         this.app = app;
@@ -59,23 +61,27 @@ var LoginPage = (function () {
                 }
                 else {
                     _this.app.getDataBaseName(_this.loginData.serverUrl).then(function (databaseName) {
-                        _this.user.setCurrentUser(_this.loginData).then(function (user) {
-                            var fields = "fields=[:all],userCredentials[userRoles[name,dataSets[id,name],programs[id,name]]";
-                            _this.httpClient.get('/api/me.json?' + fields, user).subscribe(function (data) {
-                                _this.setStickToasterMessage('success to login ');
-                                _this.user.setUserData(data).then(function (userData) {
-                                    _this.loginData.isLogin = true;
-                                    _this.user.setCurrentUser(_this.loginData).then(function (user) {
-                                        _this.navCtrl.setRoot(home_1.HomePage);
+                        //generate tables
+                        _this.sqlLite.generateTables(databaseName).then(function () {
+                            _this.loginData.currentDatabase = databaseName;
+                            _this.user.setCurrentUser(_this.loginData).then(function (user) {
+                                var fields = "fields=[:all],userCredentials[userRoles[name,dataSets[id,name],programs[id,name]]";
+                                _this.httpClient.get('/api/me.json?' + fields, user).subscribe(function (data) {
+                                    data = data.json();
+                                    _this.user.setUserData(data).then(function (userData) {
+                                        _this.downloadingPrograms(user, databaseName);
                                     });
+                                }, function (err) {
+                                    _this.setStickToasterMessage('Fail to login Fail to load System information, please checking your network connection');
+                                    console.log(err);
                                 });
-                            }, function (err) {
-                                _this.setStickToasterMessage('Fail to login Fail to load System information, please checking your network connection');
+                            }).catch(function (err) {
                                 console.log(err);
+                                _this.setStickToasterMessage('Fail set current user');
                             });
-                        }).catch(function (err) {
-                            console.log(err);
-                            _this.setStickToasterMessage('Fail set current user');
+                        }, function () {
+                            //error on create database
+                            _this.setStickToasterMessage('Fail to open local storage');
                         });
                     });
                 }
@@ -84,6 +90,29 @@ var LoginPage = (function () {
         else {
             this.setToasterMessage('Please Enter server url');
         }
+    };
+    LoginPage.prototype.downloadingPrograms = function (user, databaseName) {
+        var _this = this;
+        alert('downloading programs');
+        var resource = 'programs';
+        var tableMetadata = this.sqlLite.getDataBaseStructure()[resource];
+        var fields = tableMetadata.fields;
+        this.httpClient.get('/api/' + resource + '.json?paging=false&fields=' + fields + '&filter=programType:eq:WITHOUT_REGISTRATION', user).subscribe(function (data) {
+            alert('starting saving programs');
+            var programsData = data.json();
+            _this.app.saveMetadata(resource, programsData[resource], databaseName).then(function () {
+                _this.setStickToasterMessage('Complete saving all programs ');
+                _this.loginData.isLogin = true;
+                _this.user.setCurrentUser(_this.loginData).then(function (user) {
+                    _this.navCtrl.setRoot(home_1.HomePage);
+                });
+            }, function (error) {
+                _this.setStickToasterMessage('Fail to save programs :: ' + JSON.stringify(error));
+            });
+        }, function (err) {
+            _this.setStickToasterMessage('Fail to login Fail to downloading programs');
+            console.log(err);
+        });
     };
     LoginPage.prototype.setToasterMessage = function (message) {
         var toast = this.toastCtrl.create({
@@ -102,9 +131,9 @@ var LoginPage = (function () {
     LoginPage = __decorate([
         core_1.Component({
             templateUrl: 'build/pages/login/login.html',
-            providers: [app_1.App, http_client_1.HttpClient, user_1.User]
+            providers: [app_1.App, http_client_1.HttpClient, user_1.User, sql_lite_1.SqlLite]
         }), 
-        __metadata('design:paramtypes', [ionic_angular_1.NavController, user_1.User, http_client_1.HttpClient, app_1.App, ionic_angular_1.ToastController])
+        __metadata('design:paramtypes', [ionic_angular_1.NavController, sql_lite_1.SqlLite, user_1.User, http_client_1.HttpClient, app_1.App, ionic_angular_1.ToastController])
     ], LoginPage);
     return LoginPage;
 })();
