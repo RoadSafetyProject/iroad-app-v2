@@ -16,10 +16,12 @@ var report_accident_1 = require('./pages/report-accident/report-accident');
 var report_offence_1 = require('./pages/report-offence/report-offence');
 var driver_verification_1 = require('./pages/driver-verification/driver-verification');
 var vehicle_verification_1 = require('./pages/vehicle-verification/vehicle-verification');
+var user_1 = require("./providers/user/user");
 var MyApp = (function () {
-    function MyApp(platform) {
+    function MyApp(platform, user) {
         this.platform = platform;
-        this.rootPage = login_1.LoginPage;
+        this.user = user;
+        this.rootPage = home_1.HomePage;
         this.initializeApp();
         // used for an example of ngFor and navigation
         this.pages = [
@@ -44,7 +46,14 @@ var MyApp = (function () {
         this.nav.setRoot(page.component);
     };
     MyApp.prototype.logOut = function () {
-        console.log('Log out has been clicked');
+        var _this = this;
+        this.user.getCurrentUser().then(function (user) {
+            user = JSON.parse(user);
+            user.isLogin = false;
+            _this.user.setCurrentUser(user).then(function (user) {
+                _this.nav.setRoot(login_1.LoginPage);
+            });
+        });
     };
     __decorate([
         core_1.ViewChild(ionic_angular_1.Nav), 
@@ -52,9 +61,10 @@ var MyApp = (function () {
     ], MyApp.prototype, "nav", void 0);
     MyApp = __decorate([
         core_1.Component({
-            templateUrl: 'build/app.html'
+            templateUrl: 'build/app.html',
+            providers: [user_1.User]
         }), 
-        __metadata('design:paramtypes', [ionic_angular_1.Platform])
+        __metadata('design:paramtypes', [ionic_angular_1.Platform, user_1.User])
     ], MyApp);
     return MyApp;
 })();

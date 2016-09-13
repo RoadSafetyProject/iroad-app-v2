@@ -40,6 +40,9 @@ var LoginPage = (function () {
             else if (user.serverUrl) {
                 _this.loginData.serverUrl = user.serverUrl;
             }
+            else if (_this.loginData.username) {
+                _this.loginData.username = user.username;
+            }
         });
     };
     LoginPage.prototype.login = function () {

@@ -8,20 +8,22 @@ import { ReportAccidentPage } from './pages/report-accident/report-accident';
 import { ReportOffencePage } from './pages/report-offence/report-offence';
 import { DriverVerificationPage } from './pages/driver-verification/driver-verification';
 import { VehicleVerificationPage } from './pages/vehicle-verification/vehicle-verification';
+import {User} from "./providers/user/user";
 
 
 @Component({
-  templateUrl: 'build/app.html'
+  templateUrl: 'build/app.html',
+  providers: [User]
 })
 class MyApp {
   @ViewChild(Nav) nav: Nav;
 
 
-  rootPage:any = LoginPage;
+  rootPage:any = HomePage;
 
   pages: Array<{title: string, component: any}>;
 
-  constructor(public platform: Platform) {
+  constructor(public platform: Platform,private user:User) {
     this.initializeApp();
 
     // used for an example of ngFor and navigation
@@ -51,7 +53,13 @@ class MyApp {
   }
 
   logOut(){
-    console.log('Log out has been clicked');
+    this.user.getCurrentUser().then(user=>{
+      user = JSON.parse(user);
+      user.isLogin = false;
+      this.user.setCurrentUser(user).then(user=>{
+        this.nav.setRoot(LoginPage);
+      })
+    })
   }
 
 }
