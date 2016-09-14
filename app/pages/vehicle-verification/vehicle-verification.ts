@@ -24,6 +24,7 @@ export class VehicleVerificationPage {
   private relationDataElement : any;
   private currentUser :any = {};
   private program : any ={};
+  private dataElementListObject : any = {};
 
   constructor(private eventProvider : EventProvider,private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
     this.user.getCurrentUser().then(currentUser=>{
@@ -33,11 +34,12 @@ export class VehicleVerificationPage {
   }
 
   verifyVehicle(){
-    this.vehicle.plateNumber = this.vehicle.plateNumber.toUpperCase();
-    if(this.vehicle.plateNumber.length == 7){
-      this.vehicle.plateNumber =  this.vehicle.plateNumber.substr(0,4) + ' ' +this.vehicle.plateNumber.substr(4);
-    }
+
     if(this.vehicle.plateNumber && this.relationDataElement.id){
+      this.vehicle.plateNumber = this.vehicle.plateNumber.toUpperCase();
+      if(this.vehicle.plateNumber.length == 7){
+        this.vehicle.plateNumber =  this.vehicle.plateNumber.substr(0,4) + ' ' +this.vehicle.plateNumber.substr(4);
+      }
       this.loadData();
     }else{
       this.setToasterMessage('Please enter Vehicle Plate Number');
@@ -45,7 +47,13 @@ export class VehicleVerificationPage {
   }
 
   loadData(){
-    this.eventProvider.findEventsByDataValue(this.relationDataElement.id,this.vehicle.plateNumber,this.program.id,this.currentUser)
+    this.eventProvider.findEventsByDataValue(this.relationDataElement.id,this.vehicle.plateNumber,this.program.id,this.currentUser).then(events=>{
+      this.vehicle.events = events[0];
+      alert(JSON.stringify(events));
+    },error=>{
+      alert('fail');
+      alert(JSON.stringify(error));
+    })
   }
 
 
@@ -76,6 +84,7 @@ export class VehicleVerificationPage {
       let relationDataElementCode = "id_"+this.programName;
       relationDataElementCode = relationDataElementCode.toLocaleLowerCase();
       this.program.programStages[0].programStageDataElements.forEach(programStageDataElement=>{
+        this.dataElementListObject[programStageDataElement.dataElement.id] = programStageDataElement.dataElement.name;
         if(programStageDataElement.dataElement.code && programStageDataElement.dataElement.code.toLowerCase() ==relationDataElementCode){
           this.relationDataElement = programStageDataElement.dataElement;
         }

@@ -34,17 +34,18 @@ var VehicleVerificationPage = (function () {
         this.programName = "Vehicle";
         this.currentUser = {};
         this.program = {};
+        this.dataElementListObject = {};
         this.user.getCurrentUser().then(function (currentUser) {
             _this.currentUser = JSON.parse(currentUser);
             _this.loadingProgram();
         });
     }
     VehicleVerificationPage.prototype.verifyVehicle = function () {
-        this.vehicle.plateNumber = this.vehicle.plateNumber.toUpperCase();
-        if (this.vehicle.plateNumber.length == 7) {
-            this.vehicle.plateNumber = this.vehicle.plateNumber.substr(0, 4) + ' ' + this.vehicle.plateNumber.substr(4);
-        }
         if (this.vehicle.plateNumber && this.relationDataElement.id) {
+            this.vehicle.plateNumber = this.vehicle.plateNumber.toUpperCase();
+            if (this.vehicle.plateNumber.length == 7) {
+                this.vehicle.plateNumber = this.vehicle.plateNumber.substr(0, 4) + ' ' + this.vehicle.plateNumber.substr(4);
+            }
             this.loadData();
         }
         else {
@@ -52,7 +53,14 @@ var VehicleVerificationPage = (function () {
         }
     };
     VehicleVerificationPage.prototype.loadData = function () {
-        this.eventProvider.findEventsByDataValue(this.relationDataElement.id, this.vehicle.plateNumber, this.program.id, this.currentUser);
+        var _this = this;
+        this.eventProvider.findEventsByDataValue(this.relationDataElement.id, this.vehicle.plateNumber, this.program.id, this.currentUser).then(function (events) {
+            _this.vehicle.events = events[0];
+            alert(JSON.stringify(events));
+        }, function (error) {
+            alert('fail');
+            alert(JSON.stringify(error));
+        });
     };
     VehicleVerificationPage.prototype.loadingProgram = function () {
         var _this = this;
@@ -80,6 +88,7 @@ var VehicleVerificationPage = (function () {
             var relationDataElementCode = "id_" + this.programName;
             relationDataElementCode = relationDataElementCode.toLocaleLowerCase();
             this.program.programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
+                _this.dataElementListObject[programStageDataElement.dataElement.id] = programStageDataElement.dataElement.name;
                 if (programStageDataElement.dataElement.code && programStageDataElement.dataElement.code.toLowerCase() == relationDataElementCode) {
                     _this.relationDataElement = programStageDataElement.dataElement;
                 }

@@ -23,10 +23,63 @@ var EventProvider = (function () {
         this.httpClient = httpClient;
     }
     EventProvider.prototype.findEventsByDataValue = function (dataElementId, value, programId, user) {
-        alert('dataElementId :: ' + dataElementId);
-        alert(' value:: ' + value);
-        alert(' programId :: ' + programId);
-        alert(' user :: ' + JSON.stringify(user));
+        var self = this;
+        var sqlViewUrl = "/api/sqlViews.json?filter=name:eq:Find Event";
+        return new Promise(function (resolve, reject) {
+            self.httpClient.get(sqlViewUrl, user).subscribe(function (sqlViewData) {
+                sqlViewData = sqlViewData.json();
+                self.getEventIdList(dataElementId, value, sqlViewData, programId, user).then(function (events) {
+                    resolve(events);
+                }, function (error) {
+                    reject(error);
+                });
+            }, function (error) {
+                reject(error);
+            });
+        });
+    };
+    EventProvider.prototype.getEventIdList = function (dataElementId, value, sqlViewData, programId, user) {
+        var self = this;
+        var sqlViewEventsUrl = "/api/sqlViews/" + sqlViewData.sqlViews[0].id + "/data.json?var=dataElement:" + dataElementId + "&var=value:" + value;
+        return new Promise(function (resolve, reject) {
+            self.httpClient.get(sqlViewEventsUrl, user).subscribe(function (eventsIdData) {
+                eventsIdData = eventsIdData.json();
+                self.getEvents(eventsIdData, programId, user).then(function (events) {
+                    resolve(events);
+                }, function (error) {
+                    reject(error);
+                });
+            }, function (error) {
+                reject(error);
+            });
+        });
+    };
+    EventProvider.prototype.getEvents = function (eventsIdData, programId, user) {
+        var eventIDs = [];
+        var events = [];
+        var self = this;
+        eventsIdData.rows.forEach(function (row) {
+            if (row.length > 0) {
+                eventIDs.push(row[0]);
+            }
+        });
+        return new Promise(function (resolve, reject) {
+            if (eventIDs.length > 0) {
+                var eventListUrl = "/api/events.json?program=" + programId + "&event=" + eventIDs.join(";");
+                self.httpClient.get(eventListUrl, user).subscribe(function (eventListData) {
+                    eventListData = eventListData.json();
+                    resolve(self.getEventList(eventListData));
+                }, function (error) {
+                    reject(error);
+                });
+            }
+            else {
+                resolve(events);
+            }
+        });
+    };
+    EventProvider.prototype.getEventList = function (eventListData) {
+        return eventListData.events;
     };
     EventProvider = __decorate([
         core_1.Injectable(), 

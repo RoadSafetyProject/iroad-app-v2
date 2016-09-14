@@ -6,6 +6,7 @@ import { App } from '../../providers/app/app';
 import {User } from '../../providers/user/user';
 import {HttpClient} from '../../providers/http-client/http-client';
 import {SqlLite} from "../../providers/sql-lite/sql-lite";
+import {EventProvider} from "../../providers/event-provider/event-provider";
 
 /*
   Generated class for the DriverVerificationPage page.
@@ -15,7 +16,7 @@ import {SqlLite} from "../../providers/sql-lite/sql-lite";
 */
 @Component({
   templateUrl: 'build/pages/driver-verification/driver-verification.html',
-  providers: [App,HttpClient,User,SqlLite]
+  providers: [App,HttpClient,User,SqlLite,EventProvider]
 })
 export class DriverVerificationPage {
 
@@ -24,8 +25,9 @@ export class DriverVerificationPage {
   private relationDataElement : any;
   private currentUser :any = {};
   private program : any ={};
+  private dataElementListObject : any = {};
 
-  constructor(private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
+  constructor(private eventProvider : EventProvider,private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
     this.user.getCurrentUser().then(currentUser=>{
       this.currentUser = JSON.parse(currentUser);
       this.loadingProgram();
@@ -43,7 +45,6 @@ export class DriverVerificationPage {
 
   verifyDriver(){
     if(this.driver.driverLisence){
-      console.log('Hello, verify driver licence');
       this.loadData();
     }else{
       this.setToasterMessage('Please enter driver licence');
@@ -51,11 +52,13 @@ export class DriverVerificationPage {
   }
 
   loadData(){
-    this.driver.response ={
-      name: "Joseph Chingalo",
-      licenceNumber : this.driver.driverLisence,
-      date : '2016-06-07'
-    }
+    this.eventProvider.findEventsByDataValue(this.relationDataElement.id,this.driver.driverLisence,this.program.id,this.currentUser).then(events=>{
+      this.driver.events = events[0];
+      alert(JSON.stringify(events));
+    },error=>{
+      alert('fail');
+      alert(JSON.stringify(error));
+    })
   }
 
   loadingProgram(){
@@ -85,6 +88,7 @@ export class DriverVerificationPage {
       let relationDataElementCode = "id_"+this.programName;
       relationDataElementCode = relationDataElementCode.toLocaleLowerCase();
       this.program.programStages[0].programStageDataElements.forEach(programStageDataElement=>{
+        this.dataElementListObject[programStageDataElement.dataElement.id] = programStageDataElement.dataElement.name;
         if(programStageDataElement.dataElement.code && programStageDataElement.dataElement.code.toLowerCase() ==relationDataElementCode){
           this.relationDataElement = programStageDataElement.dataElement;
         }

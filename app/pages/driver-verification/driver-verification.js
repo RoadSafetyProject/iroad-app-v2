@@ -14,6 +14,7 @@ var app_1 = require('../../providers/app/app');
 var user_1 = require('../../providers/user/user');
 var http_client_1 = require('../../providers/http-client/http-client');
 var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
+var event_provider_1 = require("../../providers/event-provider/event-provider");
 /*
   Generated class for the DriverVerificationPage page.
 
@@ -21,8 +22,9 @@ var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
   Ionic pages and navigation.
 */
 var DriverVerificationPage = (function () {
-    function DriverVerificationPage(navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
+    function DriverVerificationPage(eventProvider, navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
         var _this = this;
+        this.eventProvider = eventProvider;
         this.navCtrl = navCtrl;
         this.toastCtrl = toastCtrl;
         this.sqlLite = sqlLite;
@@ -33,6 +35,7 @@ var DriverVerificationPage = (function () {
         this.programName = "Driver";
         this.currentUser = {};
         this.program = {};
+        this.dataElementListObject = {};
         this.user.getCurrentUser().then(function (currentUser) {
             _this.currentUser = JSON.parse(currentUser);
             _this.loadingProgram();
@@ -49,7 +52,6 @@ var DriverVerificationPage = (function () {
     };
     DriverVerificationPage.prototype.verifyDriver = function () {
         if (this.driver.driverLisence) {
-            console.log('Hello, verify driver licence');
             this.loadData();
         }
         else {
@@ -57,11 +59,14 @@ var DriverVerificationPage = (function () {
         }
     };
     DriverVerificationPage.prototype.loadData = function () {
-        this.driver.response = {
-            name: "Joseph Chingalo",
-            licenceNumber: this.driver.driverLisence,
-            date: '2016-06-07'
-        };
+        var _this = this;
+        this.eventProvider.findEventsByDataValue(this.relationDataElement.id, this.driver.driverLisence, this.program.id, this.currentUser).then(function (events) {
+            _this.driver.events = events[0];
+            alert(JSON.stringify(events));
+        }, function (error) {
+            alert('fail');
+            alert(JSON.stringify(error));
+        });
     };
     DriverVerificationPage.prototype.loadingProgram = function () {
         var _this = this;
@@ -89,6 +94,7 @@ var DriverVerificationPage = (function () {
             var relationDataElementCode = "id_" + this.programName;
             relationDataElementCode = relationDataElementCode.toLocaleLowerCase();
             this.program.programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
+                _this.dataElementListObject[programStageDataElement.dataElement.id] = programStageDataElement.dataElement.name;
                 if (programStageDataElement.dataElement.code && programStageDataElement.dataElement.code.toLowerCase() == relationDataElementCode) {
                     _this.relationDataElement = programStageDataElement.dataElement;
                 }
@@ -112,9 +118,9 @@ var DriverVerificationPage = (function () {
     DriverVerificationPage = __decorate([
         core_1.Component({
             templateUrl: 'build/pages/driver-verification/driver-verification.html',
-            providers: [app_1.App, http_client_1.HttpClient, user_1.User, sql_lite_1.SqlLite]
+            providers: [app_1.App, http_client_1.HttpClient, user_1.User, sql_lite_1.SqlLite, event_provider_1.EventProvider]
         }), 
-        __metadata('design:paramtypes', [ionic_angular_1.NavController, ionic_angular_1.ToastController, sql_lite_1.SqlLite, user_1.User, http_client_1.HttpClient, app_1.App])
+        __metadata('design:paramtypes', [event_provider_1.EventProvider, ionic_angular_1.NavController, ionic_angular_1.ToastController, sql_lite_1.SqlLite, user_1.User, http_client_1.HttpClient, app_1.App])
     ], DriverVerificationPage);
     return DriverVerificationPage;
 })();
