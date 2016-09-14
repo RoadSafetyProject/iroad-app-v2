@@ -10,6 +10,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var core_1 = require('@angular/core');
 var ionic_angular_1 = require('ionic-angular');
 var offense_payment_confirmation_1 = require("../offense-payment-confirmation/offense-payment-confirmation");
+var app_1 = require('../../providers/app/app');
+var user_1 = require('../../providers/user/user');
+var http_client_1 = require('../../providers/http-client/http-client');
+var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
 /*
   Generated class for the ReportOffencePage page.
 
@@ -17,8 +21,13 @@ var offense_payment_confirmation_1 = require("../offense-payment-confirmation/of
   Ionic pages and navigation.
 */
 var ReportOffencePage = (function () {
-    function ReportOffencePage(navCtrl) {
+    function ReportOffencePage(navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
         this.navCtrl = navCtrl;
+        this.toastCtrl = toastCtrl;
+        this.sqlLite = sqlLite;
+        this.user = user;
+        this.httpClient = httpClient;
+        this.app = app;
     }
     ReportOffencePage.prototype.goToOffensePaymentConfirmation = function () {
         this.navCtrl.push(offense_payment_confirmation_1.OffensePaymentConfirmationPage);
@@ -26,8 +35,9 @@ var ReportOffencePage = (function () {
     ReportOffencePage = __decorate([
         core_1.Component({
             templateUrl: 'build/pages/report-offence/report-offence.html',
+            providers: [app_1.App, http_client_1.HttpClient, user_1.User, sql_lite_1.SqlLite]
         }), 
-        __metadata('design:paramtypes', [ionic_angular_1.NavController])
+        __metadata('design:paramtypes', [ionic_angular_1.NavController, ionic_angular_1.ToastController, sql_lite_1.SqlLite, user_1.User, http_client_1.HttpClient, app_1.App])
     ], ReportOffencePage);
     return ReportOffencePage;
 })();

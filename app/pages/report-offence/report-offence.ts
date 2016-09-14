@@ -1,6 +1,11 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { NavController ,ToastController} from 'ionic-angular';
 import {OffensePaymentConfirmationPage} from "../offense-payment-confirmation/offense-payment-confirmation";
+
+import { App } from '../../providers/app/app';
+import {User } from '../../providers/user/user';
+import {HttpClient} from '../../providers/http-client/http-client';
+import {SqlLite} from "../../providers/sql-lite/sql-lite";
 
 /*
   Generated class for the ReportOffencePage page.
@@ -10,10 +15,11 @@ import {OffensePaymentConfirmationPage} from "../offense-payment-confirmation/of
 */
 @Component({
   templateUrl: 'build/pages/report-offence/report-offence.html',
+  providers: [App,HttpClient,User,SqlLite]
 })
 export class ReportOffencePage {
 
-  constructor(private navCtrl: NavController) {
+  constructor(private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
 
   }
 

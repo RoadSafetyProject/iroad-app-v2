@@ -2,6 +2,11 @@ import { Component } from '@angular/core';
 import { NavController,ToastController } from 'ionic-angular';
 import { BarcodeScanner } from 'ionic-native';
 
+import { App } from '../../providers/app/app';
+import {User } from '../../providers/user/user';
+import {HttpClient} from '../../providers/http-client/http-client';
+import {SqlLite} from "../../providers/sql-lite/sql-lite";
+
 /*
   Generated class for the DriverVerificationPage page.
 
@@ -10,12 +15,13 @@ import { BarcodeScanner } from 'ionic-native';
 */
 @Component({
   templateUrl: 'build/pages/driver-verification/driver-verification.html',
+  providers: [App,HttpClient,User,SqlLite]
 })
 export class DriverVerificationPage {
 
   private driver : any ={};
 
-  constructor(private navCtrl: NavController,private toastCtrl: ToastController) {
+  constructor(private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
 
   }
 

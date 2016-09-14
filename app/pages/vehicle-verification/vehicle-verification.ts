@@ -1,6 +1,11 @@
 import { Component } from '@angular/core';
 import { NavController,ToastController } from 'ionic-angular';
 
+import { App } from '../../providers/app/app';
+import {User } from '../../providers/user/user';
+import {HttpClient} from '../../providers/http-client/http-client';
+import {SqlLite} from "../../providers/sql-lite/sql-lite";
+
 /*
   Generated class for the VehicleVerificationPage page.
 
@@ -9,12 +14,13 @@ import { NavController,ToastController } from 'ionic-angular';
 */
 @Component({
   templateUrl: 'build/pages/vehicle-verification/vehicle-verification.html',
+  providers: [App,HttpClient,User,SqlLite]
 })
 export class VehicleVerificationPage {
 
   private vehicle : any ={};
 
-  constructor(private navCtrl: NavController,private toastCtrl: ToastController) {
+  constructor(private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
 
   }
 

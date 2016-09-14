@@ -9,6 +9,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var core_1 = require('@angular/core');
 var ionic_angular_1 = require('ionic-angular');
+var app_1 = require('../../providers/app/app');
+var user_1 = require('../../providers/user/user');
+var http_client_1 = require('../../providers/http-client/http-client');
+var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
 var accident_vehicle_1 = require('../accident-vehicle/accident-vehicle');
 /*
   Generated class for the AccidentBasicInformationPage page.
@@ -17,8 +21,13 @@ var accident_vehicle_1 = require('../accident-vehicle/accident-vehicle');
   Ionic pages and navigation.
 */
 var AccidentBasicInformationPage = (function () {
-    function AccidentBasicInformationPage(navCtrl) {
+    function AccidentBasicInformationPage(navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
         this.navCtrl = navCtrl;
+        this.toastCtrl = toastCtrl;
+        this.sqlLite = sqlLite;
+        this.user = user;
+        this.httpClient = httpClient;
+        this.app = app;
     }
     AccidentBasicInformationPage.prototype.goToAccidentVehicle = function () {
         this.navCtrl.push(accident_vehicle_1.AccidentVehiclePage);
@@ -26,8 +35,9 @@ var AccidentBasicInformationPage = (function () {
     AccidentBasicInformationPage = __decorate([
         core_1.Component({
             templateUrl: 'build/pages/accident-basic-information/accident-basic-information.html',
+            providers: [app_1.App, http_client_1.HttpClient, user_1.User, sql_lite_1.SqlLite]
         }), 
-        __metadata('design:paramtypes', [ionic_angular_1.NavController])
+        __metadata('design:paramtypes', [ionic_angular_1.NavController, ionic_angular_1.ToastController, sql_lite_1.SqlLite, user_1.User, http_client_1.HttpClient, app_1.App])
     ], AccidentBasicInformationPage);
     return AccidentBasicInformationPage;
 })();

@@ -2,6 +2,10 @@ import { Component } from '@angular/core';
 import { NavController,ToastController } from 'ionic-angular';
 import { Camera } from 'ionic-native';
 
+import { App } from '../../providers/app/app';
+import {User } from '../../providers/user/user';
+import {HttpClient} from '../../providers/http-client/http-client';
+import {SqlLite} from "../../providers/sql-lite/sql-lite";
 
 import {AccidentBasicInformationPage} from '../accident-basic-information/accident-basic-information';
 
@@ -13,11 +17,13 @@ import {AccidentBasicInformationPage} from '../accident-basic-information/accide
  */
 @Component({
   templateUrl: 'build/pages/report-accident/report-accident.html',
+  providers: [App,HttpClient,User,SqlLite]
 })
 export class ReportAccidentPage {
 
   public mediaData : string;
-  constructor(private navCtrl: NavController,private toastCtrl: ToastController) {
+
+  constructor(private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
 
   }
 
