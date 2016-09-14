@@ -22,6 +22,7 @@ var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
 */
 var DriverVerificationPage = (function () {
     function DriverVerificationPage(navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
+        var _this = this;
         this.navCtrl = navCtrl;
         this.toastCtrl = toastCtrl;
         this.sqlLite = sqlLite;
@@ -29,6 +30,13 @@ var DriverVerificationPage = (function () {
         this.httpClient = httpClient;
         this.app = app;
         this.driver = {};
+        this.programName = "Driver";
+        this.currentUser = {};
+        this.program = {};
+        this.user.getCurrentUser().then(function (currentUser) {
+            _this.currentUser = JSON.parse(currentUser);
+            _this.loadingProgram();
+        });
     }
     DriverVerificationPage.prototype.scanBarcode = function () {
         var _this = this;
@@ -54,6 +62,38 @@ var DriverVerificationPage = (function () {
             licenceNumber: this.driver.driverLisence,
             date: '2016-06-07'
         };
+    };
+    DriverVerificationPage.prototype.loadingProgram = function () {
+        var _this = this;
+        var resource = 'programs';
+        var attribute = 'name';
+        var attributeValue = [];
+        attributeValue.push(this.programName);
+        this.sqlLite.getDataFromTableByAttributes(resource, attribute, attributeValue, this.currentUser.currentDatabase).then(function (programs) {
+            _this.setProgramMetadata(programs);
+        }, function (error) {
+            var message = "Fail to loading programs " + error;
+            _this.setStickToasterMessage(message);
+        });
+    };
+    DriverVerificationPage.prototype.setProgramMetadata = function (programs) {
+        if (programs.length > 0) {
+            this.relationDataElement = {};
+            this.program = programs[0];
+            this.setRelationDataElement();
+        }
+    };
+    DriverVerificationPage.prototype.setRelationDataElement = function () {
+        var _this = this;
+        if (this.program.programStages.length > 0) {
+            var relationDataElementCode = "id_" + this.programName;
+            relationDataElementCode = relationDataElementCode.toLocaleLowerCase();
+            this.program.programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
+                if (programStageDataElement.dataElement.code && programStageDataElement.dataElement.code.toLowerCase() == relationDataElementCode) {
+                    _this.relationDataElement = programStageDataElement.dataElement;
+                }
+            });
+        }
     };
     DriverVerificationPage.prototype.setToasterMessage = function (message) {
         var toast = this.toastCtrl.create({

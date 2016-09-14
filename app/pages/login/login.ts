@@ -37,8 +37,9 @@ export class LoginPage {
         this.navCtrl.setRoot(HomePage);
       }else if(user.serverUrl){
         this.loginData.serverUrl = user.serverUrl;
-      }else if(this.loginData.username){
-        this.loginData.username = user.username;
+        if(this.loginData.username){
+          this.loginData.username = user.username;
+        }
       }
     });
   }

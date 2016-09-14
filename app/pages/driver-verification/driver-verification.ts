@@ -20,9 +20,16 @@ import {SqlLite} from "../../providers/sql-lite/sql-lite";
 export class DriverVerificationPage {
 
   private driver : any ={};
+  private programName: string = "Driver";
+  private relationDataElement : any;
+  private currentUser :any = {};
+  private program : any ={};
 
   constructor(private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
-
+    this.user.getCurrentUser().then(currentUser=>{
+      this.currentUser = JSON.parse(currentUser);
+      this.loadingProgram();
+    })
   }
 
   scanBarcode(){
@@ -48,6 +55,40 @@ export class DriverVerificationPage {
       name: "Joseph Chingalo",
       licenceNumber : this.driver.driverLisence,
       date : '2016-06-07'
+    }
+  }
+
+  loadingProgram(){
+    let resource = 'programs';
+    let attribute = 'name';
+    let attributeValue =[];
+    attributeValue.push(this.programName);
+
+    this.sqlLite.getDataFromTableByAttributes(resource,attribute,attributeValue,this.currentUser.currentDatabase).then((programs)=>{
+      this.setProgramMetadata(programs);
+    },error=>{
+      let message = "Fail to loading programs " + error;
+      this.setStickToasterMessage(message);
+    })
+  }
+
+  setProgramMetadata(programs){
+    if(programs.length > 0){
+      this.relationDataElement = {};
+      this.program = programs[0];
+      this.setRelationDataElement();
+    }
+  }
+
+  setRelationDataElement(){
+    if(this.program.programStages.length > 0){
+      let relationDataElementCode = "id_"+this.programName;
+      relationDataElementCode = relationDataElementCode.toLocaleLowerCase();
+      this.program.programStages[0].programStageDataElements.forEach(programStageDataElement=>{
+        if(programStageDataElement.dataElement.code && programStageDataElement.dataElement.code.toLowerCase() ==relationDataElementCode){
+          this.relationDataElement = programStageDataElement.dataElement;
+        }
+      })
     }
   }
 

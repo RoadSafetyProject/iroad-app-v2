@@ -13,6 +13,7 @@ var app_1 = require('../../providers/app/app');
 var user_1 = require('../../providers/user/user');
 var http_client_1 = require('../../providers/http-client/http-client');
 var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
+var event_provider_1 = require("../../providers/event-provider/event-provider");
 /*
   Generated class for the VehicleVerificationPage page.
 
@@ -20,7 +21,9 @@ var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
   Ionic pages and navigation.
 */
 var VehicleVerificationPage = (function () {
-    function VehicleVerificationPage(navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
+    function VehicleVerificationPage(eventProvider, navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
+        var _this = this;
+        this.eventProvider = eventProvider;
         this.navCtrl = navCtrl;
         this.toastCtrl = toastCtrl;
         this.sqlLite = sqlLite;
@@ -28,10 +31,20 @@ var VehicleVerificationPage = (function () {
         this.httpClient = httpClient;
         this.app = app;
         this.vehicle = {};
+        this.programName = "Vehicle";
+        this.currentUser = {};
+        this.program = {};
+        this.user.getCurrentUser().then(function (currentUser) {
+            _this.currentUser = JSON.parse(currentUser);
+            _this.loadingProgram();
+        });
     }
     VehicleVerificationPage.prototype.verifyVehicle = function () {
-        if (this.vehicle.plateNumber) {
-            console.log('Hello, verify driver licence');
+        this.vehicle.plateNumber = this.vehicle.plateNumber.toUpperCase();
+        if (this.vehicle.plateNumber.length == 7) {
+            this.vehicle.plateNumber = this.vehicle.plateNumber.substr(0, 4) + ' ' + this.vehicle.plateNumber.substr(4);
+        }
+        if (this.vehicle.plateNumber && this.relationDataElement.id) {
             this.loadData();
         }
         else {
@@ -39,11 +52,39 @@ var VehicleVerificationPage = (function () {
         }
     };
     VehicleVerificationPage.prototype.loadData = function () {
-        this.vehicle.response = {
-            owner: "Joseph Chingalo",
-            plateNumber: this.vehicle.plateNumber,
-            date: '2016-06-07'
-        };
+        this.eventProvider.findEventsByDataValue(this.relationDataElement.id, this.vehicle.plateNumber, this.program.id, this.currentUser);
+    };
+    VehicleVerificationPage.prototype.loadingProgram = function () {
+        var _this = this;
+        var resource = 'programs';
+        var attribute = 'name';
+        var attributeValue = [];
+        attributeValue.push(this.programName);
+        this.sqlLite.getDataFromTableByAttributes(resource, attribute, attributeValue, this.currentUser.currentDatabase).then(function (programs) {
+            _this.setProgramMetadata(programs);
+        }, function (error) {
+            var message = "Fail to loading programs " + error;
+            _this.setStickToasterMessage(message);
+        });
+    };
+    VehicleVerificationPage.prototype.setProgramMetadata = function (programs) {
+        if (programs.length > 0) {
+            this.relationDataElement = {};
+            this.program = programs[0];
+            this.setRelationDataElement();
+        }
+    };
+    VehicleVerificationPage.prototype.setRelationDataElement = function () {
+        var _this = this;
+        if (this.program.programStages.length > 0) {
+            var relationDataElementCode = "id_" + this.programName;
+            relationDataElementCode = relationDataElementCode.toLocaleLowerCase();
+            this.program.programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
+                if (programStageDataElement.dataElement.code && programStageDataElement.dataElement.code.toLowerCase() == relationDataElementCode) {
+                    _this.relationDataElement = programStageDataElement.dataElement;
+                }
+            });
+        }
     };
     VehicleVerificationPage.prototype.setToasterMessage = function (message) {
         var toast = this.toastCtrl.create({
@@ -62,9 +103,9 @@ var VehicleVerificationPage = (function () {
     VehicleVerificationPage = __decorate([
         core_1.Component({
             templateUrl: 'build/pages/vehicle-verification/vehicle-verification.html',
-            providers: [app_1.App, http_client_1.HttpClient, user_1.User, sql_lite_1.SqlLite]
+            providers: [app_1.App, http_client_1.HttpClient, user_1.User, sql_lite_1.SqlLite, event_provider_1.EventProvider]
         }), 
-        __metadata('design:paramtypes', [ionic_angular_1.NavController, ionic_angular_1.ToastController, sql_lite_1.SqlLite, user_1.User, http_client_1.HttpClient, app_1.App])
+        __metadata('design:paramtypes', [event_provider_1.EventProvider, ionic_angular_1.NavController, ionic_angular_1.ToastController, sql_lite_1.SqlLite, user_1.User, http_client_1.HttpClient, app_1.App])
     ], VehicleVerificationPage);
     return VehicleVerificationPage;
 })();
