@@ -31,7 +31,7 @@ export class App {
   }
 
   hideProgressMessage(){
-    this.loading.dismiss();
+    this.loading.destroy();
   }
 
   getFormattedBaseUrl(url){
@@ -67,6 +67,7 @@ export class App {
     let self = this;
 
     return new Promise(function(resolve, reject) {
+      let counter = 1;
       resourceValues.forEach(resourceValue=>{
         promises.push(
           self.sqlLite.insertDataOnTable(resource,resourceValue,databaseName).then(()=>{

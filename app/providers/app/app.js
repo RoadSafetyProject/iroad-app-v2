@@ -32,7 +32,7 @@ var App = (function () {
         this.loading.present();
     };
     App.prototype.hideProgressMessage = function () {
-        this.loading.dismiss();
+        this.loading.destroy();
     };
     App.prototype.getFormattedBaseUrl = function (url) {
         this.formattedBaseUrl = "";
@@ -65,6 +65,7 @@ var App = (function () {
         var promises = [];
         var self = this;
         return new Promise(function (resolve, reject) {
+            var counter = 1;
             resourceValues.forEach(function (resourceValue) {
                 promises.push(self.sqlLite.insertDataOnTable(resource, resourceValue, databaseName).then(function () {
                     //saving success

@@ -22,6 +22,8 @@ import {SqlLite} from "../../providers/sql-lite/sql-lite";
 export class LoginPage {
 
   private loginData : any ={};
+  private loadingData : boolean = false;
+  private loadingMessages : any = [];
 
   constructor(private navCtrl: NavController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App,private toastCtrl: ToastController) {
     this.loginData.logoUrl = 'img/logo.png';
@@ -51,10 +53,16 @@ export class LoginPage {
           }else if (!this.loginData.password){
             this.setToasterMessage('Please Enter password');
           }else{
+            this.loadingData = true;
+            this.loadingMessages = [];
+
             this.app.getDataBaseName(this.loginData.serverUrl).then(databaseName=>{
               //generate tables
+              this.setLoadingMessages('Open database');
               this.sqlLite.generateTables(databaseName).then(()=>{
                 this.loginData.currentDatabase = databaseName;
+                //Authenticating user
+                this.setLoadingMessages('Authenticating user');
                 this.user.setCurrentUser(this.loginData).then(user=>{
                   let fields = "fields=[:all],userCredentials[userRoles[name,dataSets[id,name],programs[id,name]]";
                   this.httpClient.get('/api/me.json?'+fields,user).subscribe(
@@ -65,19 +73,21 @@ export class LoginPage {
                       });
                     },
                     err => {
+                      this.loadingData = false;
                       this.setStickToasterMessage('Fail to login Fail to load System information, please checking your network connection');
                       console.log(err);
                     }
                   );
                 }).catch(err=>{
                   console.log(err);
+                  this.loadingData = false;
                   this.setStickToasterMessage('Fail set current user');
                 })
               },()=>{
                 //error on create database
+                this.loadingData = false;
                 this.setStickToasterMessage('Fail to open local storage');
               });
-
 
             });
           }
@@ -88,36 +98,45 @@ export class LoginPage {
   }
 
   downloadingPrograms(user,databaseName){
-    alert('downloading programs');
+
+    this.setLoadingMessages('Downloading programs');
     let resource = 'programs';
     let tableMetadata = this.sqlLite.getDataBaseStructure()[resource];
     let fields = tableMetadata.fields;
+
     this.httpClient.get('/api/'+resource+'.json?paging=false&fields='+fields+'&filter=programType:eq:WITHOUT_REGISTRATION',user).subscribe(
       data => {
-        alert('starting saving programs');
         let programsData = data.json();
+        this.setLoadingMessages('Starting saving '+programsData[resource].length+' program(s)');
         this.app.saveMetadata(resource,programsData[resource],databaseName).then(()=>{
-          this.setStickToasterMessage('Complete saving all programs ');
+          this.setToasterMessage('Complete saving all programs');
           this.loginData.isLogin = true;
           this.user.setCurrentUser(this.loginData).then(user=>{
             this.navCtrl.setRoot(HomePage);
           })
         },error=>{
+          this.loadingData = false;
           this.setStickToasterMessage('Fail to save programs :: ' + JSON.stringify(error));
         });
-
       },
       err => {
+        this.loadingData = false;
         this.setStickToasterMessage('Fail to login Fail to downloading programs');
         console.log(err);
       }
     );
+
+  }
+
+
+  setLoadingMessages(message){
+    this.loadingMessages.push(message);
   }
 
   setToasterMessage(message){
     let toast = this.toastCtrl.create({
       message: message,
-      duration: 3000
+      duration: 4000
     });
     toast.present();
   }

@@ -29,6 +29,8 @@ var LoginPage = (function () {
         this.app = app;
         this.toastCtrl = toastCtrl;
         this.loginData = {};
+        this.loadingData = false;
+        this.loadingMessages = [];
         this.loginData.logoUrl = 'img/logo.png';
         this.reAuthenticateUser();
     }
@@ -60,10 +62,15 @@ var LoginPage = (function () {
                     _this.setToasterMessage('Please Enter password');
                 }
                 else {
+                    _this.loadingData = true;
+                    _this.loadingMessages = [];
                     _this.app.getDataBaseName(_this.loginData.serverUrl).then(function (databaseName) {
                         //generate tables
+                        _this.setLoadingMessages('Open database');
                         _this.sqlLite.generateTables(databaseName).then(function () {
                             _this.loginData.currentDatabase = databaseName;
+                            //Authenticating user
+                            _this.setLoadingMessages('Authenticating user');
                             _this.user.setCurrentUser(_this.loginData).then(function (user) {
                                 var fields = "fields=[:all],userCredentials[userRoles[name,dataSets[id,name],programs[id,name]]";
                                 _this.httpClient.get('/api/me.json?' + fields, user).subscribe(function (data) {
@@ -72,15 +79,18 @@ var LoginPage = (function () {
                                         _this.downloadingPrograms(user, databaseName);
                                     });
                                 }, function (err) {
+                                    _this.loadingData = false;
                                     _this.setStickToasterMessage('Fail to login Fail to load System information, please checking your network connection');
                                     console.log(err);
                                 });
                             }).catch(function (err) {
                                 console.log(err);
+                                _this.loadingData = false;
                                 _this.setStickToasterMessage('Fail set current user');
                             });
                         }, function () {
                             //error on create database
+                            _this.loadingData = false;
                             _this.setStickToasterMessage('Fail to open local storage');
                         });
                     });
@@ -93,31 +103,36 @@ var LoginPage = (function () {
     };
     LoginPage.prototype.downloadingPrograms = function (user, databaseName) {
         var _this = this;
-        alert('downloading programs');
+        this.setLoadingMessages('Downloading programs');
         var resource = 'programs';
         var tableMetadata = this.sqlLite.getDataBaseStructure()[resource];
         var fields = tableMetadata.fields;
         this.httpClient.get('/api/' + resource + '.json?paging=false&fields=' + fields + '&filter=programType:eq:WITHOUT_REGISTRATION', user).subscribe(function (data) {
-            alert('starting saving programs');
             var programsData = data.json();
+            _this.setLoadingMessages('Starting saving ' + programsData[resource].length + ' program(s)');
             _this.app.saveMetadata(resource, programsData[resource], databaseName).then(function () {
-                _this.setStickToasterMessage('Complete saving all programs ');
+                _this.setToasterMessage('Complete saving all programs');
                 _this.loginData.isLogin = true;
                 _this.user.setCurrentUser(_this.loginData).then(function (user) {
                     _this.navCtrl.setRoot(home_1.HomePage);
                 });
             }, function (error) {
+                _this.loadingData = false;
                 _this.setStickToasterMessage('Fail to save programs :: ' + JSON.stringify(error));
             });
         }, function (err) {
+            _this.loadingData = false;
             _this.setStickToasterMessage('Fail to login Fail to downloading programs');
             console.log(err);
         });
     };
+    LoginPage.prototype.setLoadingMessages = function (message) {
+        this.loadingMessages.push(message);
+    };
     LoginPage.prototype.setToasterMessage = function (message) {
         var toast = this.toastCtrl.create({
             message: message,
-            duration: 3000
+            duration: 4000
         });
         toast.present();
     };
