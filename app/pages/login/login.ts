@@ -58,13 +58,13 @@ export class LoginPage {
 
             this.app.getDataBaseName(this.loginData.serverUrl).then(databaseName=>{
               //generate tables
-              this.setLoadingMessages('Open database');
+              this.setLoadingMessages('Opening database');
               this.sqlLite.generateTables(databaseName).then(()=>{
                 this.loginData.currentDatabase = databaseName;
                 //Authenticating user
                 this.setLoadingMessages('Authenticating user');
                 this.user.setCurrentUser(this.loginData).then(user=>{
-                  let fields = "fields=[:all],userCredentials[userRoles[name,dataSets[id,name],programs[id,name]]";
+                  let fields = "fields=[:all],userCredentials[userRoles[name,programs[id,name]]";
                   this.httpClient.get('/api/me.json?'+fields,user).subscribe(
                     data => {
                       data = data.json();

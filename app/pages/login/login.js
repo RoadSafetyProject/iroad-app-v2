@@ -66,13 +66,13 @@ var LoginPage = (function () {
                     _this.loadingMessages = [];
                     _this.app.getDataBaseName(_this.loginData.serverUrl).then(function (databaseName) {
                         //generate tables
-                        _this.setLoadingMessages('Open database');
+                        _this.setLoadingMessages('Opening database');
                         _this.sqlLite.generateTables(databaseName).then(function () {
                             _this.loginData.currentDatabase = databaseName;
                             //Authenticating user
                             _this.setLoadingMessages('Authenticating user');
                             _this.user.setCurrentUser(_this.loginData).then(function (user) {
-                                var fields = "fields=[:all],userCredentials[userRoles[name,dataSets[id,name],programs[id,name]]";
+                                var fields = "fields=[:all],userCredentials[userRoles[name,programs[id,name]]";
                                 _this.httpClient.get('/api/me.json?' + fields, user).subscribe(function (data) {
                                     data = data.json();
                                     _this.user.setUserData(data).then(function (userData) {
