@@ -20,7 +20,7 @@ export class SqlLite {
         {value: 'organisationUnits',type:'LONGTEXT'},
         {value: 'programStages',type:'LONGTEXT'}
       ],
-      fields : "id,name,categoryCombo[id,isDefault,categories[id,categoryOptions[id,name]]],organisationUnits[id],programStages[programStageDataElements[id,name,compulsory,sortOrder,dataElement[id,name,code,optionSetValue,valueType,optionSet[options[id,code,name]],categoryCombo[id,isDefault,categories[id,name]]]]]",
+      fields : "id,name,categoryCombo[id,isDefault,categories[id,categoryOptions[id,name]]],organisationUnits[id],programStages[programStageDataElements[id,name,displayInReports,compulsory,sortOrder,dataElement[id,name,code,optionSetValue,valueType,optionSet[options[id,code,name]],categoryCombo[id,isDefault,categories[id,name]]]]]",
     }
   };
 
