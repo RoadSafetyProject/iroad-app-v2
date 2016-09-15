@@ -24,7 +24,11 @@ export class VehicleVerificationPage {
   private relationDataElement : any;
   private currentUser :any = {};
   private program : any ={};
+  private verificationData : any = [];
   private dataElementListObject : any = {};
+  private loadingData : boolean = false;
+  private loadingMessages : any = [];
+
 
   constructor(private eventProvider : EventProvider,private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
     this.user.getCurrentUser().then(currentUser=>{
@@ -34,26 +38,42 @@ export class VehicleVerificationPage {
   }
 
   verifyVehicle(){
-
-    if(this.vehicle.plateNumber && this.relationDataElement.id){
+    if(this.vehicle.plateNumber){
       this.vehicle.plateNumber = this.vehicle.plateNumber.toUpperCase();
       if(this.vehicle.plateNumber.length == 7){
-        this.vehicle.plateNumber =  this.vehicle.plateNumber.substr(0,4) + ' ' +this.vehicle.plateNumber.substr(4);
+        this.vehicle.plateNumber =  this.vehicle.plateNumber.substr(0,4) + ' ' + this.vehicle.plateNumber.substr(4);
       }
-      this.loadData();
+      this.verificationData = [];
+      if(this.relationDataElement.id){
+        this.loadData();
+      }else{
+        this.setToasterMessage('Fail to set relation data element ');
+      }
     }else{
       this.setToasterMessage('Please enter Vehicle Plate Number');
     }
   }
 
   loadData(){
+    this.loadingData = true;
+    this.loadingMessages = [];
+    this.setLoadingMessages('Fetching vehicle information');
     this.eventProvider.findEventsByDataValue(this.relationDataElement.id,this.vehicle.plateNumber,this.program.id,this.currentUser).then(events=>{
-      this.vehicle.events = events[0];
-      alert(JSON.stringify(events));
+      this.setLoadedData(events);
     },error=>{
-      alert('fail');
-      alert(JSON.stringify(error));
+      this.loadingData = false;
+      this.setToasterMessage('Fail to verify, please your network connection');
     })
+  }
+
+  setLoadedData(events){
+    this.loadingData = false;
+    if(events.length> 0){
+      this.vehicle.events = events[0];
+      this.verificationData = events[0].dataValues;
+    }else{
+      this.setToasterMessage('Vehicle does not exist in the system');
+    }
   }
 
 
@@ -71,6 +91,10 @@ export class VehicleVerificationPage {
     })
   }
 
+  setLoadingMessages(message){
+    this.loadingMessages.push(message);
+  }
+
   setProgramMetadata(programs){
     if(programs.length > 0){
       this.relationDataElement = {};
@@ -84,7 +108,11 @@ export class VehicleVerificationPage {
       let relationDataElementCode = "id_"+this.programName;
       relationDataElementCode = relationDataElementCode.toLocaleLowerCase();
       this.program.programStages[0].programStageDataElements.forEach(programStageDataElement=>{
-        this.dataElementListObject[programStageDataElement.dataElement.id] = programStageDataElement.dataElement.name;
+        this.dataElementListObject[programStageDataElement.dataElement.id] = {
+          name : programStageDataElement.dataElement.name,
+          displayInReports : programStageDataElement.displayInReports,
+          compulsory : programStageDataElement.compulsory
+        };
         if(programStageDataElement.dataElement.code && programStageDataElement.dataElement.code.toLowerCase() ==relationDataElementCode){
           this.relationDataElement = programStageDataElement.dataElement;
         }

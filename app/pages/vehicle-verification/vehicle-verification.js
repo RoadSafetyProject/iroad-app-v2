@@ -34,19 +34,28 @@ var VehicleVerificationPage = (function () {
         this.programName = "Vehicle";
         this.currentUser = {};
         this.program = {};
+        this.verificationData = [];
         this.dataElementListObject = {};
+        this.loadingData = false;
+        this.loadingMessages = [];
         this.user.getCurrentUser().then(function (currentUser) {
             _this.currentUser = JSON.parse(currentUser);
             _this.loadingProgram();
         });
     }
     VehicleVerificationPage.prototype.verifyVehicle = function () {
-        if (this.vehicle.plateNumber && this.relationDataElement.id) {
+        if (this.vehicle.plateNumber) {
             this.vehicle.plateNumber = this.vehicle.plateNumber.toUpperCase();
             if (this.vehicle.plateNumber.length == 7) {
                 this.vehicle.plateNumber = this.vehicle.plateNumber.substr(0, 4) + ' ' + this.vehicle.plateNumber.substr(4);
             }
-            this.loadData();
+            this.verificationData = [];
+            if (this.relationDataElement.id) {
+                this.loadData();
+            }
+            else {
+                this.setToasterMessage('Fail to set relation data element ');
+            }
         }
         else {
             this.setToasterMessage('Please enter Vehicle Plate Number');
@@ -54,13 +63,25 @@ var VehicleVerificationPage = (function () {
     };
     VehicleVerificationPage.prototype.loadData = function () {
         var _this = this;
+        this.loadingData = true;
+        this.loadingMessages = [];
+        this.setLoadingMessages('Fetching vehicle information');
         this.eventProvider.findEventsByDataValue(this.relationDataElement.id, this.vehicle.plateNumber, this.program.id, this.currentUser).then(function (events) {
-            _this.vehicle.events = events[0];
-            alert(JSON.stringify(events));
+            _this.setLoadedData(events);
         }, function (error) {
-            alert('fail');
-            alert(JSON.stringify(error));
+            _this.loadingData = false;
+            _this.setToasterMessage('Fail to verify, please your network connection');
         });
+    };
+    VehicleVerificationPage.prototype.setLoadedData = function (events) {
+        this.loadingData = false;
+        if (events.length > 0) {
+            this.vehicle.events = events[0];
+            this.verificationData = events[0].dataValues;
+        }
+        else {
+            this.setToasterMessage('Vehicle does not exist in the system');
+        }
     };
     VehicleVerificationPage.prototype.loadingProgram = function () {
         var _this = this;
@@ -75,6 +96,9 @@ var VehicleVerificationPage = (function () {
             _this.setStickToasterMessage(message);
         });
     };
+    VehicleVerificationPage.prototype.setLoadingMessages = function (message) {
+        this.loadingMessages.push(message);
+    };
     VehicleVerificationPage.prototype.setProgramMetadata = function (programs) {
         if (programs.length > 0) {
             this.relationDataElement = {};
@@ -88,7 +112,11 @@ var VehicleVerificationPage = (function () {
             var relationDataElementCode = "id_" + this.programName;
             relationDataElementCode = relationDataElementCode.toLocaleLowerCase();
             this.program.programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
-                _this.dataElementListObject[programStageDataElement.dataElement.id] = programStageDataElement.dataElement.name;
+                _this.dataElementListObject[programStageDataElement.dataElement.id] = {
+                    name: programStageDataElement.dataElement.name,
+                    displayInReports: programStageDataElement.displayInReports,
+                    compulsory: programStageDataElement.compulsory
+                };
                 if (programStageDataElement.dataElement.code && programStageDataElement.dataElement.code.toLowerCase() == relationDataElementCode) {
                     _this.relationDataElement = programStageDataElement.dataElement;
                 }

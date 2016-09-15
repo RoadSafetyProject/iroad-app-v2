@@ -9,6 +9,7 @@ import { ReportOffencePage } from './pages/report-offence/report-offence';
 import { DriverVerificationPage } from './pages/driver-verification/driver-verification';
 import { VehicleVerificationPage } from './pages/vehicle-verification/vehicle-verification';
 import {User} from "./providers/user/user";
+import {AboutPage} from "./pages/about/about";
 
 
 @Component({
@@ -32,7 +33,8 @@ class MyApp {
       { title: 'Report Accident', component: ReportAccidentPage},
       { title: 'Report Offence', component: ReportOffencePage },
       { title: 'Driver Verification', component: DriverVerificationPage},
-      { title: 'Vehicle Verification', component: VehicleVerificationPage}
+      { title: 'Vehicle Verification', component: VehicleVerificationPage},
+      { title: 'About', component: AboutPage}
     ];
 
   }

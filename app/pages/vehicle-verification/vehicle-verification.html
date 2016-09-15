@@ -26,7 +26,7 @@
 
   <ion-row>
     <ion-col width-100>
-      <button (click)="verifyVehicle()"  full>
+      <button (click)="verifyVehicle()" full >
         Verify Vehicle
       </button>
     </ion-col>
@@ -34,9 +34,32 @@
 
   <ion-row>
     <ion-col width-100>
-      {{ vehicle |json }}
-      <hr>
-      {{ dataElementListObject |json }}
+
+      <div *ngIf="loadingData">
+        <ion-list>
+          <ion-item *ngFor="let message of loadingMessages; let currentIndex = index">
+            {{ message }}
+            <ion-icon *ngIf="(currentIndex + 1) < loadingMessages.length" name="done-all" item-right></ion-icon>
+            <div style="text-align: center" item-right *ngIf="(currentIndex + 1) >= loadingMessages.length">
+              <ion-spinner name="crescent"></ion-spinner>
+            </div>
+          </ion-item>
+        </ion-list>
+      </div>
+
+      <div *ngIf="verificationData.length > 0 && !loadingData" style="margn-top:1%;">
+        <h3 align="center">
+          Verification Information
+        </h3>
+        <ion-list >
+          <div *ngFor="let dataValue of verificationData">
+            <ion-item *ngIf="dataElementListObject[dataValue.dataElement].displayInReports">
+              <h2>{{ dataElementListObject[dataValue.dataElement].name }}</h2>
+              <p>{{ dataValue.value }}</p>
+            </ion-item>
+          </div>
+        </ion-list>
+      </div>
     </ion-col>
   </ion-row>
 </ion-content>

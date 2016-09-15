@@ -17,6 +17,7 @@ var report_offence_1 = require('./pages/report-offence/report-offence');
 var driver_verification_1 = require('./pages/driver-verification/driver-verification');
 var vehicle_verification_1 = require('./pages/vehicle-verification/vehicle-verification');
 var user_1 = require("./providers/user/user");
+var about_1 = require("./pages/about/about");
 var MyApp = (function () {
     function MyApp(platform, user) {
         this.platform = platform;
@@ -29,7 +30,8 @@ var MyApp = (function () {
             { title: 'Report Accident', component: report_accident_1.ReportAccidentPage },
             { title: 'Report Offence', component: report_offence_1.ReportOffencePage },
             { title: 'Driver Verification', component: driver_verification_1.DriverVerificationPage },
-            { title: 'Vehicle Verification', component: vehicle_verification_1.VehicleVerificationPage }
+            { title: 'Vehicle Verification', component: vehicle_verification_1.VehicleVerificationPage },
+            { title: 'About', component: about_1.AboutPage }
         ];
     }
     MyApp.prototype.initializeApp = function () {
