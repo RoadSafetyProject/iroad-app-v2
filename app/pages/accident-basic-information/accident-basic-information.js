@@ -9,6 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var core_1 = require('@angular/core');
 var ionic_angular_1 = require('ionic-angular');
+var ionic_native_1 = require('ionic-native');
 var app_1 = require('../../providers/app/app');
 var user_1 = require('../../providers/user/user');
 var http_client_1 = require('../../providers/http-client/http-client');
@@ -32,6 +33,8 @@ var AccidentBasicInformationPage = (function () {
         this.programName = "Accident";
         this.currentUser = {};
         this.program = {};
+        this.dataValues = {};
+        this.currentCoordinate = {};
         this.loadingData = false;
         this.loadingMessages = [];
         this.user.getCurrentUser().then(function (currentUser) {
@@ -41,6 +44,9 @@ var AccidentBasicInformationPage = (function () {
     }
     AccidentBasicInformationPage.prototype.loadingProgram = function () {
         var _this = this;
+        this.loadingData = true;
+        this.loadingMessages = [];
+        this.setLoadingMessages('Loading accident basic information metadata');
         var resource = 'programs';
         var attribute = 'name';
         var attributeValue = [];
@@ -48,16 +54,24 @@ var AccidentBasicInformationPage = (function () {
         this.sqlLite.getDataFromTableByAttributes(resource, attribute, attributeValue, this.currentUser.currentDatabase).then(function (programs) {
             _this.setProgramMetadata(programs);
         }, function (error) {
+            _this.loadingData = false;
             var message = "Fail to loading programs " + error;
             _this.setStickToasterMessage(message);
         });
     };
     AccidentBasicInformationPage.prototype.setProgramMetadata = function (programs) {
+        var _this = this;
         if (programs.length > 0) {
             this.program = programs[0];
         }
+        ionic_native_1.Geolocation.getCurrentPosition().then(function (resp) {
+            _this.currentCoordinate = resp.coords;
+            alert(JSON.stringify(resp));
+        });
+        this.loadingData = false;
     };
     AccidentBasicInformationPage.prototype.goToAccidentVehicle = function () {
+        alert('dataValues :: ' + JSON.stringify(this.dataValues));
         this.navCtrl.push(accident_vehicle_1.AccidentVehiclePage);
     };
     AccidentBasicInformationPage.prototype.setLoadingMessages = function (message) {

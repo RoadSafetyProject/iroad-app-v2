@@ -9,6 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var core_1 = require('@angular/core');
 var ionic_angular_1 = require('ionic-angular');
+var ionic_native_1 = require('ionic-native');
 var app_1 = require('../../providers/app/app');
 var user_1 = require('../../providers/user/user');
 var http_client_1 = require('../../providers/http-client/http-client');
@@ -32,6 +33,8 @@ var AccidentVehiclePage = (function () {
         this.programName = "Accident Vehicle";
         this.currentUser = {};
         this.program = {};
+        this.dataValues = {};
+        this.currentCoordinate = {};
         this.loadingData = false;
         this.loadingMessages = [];
         this.user.getCurrentUser().then(function (currentUser) {
@@ -41,6 +44,9 @@ var AccidentVehiclePage = (function () {
     }
     AccidentVehiclePage.prototype.loadingProgram = function () {
         var _this = this;
+        this.loadingData = true;
+        this.loadingMessages = [];
+        this.setLoadingMessages('Loading accident basic information metadata');
         var resource = 'programs';
         var attribute = 'name';
         var attributeValue = [];
@@ -48,16 +54,24 @@ var AccidentVehiclePage = (function () {
         this.sqlLite.getDataFromTableByAttributes(resource, attribute, attributeValue, this.currentUser.currentDatabase).then(function (programs) {
             _this.setProgramMetadata(programs);
         }, function (error) {
+            _this.loadingData = false;
             var message = "Fail to loading programs " + error;
             _this.setStickToasterMessage(message);
         });
     };
     AccidentVehiclePage.prototype.setProgramMetadata = function (programs) {
+        var _this = this;
         if (programs.length > 0) {
             this.program = programs[0];
         }
+        ionic_native_1.Geolocation.getCurrentPosition().then(function (resp) {
+            _this.currentCoordinate = resp.coords;
+            alert(JSON.stringify(resp));
+        });
+        this.loadingData = false;
     };
     AccidentVehiclePage.prototype.goToAccidentWitness = function () {
+        alert('dataValues :: ' + JSON.stringify(this.dataValues));
         this.navCtrl.push(accident_witness_1.AccidentWitnessPage);
     };
     AccidentVehiclePage.prototype.setLoadingMessages = function (message) {

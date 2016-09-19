@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { NavController,ToastController } from 'ionic-angular';
 
+import { Geolocation } from 'ionic-native';
+
 import { App } from '../../providers/app/app';
 import {User } from '../../providers/user/user';
 import {HttpClient} from '../../providers/http-client/http-client';
@@ -23,7 +25,9 @@ export class AccidentBasicInformationPage {
 
   private programName: string = "Accident";
   private currentUser :any = {};
-  private program : any ={};
+  private program : any = {};
+  private dataValues : any = {};
+  private currentCoordinate : any = {};
   private loadingData : boolean = false;
   private loadingMessages : any = [];
 
@@ -31,10 +35,13 @@ export class AccidentBasicInformationPage {
     this.user.getCurrentUser().then(currentUser=>{
       this.currentUser = JSON.parse(currentUser);
       this.loadingProgram();
-    })
+    });
   }
 
   loadingProgram(){
+    this.loadingData = true;
+    this.loadingMessages = [];
+    this.setLoadingMessages('Loading accident basic information metadata');
     let resource = 'programs';
     let attribute = 'name';
     let attributeValue =[];
@@ -43,6 +50,7 @@ export class AccidentBasicInformationPage {
     this.sqlLite.getDataFromTableByAttributes(resource,attribute,attributeValue,this.currentUser.currentDatabase).then((programs)=>{
       this.setProgramMetadata(programs);
     },error=>{
+      this.loadingData = false;
       let message = "Fail to loading programs " + error;
       this.setStickToasterMessage(message);
     })
@@ -52,10 +60,16 @@ export class AccidentBasicInformationPage {
     if(programs.length > 0){
       this.program = programs[0];
     }
+    Geolocation.getCurrentPosition().then((resp) => {
+      this.currentCoordinate = resp.coords;
+      alert(JSON.stringify(resp));
+    });
+    this.loadingData = false;
   }
 
 
   goToAccidentVehicle(){
+    alert('dataValues :: ' + JSON.stringify(this.dataValues));
     this.navCtrl.push(AccidentVehiclePage);
   }
 

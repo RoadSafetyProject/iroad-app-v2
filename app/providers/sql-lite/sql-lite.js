@@ -86,7 +86,7 @@ var SqlLite = (function () {
             var query = 'CREATE TABLE IF NOT EXISTS ' + tableName + ' (';
             var columns = self.dataBaseStructure[tableName].columns;
             columns.forEach(function (column, index) {
-                if (column.value == "id") {
+                if (column.value == "id" || column.value == "event") {
                     query += column.value + " " + column.type + ' primary key';
                 }
                 else {

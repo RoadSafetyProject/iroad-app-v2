@@ -91,7 +91,7 @@ export class SqlLite {
       let query = 'CREATE TABLE IF NOT EXISTS ' + tableName + ' (';
       let columns = self.dataBaseStructure[tableName].columns;
       columns.forEach((column: any,index:any) => {
-        if (column.value == "id") {
+        if (column.value == "id" || column.value == "event") {
           query += column.value + " " + column.type + ' primary key';
         } else {
           query += column.value + " " + column.type;
@@ -101,7 +101,6 @@ export class SqlLite {
         }
       });
       query += ')';
-
       let db = new SQLite();
       db.openDatabase({name: databaseName,location: 'default'}).then(() => {
         db.executeSql(query, []).then((success) => {
