@@ -22,15 +22,61 @@ var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
 */
 var ReportOffencePage = (function () {
     function ReportOffencePage(navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
+        var _this = this;
         this.navCtrl = navCtrl;
         this.toastCtrl = toastCtrl;
         this.sqlLite = sqlLite;
         this.user = user;
         this.httpClient = httpClient;
         this.app = app;
+        this.programName = "Offence";
+        this.currentUser = {};
+        this.program = {};
+        this.loadingData = false;
+        this.loadingMessages = [];
+        this.user.getCurrentUser().then(function (currentUser) {
+            _this.currentUser = JSON.parse(currentUser);
+            _this.loadingProgram();
+        });
     }
+    ReportOffencePage.prototype.loadingProgram = function () {
+        var _this = this;
+        var resource = 'programs';
+        var attribute = 'name';
+        var attributeValue = [];
+        attributeValue.push(this.programName);
+        this.sqlLite.getDataFromTableByAttributes(resource, attribute, attributeValue, this.currentUser.currentDatabase).then(function (programs) {
+            _this.setProgramMetadata(programs);
+        }, function (error) {
+            var message = "Fail to loading programs " + error;
+            _this.setStickToasterMessage(message);
+        });
+    };
+    ReportOffencePage.prototype.setProgramMetadata = function (programs) {
+        if (programs.length > 0) {
+            this.program = programs[0];
+        }
+        //Offence Registry
+    };
     ReportOffencePage.prototype.goToOffensePaymentConfirmation = function () {
         this.navCtrl.push(offense_payment_confirmation_1.OffensePaymentConfirmationPage);
+    };
+    ReportOffencePage.prototype.setLoadingMessages = function (message) {
+        this.loadingMessages.push(message);
+    };
+    ReportOffencePage.prototype.setToasterMessage = function (message) {
+        var toast = this.toastCtrl.create({
+            message: message,
+            duration: 3000
+        });
+        toast.present();
+    };
+    ReportOffencePage.prototype.setStickToasterMessage = function (message) {
+        var toast = this.toastCtrl.create({
+            message: message,
+            showCloseButton: true
+        });
+        toast.present();
     };
     ReportOffencePage = __decorate([
         core_1.Component({

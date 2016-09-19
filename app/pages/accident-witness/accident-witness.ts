@@ -20,12 +20,63 @@ import {HomePage} from '../home/home'
 })
 export class AccidentWitnessPage {
 
-  constructor(private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
+  private programName: string = "Accident Witness";
+  private currentUser :any = {};
+  private program : any ={};
+  private loadingData : boolean = false;
+  private loadingMessages : any = [];
 
+  constructor(private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
+    this.user.getCurrentUser().then(currentUser=>{
+      this.currentUser = JSON.parse(currentUser);
+      this.loadingProgram();
+    })
   }
+
+  loadingProgram(){
+    let resource = 'programs';
+    let attribute = 'name';
+    let attributeValue =[];
+    attributeValue.push(this.programName);
+
+    this.sqlLite.getDataFromTableByAttributes(resource,attribute,attributeValue,this.currentUser.currentDatabase).then((programs)=>{
+      this.setProgramMetadata(programs);
+    },error=>{
+      let message = "Fail to loading programs " + error;
+      this.setStickToasterMessage(message);
+    })
+  }
+
+  setProgramMetadata(programs){
+    if(programs.length > 0){
+      this.program = programs[0];
+    }
+  }
+
 
   goToHome(){
     this.navCtrl.setRoot(HomePage);
   }
+
+  setLoadingMessages(message){
+    this.loadingMessages.push(message);
+  }
+
+  setToasterMessage(message){
+    let toast = this.toastCtrl.create({
+      message: message,
+      duration: 3000
+    });
+    toast.present();
+  }
+
+  setStickToasterMessage(message){
+    let toast = this.toastCtrl.create({
+      message: message,
+      showCloseButton : true
+    });
+    toast.present();
+  }
+
 
 }

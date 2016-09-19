@@ -22,15 +22,60 @@ var accident_witness_1 = require('../accident-witness/accident-witness');
 */
 var AccidentVehiclePage = (function () {
     function AccidentVehiclePage(navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
+        var _this = this;
         this.navCtrl = navCtrl;
         this.toastCtrl = toastCtrl;
         this.sqlLite = sqlLite;
         this.user = user;
         this.httpClient = httpClient;
         this.app = app;
+        this.programName = "Accident Vehicle";
+        this.currentUser = {};
+        this.program = {};
+        this.loadingData = false;
+        this.loadingMessages = [];
+        this.user.getCurrentUser().then(function (currentUser) {
+            _this.currentUser = JSON.parse(currentUser);
+            _this.loadingProgram();
+        });
     }
+    AccidentVehiclePage.prototype.loadingProgram = function () {
+        var _this = this;
+        var resource = 'programs';
+        var attribute = 'name';
+        var attributeValue = [];
+        attributeValue.push(this.programName);
+        this.sqlLite.getDataFromTableByAttributes(resource, attribute, attributeValue, this.currentUser.currentDatabase).then(function (programs) {
+            _this.setProgramMetadata(programs);
+        }, function (error) {
+            var message = "Fail to loading programs " + error;
+            _this.setStickToasterMessage(message);
+        });
+    };
+    AccidentVehiclePage.prototype.setProgramMetadata = function (programs) {
+        if (programs.length > 0) {
+            this.program = programs[0];
+        }
+    };
     AccidentVehiclePage.prototype.goToAccidentWitness = function () {
         this.navCtrl.push(accident_witness_1.AccidentWitnessPage);
+    };
+    AccidentVehiclePage.prototype.setLoadingMessages = function (message) {
+        this.loadingMessages.push(message);
+    };
+    AccidentVehiclePage.prototype.setToasterMessage = function (message) {
+        var toast = this.toastCtrl.create({
+            message: message,
+            duration: 3000
+        });
+        toast.present();
+    };
+    AccidentVehiclePage.prototype.setStickToasterMessage = function (message) {
+        var toast = this.toastCtrl.create({
+            message: message,
+            showCloseButton: true
+        });
+        toast.present();
     };
     AccidentVehiclePage = __decorate([
         core_1.Component({
