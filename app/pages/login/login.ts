@@ -167,9 +167,6 @@ export class LoginPage {
         console.log(err);
       }
     );
-
-
-
   }
 
   setLoadingMessages(message){
