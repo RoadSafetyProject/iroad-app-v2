@@ -107,22 +107,58 @@ var LoginPage = (function () {
         var resource = 'programs';
         var tableMetadata = this.sqlLite.getDataBaseStructure()[resource];
         var fields = tableMetadata.fields;
-        this.httpClient.get('/api/' + resource + '.json?paging=false&fields=' + fields + '&filter=programType:eq:WITHOUT_REGISTRATION', user).subscribe(function (data) {
+        this.httpClient.get('/api/' + resource + '.json?paging=false&fields=' + fields, user).subscribe(function (data) {
             var programsData = data.json();
-            _this.setLoadingMessages('Starting saving ' + programsData[resource].length + ' program(s)');
+            _this.setLoadingMessages('Start saving ' + programsData[resource].length + ' program(s)');
             _this.app.saveMetadata(resource, programsData[resource], databaseName).then(function () {
                 _this.setToasterMessage('Complete saving all programs');
-                _this.loginData.isLogin = true;
-                _this.user.setCurrentUser(_this.loginData).then(function (user) {
-                    _this.navCtrl.setRoot(home_1.HomePage);
-                });
+                _this.loadingOffenseRegistryProgram();
             }, function (error) {
                 _this.loadingData = false;
                 _this.setStickToasterMessage('Fail to save programs :: ' + JSON.stringify(error));
             });
         }, function (err) {
             _this.loadingData = false;
-            _this.setStickToasterMessage('Fail to login Fail to downloading programs');
+            _this.setStickToasterMessage('Fail to login Fail to download programs');
+            console.log(err);
+        });
+    };
+    LoginPage.prototype.loadingOffenseRegistryProgram = function () {
+        var _this = this;
+        this.setLoadingMessages('Loading offence(s) list metadata');
+        var resource = 'programs';
+        var attribute = 'name';
+        var attributeValue = [];
+        attributeValue.push('Offence Registry');
+        this.sqlLite.getDataFromTableByAttributes(resource, attribute, attributeValue, this.loginData.currentDatabase).then(function (programs) {
+            _this.downloadingOffenceList(programs);
+        }, function (error) {
+            _this.loadingData = false;
+            var message = "Fail to loading programs " + error;
+            _this.setStickToasterMessage(message);
+        });
+    };
+    LoginPage.prototype.downloadingOffenceList = function (programs) {
+        var _this = this;
+        this.setLoadingMessages('Downloading offence(s) list');
+        var resource = "events";
+        var programId = programs[0].id;
+        var url = "/api/" + resource + '.json?paging=false&program=' + programId;
+        this.httpClient.get(url, this.loginData).subscribe(function (data) {
+            var eventData = data.json();
+            _this.setLoadingMessages('Start saving ' + eventData[resource].length + ' offence(s) list');
+            _this.app.saveMetadata(resource, eventData[resource], _this.loginData.currentDatabase).then(function () {
+                _this.loginData.isLogin = true;
+                _this.user.setCurrentUser(_this.loginData).then(function (user) {
+                    _this.navCtrl.setRoot(home_1.HomePage);
+                });
+            }, function (error) {
+                _this.loadingData = false;
+                _this.setStickToasterMessage('Fail to save  offence(s) list :: ' + JSON.stringify(error));
+            });
+        }, function (err) {
+            _this.loadingData = false;
+            _this.setStickToasterMessage('Fail to login Fail to download offence(s) list');
             console.log(err);
         });
     };

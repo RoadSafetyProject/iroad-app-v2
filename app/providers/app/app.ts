@@ -68,6 +68,9 @@ export class App {
 
     return new Promise(function(resolve, reject) {
       let counter = 1;
+      if(resourceValues.length == 0){
+        resolve();
+      }
       resourceValues.forEach(resourceValue=>{
         promises.push(
           self.sqlLite.insertDataOnTable(resource,resourceValue,databaseName).then(()=>{

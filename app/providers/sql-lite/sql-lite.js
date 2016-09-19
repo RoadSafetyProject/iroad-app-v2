@@ -28,6 +28,18 @@ var SqlLite = (function () {
                     { value: 'programStages', type: 'LONGTEXT' }
                 ],
                 fields: "id,name,categoryCombo[id,isDefault,categories[id,categoryOptions[id,name]]],organisationUnits[id],programStages[programStageDataElements[id,name,displayInReports,compulsory,sortOrder,dataElement[id,name,code,optionSetValue,valueType,optionSet[options[id,code,name]],categoryCombo[id,isDefault,categories[id,name]]]]]",
+            },
+            events: {
+                columns: [
+                    { value: 'orgUnit', type: 'TEXT' },
+                    { value: 'eventDate', type: 'TEXT' },
+                    { value: 'status', type: 'TEXT' },
+                    { value: 'event', type: 'TEXT' },
+                    { value: 'program', type: 'TEXT' },
+                    { value: 'coordinate', type: 'LONGTEXT' },
+                    { value: 'dataValues', type: 'LONGTEXT' }
+                ],
+                fields: ""
             }
         };
     }

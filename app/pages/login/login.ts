@@ -105,16 +105,13 @@ export class LoginPage {
     let tableMetadata = this.sqlLite.getDataBaseStructure()[resource];
     let fields = tableMetadata.fields;
 
-    this.httpClient.get('/api/'+resource+'.json?paging=false&fields='+fields+'&filter=programType:eq:WITHOUT_REGISTRATION',user).subscribe(
+    this.httpClient.get('/api/'+resource+'.json?paging=false&fields='+fields,user).subscribe(
       data => {
         let programsData = data.json();
-        this.setLoadingMessages('Starting saving '+programsData[resource].length+' program(s)');
+        this.setLoadingMessages('Start saving '+programsData[resource].length+' program(s)');
         this.app.saveMetadata(resource,programsData[resource],databaseName).then(()=>{
           this.setToasterMessage('Complete saving all programs');
-          this.loginData.isLogin = true;
-          this.user.setCurrentUser(this.loginData).then(user=>{
-            this.navCtrl.setRoot(HomePage);
-          })
+          this.loadingOffenseRegistryProgram();
         },error=>{
           this.loadingData = false;
           this.setStickToasterMessage('Fail to save programs :: ' + JSON.stringify(error));
@@ -122,13 +119,58 @@ export class LoginPage {
       },
       err => {
         this.loadingData = false;
-        this.setStickToasterMessage('Fail to login Fail to downloading programs');
+        this.setStickToasterMessage('Fail to login Fail to download programs');
         console.log(err);
       }
     );
 
   }
 
+  loadingOffenseRegistryProgram(){
+    this.setLoadingMessages('Loading offence(s) list metadata');
+    let resource = 'programs';
+    let attribute = 'name';
+    let attributeValue =[];
+    attributeValue.push('Offence Registry');
+
+    this.sqlLite.getDataFromTableByAttributes(resource,attribute,attributeValue,this.loginData.currentDatabase).then((programs)=>{
+      this.downloadingOffenceList(programs);
+    },error=>{
+      this.loadingData = false;
+      let message = "Fail to loading programs " + error;
+      this.setStickToasterMessage(message);
+    })
+  }
+
+  downloadingOffenceList(programs){
+    this.setLoadingMessages('Downloading offence(s) list');
+    let resource = "events";
+    let programId = programs[0].id;
+    let url = "/api/"+resource+'.json?paging=false&program=' + programId;
+    this.httpClient.get(url,this.loginData).subscribe(
+      data => {
+        let eventData = data.json();
+        this.setLoadingMessages('Start saving '+eventData[resource].length+' offence(s) list');
+        this.app.saveMetadata(resource,eventData[resource],this.loginData.currentDatabase).then(()=>{
+          this.loginData.isLogin = true;
+          this.user.setCurrentUser(this.loginData).then(user=>{
+            this.navCtrl.setRoot(HomePage);
+          });
+        },error=>{
+          this.loadingData = false;
+          this.setStickToasterMessage('Fail to save  offence(s) list :: ' + JSON.stringify(error));
+        });
+      },
+      err => {
+        this.loadingData = false;
+        this.setStickToasterMessage('Fail to login Fail to download offence(s) list');
+        console.log(err);
+      }
+    );
+
+
+
+  }
 
   setLoadingMessages(message){
     this.loadingMessages.push(message);

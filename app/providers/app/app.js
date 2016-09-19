@@ -66,6 +66,9 @@ var App = (function () {
         var self = this;
         return new Promise(function (resolve, reject) {
             var counter = 1;
+            if (resourceValues.length == 0) {
+                resolve();
+            }
             resourceValues.forEach(function (resourceValue) {
                 promises.push(self.sqlLite.insertDataOnTable(resource, resourceValue, databaseName).then(function () {
                     //saving success
