@@ -33,6 +33,9 @@ export class ReportOffencePage {
   private currentCoordinate : any = {};
   private loadingData : boolean = false;
   private loadingMessages : any = [];
+  private relationDataElements:any = {};
+  private relationDataElementPrefix : string = "Program_";
+  private data : any = {};
 
   constructor(private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
     this.user.getCurrentUser().then(currentUser=>{
@@ -61,10 +64,24 @@ export class ReportOffencePage {
   setProgramMetadata(programs){
     if(programs.length > 0){
       this.program = programs[0];
+      this.checkingRelationDataElements();
       this.loadingOffenseRegistryProgram();
     }else{
       this.loadingData = false;
     }
+  }
+
+  checkingRelationDataElements(){
+    this.program.programStages[0].programStageDataElements.forEach(programStageDataElement=>{
+      if(programStageDataElement.dataElement.name.startsWith(this.relationDataElementPrefix)){
+        let programName = programStageDataElement.dataElement.name.replace(this.relationDataElementPrefix,"");
+        this.relationDataElements[programStageDataElement.dataElement.id] = {
+          program : programName,
+        }
+      }
+    });
+    alert(JSON.stringify(this.relationDataElements));
+
   }
 
 
@@ -117,17 +134,18 @@ export class ReportOffencePage {
     });
     Geolocation.getCurrentPosition().then((resp) => {
       this.currentCoordinate = resp.coords;
-      alert(JSON.stringify(resp));
+      //alert(JSON.stringify(resp));
     });
   }
 
   goToOffensePaymentConfirmation(){
     if(this.selectedOffenses.length > 0){
-      alert('selectedOffenses :: ' + JSON.stringify(this.selectedOffenses));
-      alert('dataValues :: ' + JSON.stringify(this.dataValues));
-      alert(JSON.stringify(this.currentCoordinate));
+      alert(JSON.stringify(this.data));
+      //alert('selectedOffenses :: ' + JSON.stringify(this.selectedOffenses));
+      //alert('dataValues :: ' + JSON.stringify(this.dataValues));
+      //alert(JSON.stringify(this.currentCoordinate));
       //@todo saving offense as well as offence list
-      this.navCtrl.push(OffensePaymentConfirmationPage);
+     // this.navCtrl.push(OffensePaymentConfirmationPage);
     }else{
       this.setToasterMessage('Please select at least one offence from offence list');
     }

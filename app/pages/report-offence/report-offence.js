@@ -9,7 +9,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var core_1 = require('@angular/core');
 var ionic_angular_1 = require('ionic-angular');
-var offense_payment_confirmation_1 = require("../offense-payment-confirmation/offense-payment-confirmation");
 var ionic_native_1 = require('ionic-native');
 var app_1 = require('../../providers/app/app');
 var user_1 = require('../../providers/user/user');
@@ -42,6 +41,9 @@ var ReportOffencePage = (function () {
         this.currentCoordinate = {};
         this.loadingData = false;
         this.loadingMessages = [];
+        this.relationDataElements = {};
+        this.relationDataElementPrefix = "Program_";
+        this.data = {};
         this.user.getCurrentUser().then(function (currentUser) {
             _this.currentUser = JSON.parse(currentUser);
             _this.loadingProgram();
@@ -66,11 +68,24 @@ var ReportOffencePage = (function () {
     ReportOffencePage.prototype.setProgramMetadata = function (programs) {
         if (programs.length > 0) {
             this.program = programs[0];
+            this.checkingRelationDataElements();
             this.loadingOffenseRegistryProgram();
         }
         else {
             this.loadingData = false;
         }
+    };
+    ReportOffencePage.prototype.checkingRelationDataElements = function () {
+        var _this = this;
+        this.program.programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
+            if (programStageDataElement.dataElement.name.startsWith(_this.relationDataElementPrefix)) {
+                var programName = programStageDataElement.dataElement.name.replace(_this.relationDataElementPrefix, "");
+                _this.relationDataElements[programStageDataElement.dataElement.id] = {
+                    program: programName,
+                };
+            }
+        });
+        alert(JSON.stringify(this.relationDataElements));
     };
     ReportOffencePage.prototype.loadingOffenseRegistryProgram = function () {
         var _this = this;
@@ -120,16 +135,12 @@ var ReportOffencePage = (function () {
         });
         ionic_native_1.Geolocation.getCurrentPosition().then(function (resp) {
             _this.currentCoordinate = resp.coords;
-            alert(JSON.stringify(resp));
+            //alert(JSON.stringify(resp));
         });
     };
     ReportOffencePage.prototype.goToOffensePaymentConfirmation = function () {
         if (this.selectedOffenses.length > 0) {
-            alert('selectedOffenses :: ' + JSON.stringify(this.selectedOffenses));
-            alert('dataValues :: ' + JSON.stringify(this.dataValues));
-            alert(JSON.stringify(this.currentCoordinate));
-            //@todo saving offense as well as offence list
-            this.navCtrl.push(offense_payment_confirmation_1.OffensePaymentConfirmationPage);
+            alert(JSON.stringify(this.data));
         }
         else {
             this.setToasterMessage('Please select at least one offence from offence list');

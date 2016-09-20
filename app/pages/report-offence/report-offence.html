@@ -30,10 +30,21 @@
 
   <div *ngIf="!loadingData">
     <ion-list>
+
+      <ion-item >
+        <ion-label floating>Vehicle plate number</ion-label>
+        <ion-input type="text" [(ngModel)]="data.plateNumber"></ion-input>
+      </ion-item>
+      <ion-item >
+        <ion-label floating >Driver Licence Number</ion-label>
+        <ion-input type="text" [(ngModel)]="data.licenceNumber" ></ion-input>
+      </ion-item>
+
+
       <div *ngIf="program.programStages">
         <div *ngIf="program.programStages.length > 0">
           <div *ngFor="let programStageDataElement of program.programStages[0].programStageDataElements">
-            <div *ngIf="programStageDataElement.displayInReports">
+            <div *ngIf="programStageDataElement.displayInReports && !relationDataElements[programStageDataElement.dataElement.id]">
               <div *ngIf="!programStageDataElement.dataElement.optionSetValue">
 
                 <ion-item *ngIf="programStageDataElement.dataElement.valueType =='BOOLEAN' ">
