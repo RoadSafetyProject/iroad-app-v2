@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController,ToastController } from 'ionic-angular';
-import { Camera } from 'ionic-native';
+import { Camera ,MediaCapture,CaptureError,MediaFile } from 'ionic-native';
 
 import { App } from '../../providers/app/app';
 import {User } from '../../providers/user/user';
@@ -55,7 +55,18 @@ export class ReportAccidentPage {
   }
 
   takeVideo(){
-    this.setToasterMessage('This functionality is currently not supported');
+    MediaCapture.captureVideo({limit : 1})
+      .then(
+        (data: MediaFile[]) => {
+          //this.mediaData = data;
+          alert(JSON.stringify(data));
+          this.setToasterMessage('Video has been selected successfully');
+        },
+        (err: CaptureError) => {
+          this.setToasterMessage('Fail to take video');
+        }
+      );
+
   }
 
   goToAccidentBasicInformation(){

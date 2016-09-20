@@ -61,7 +61,7 @@ export class AccidentWitnessPage {
     }
     Geolocation.getCurrentPosition().then((resp) => {
       this.currentCoordinate = resp.coords;
-      alert(JSON.stringify(resp));
+      //alert(JSON.stringify(resp));
     });
     this.loadingData = false;
   }

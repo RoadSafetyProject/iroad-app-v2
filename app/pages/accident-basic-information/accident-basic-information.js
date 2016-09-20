@@ -66,7 +66,7 @@ var AccidentBasicInformationPage = (function () {
         }
         ionic_native_1.Geolocation.getCurrentPosition().then(function (resp) {
             _this.currentCoordinate = resp.coords;
-            alert(JSON.stringify(resp));
+            //alert(JSON.stringify(resp));
         });
         this.loadingData = false;
     };

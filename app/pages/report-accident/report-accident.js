@@ -57,7 +57,15 @@ var ReportAccidentPage = (function () {
         });
     };
     ReportAccidentPage.prototype.takeVideo = function () {
-        this.setToasterMessage('This functionality is currently not supported');
+        var _this = this;
+        ionic_native_1.MediaCapture.captureVideo({ limit: 1 })
+            .then(function (data) {
+            //this.mediaData = data;
+            alert(JSON.stringify(data));
+            _this.setToasterMessage('Video has been selected successfully');
+        }, function (err) {
+            _this.setToasterMessage('Fail to take video');
+        });
     };
     ReportAccidentPage.prototype.goToAccidentBasicInformation = function () {
         this.navCtrl.push(accident_basic_information_1.AccidentBasicInformationPage);
