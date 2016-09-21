@@ -7,12 +7,49 @@
 <ion-header>
 
   <ion-navbar primary>
-    <ion-title>OffensePaymentConfirmation</ion-title>
+    <ion-title>Offense Payment Confirmation</ion-title>
   </ion-navbar>
 
 </ion-header>
 
 
 <ion-content padding class="offense-payment-confirmation">
-  <button full (click)="goToOffensePaymentCode()">Payment code</button>
+
+  <div *ngIf="loadingData">
+    <ion-list>
+      <ion-item *ngFor="let message of loadingMessages; let currentIndex = index">
+        {{ message }}
+        <ion-icon *ngIf="(currentIndex + 1) < loadingMessages.length" name="done-all" item-right></ion-icon>
+        <div style="text-align: center" item-right *ngIf="(currentIndex + 1) >= loadingMessages.length">
+          <ion-spinner name="crescent"></ion-spinner>
+        </div>
+      </ion-item>
+    </ion-list>
+  </div>
+
+  <div *ngIf="!loadingData">
+
+    <ion-list>
+      <ion-item *ngFor="let selectedOffence of selectedOffences">
+        <h2>{{selectedOffence.offence}}</h2>
+        <p>Tsh {{selectedOffence.cost}}</p>
+      </ion-item>
+      <ion-item>
+        <h2>Total</h2>
+        <p>Tsh {{ selectedOffencesTotal }}</p>
+      </ion-item>
+    </ion-list>
+
+    <ion-row >
+      <ion-col width-50 >
+        <button full (click)="goToOffensePaymentCode()">Pay later</button>
+      </ion-col>
+      <ion-col width-50 >
+        <button full (click)="goToOffensePayment()">Pay now</button>
+      </ion-col>
+    </ion-row>
+
+  </div>
+
+
 </ion-content>

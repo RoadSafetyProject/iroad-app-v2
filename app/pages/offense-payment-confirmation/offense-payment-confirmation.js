@@ -13,7 +13,6 @@ var app_1 = require('../../providers/app/app');
 var user_1 = require('../../providers/user/user');
 var http_client_1 = require('../../providers/http-client/http-client');
 var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
-var offense_payment_code_1 = require("../offense-payment-code/offense-payment-code");
 /*
   Generated class for the OffensePaymentConfirmationPage page.
 
@@ -21,23 +20,124 @@ var offense_payment_code_1 = require("../offense-payment-code/offense-payment-co
   Ionic pages and navigation.
 */
 var OffensePaymentConfirmationPage = (function () {
-    function OffensePaymentConfirmationPage(navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
+    function OffensePaymentConfirmationPage(params, navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
+        var _this = this;
+        this.params = params;
         this.navCtrl = navCtrl;
         this.toastCtrl = toastCtrl;
         this.sqlLite = sqlLite;
         this.user = user;
         this.httpClient = httpClient;
         this.app = app;
+        this.offenceListIds = [];
+        this.programOffenceRegistry = 'Offence Registry';
+        this.offenceListDisplayName = "Nature";
+        this.offenceListCost = "Amount";
+        this.offenceListDisplayNameToDataElement = {};
+        this.currentUser = {};
+        this.program = {};
+        this.loadingData = false;
+        this.loadingMessages = [];
+        this.user.getCurrentUser().then(function (currentUser) {
+            _this.currentUser = JSON.parse(currentUser);
+            _this.offenceId = _this.params.get('offenceId');
+            _this.offenceListIds = _this.params.get('offenceListId');
+            _this.loadingOffenceRegistryProgram();
+        });
     }
+    OffensePaymentConfirmationPage.prototype.loadingOffenceRegistryProgram = function () {
+        var _this = this;
+        this.loadingData = true;
+        this.setLoadingMessages('Loading offence List metadata');
+        var resource = 'programs';
+        var attribute = 'name';
+        var attributeValue = [];
+        attributeValue.push(this.programOffenceRegistry);
+        this.sqlLite.getDataFromTableByAttributes(resource, attribute, attributeValue, this.currentUser.currentDatabase).then(function (programs) {
+            _this.setOffenceRegistryProgram(programs);
+        }, function (error) {
+            _this.setToasterMessage('Fail to load offence list metadata');
+            _this.loadingData = false;
+        });
+    };
+    OffensePaymentConfirmationPage.prototype.setOffenceRegistryProgram = function (programs) {
+        var _this = this;
+        this.program = programs[0];
+        programs[0].programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
+            if (programStageDataElement.dataElement.name.toLowerCase() == _this.offenceListDisplayName.toLowerCase()) {
+                _this.offenceListDisplayNameToDataElement[_this.offenceListDisplayName] = programStageDataElement.dataElement.id;
+            }
+            if (programStageDataElement.dataElement.name.toLowerCase() == _this.offenceListCost.toLowerCase()) {
+                _this.offenceListDisplayNameToDataElement[_this.offenceListCost] = programStageDataElement.dataElement.id;
+            }
+        });
+        this.loadSelectedOffences();
+    };
+    OffensePaymentConfirmationPage.prototype.loadSelectedOffences = function () {
+        var _this = this;
+        this.setLoadingMessages('Loading selected offence(s) list from local storage');
+        var resource = 'events';
+        var attribute = 'event';
+        this.sqlLite.getDataFromTableByAttributes(resource, attribute, this.offenceListIds, this.currentUser.currentDatabase).then(function (events) {
+            _this.setSelectedOffences(events);
+        }, function (error) {
+            _this.setToasterMessage('Fail to load offence list metadata');
+            _this.loadingData = false;
+        });
+    };
+    OffensePaymentConfirmationPage.prototype.setSelectedOffences = function (events) {
+        var _this = this;
+        this.selectedOffences = [];
+        this.selectedOffencesTotal = 0;
+        events.forEach(function (event) {
+            var offence = "";
+            var cost = "";
+            event.dataValues.forEach(function (dataValue) {
+                if (dataValue.dataElement == _this.offenceListDisplayNameToDataElement[_this.offenceListCost]) {
+                    cost = dataValue.value;
+                    _this.selectedOffencesTotal += parseInt(cost);
+                }
+                else if (dataValue.dataElement == _this.offenceListDisplayNameToDataElement[_this.offenceListDisplayName]) {
+                    offence = dataValue.value;
+                }
+            });
+            _this.selectedOffences.push({
+                offence: offence,
+                cost: cost
+            });
+        });
+        this.loadingData = false;
+    };
     OffensePaymentConfirmationPage.prototype.goToOffensePaymentCode = function () {
-        this.navCtrl.push(offense_payment_code_1.OffensePaymentCodePage);
+        this.setToasterMessage('Pay later with code code');
+        //this.navCtrl.push(OffensePaymentCodePage);
+    };
+    OffensePaymentConfirmationPage.prototype.goToOffensePayment = function () {
+        this.setToasterMessage('Pay now');
+    };
+    OffensePaymentConfirmationPage.prototype.setLoadingMessages = function (message) {
+        this.loadingMessages.push(message);
+    };
+    OffensePaymentConfirmationPage.prototype.setToasterMessage = function (message) {
+        var toast = this.toastCtrl.create({
+            message: message,
+            duration: 3000
+        });
+        toast.present();
+    };
+    OffensePaymentConfirmationPage.prototype.setStickToasterMessage = function (message) {
+        var toast = this.toastCtrl.create({
+            message: message,
+            showCloseButton: true
+        });
+        toast.present();
     };
     OffensePaymentConfirmationPage = __decorate([
         core_1.Component({
             templateUrl: 'build/pages/offense-payment-confirmation/offense-payment-confirmation.html',
             providers: [app_1.App, http_client_1.HttpClient, user_1.User, sql_lite_1.SqlLite]
         }), 
-        __metadata('design:paramtypes', [ionic_angular_1.NavController, ionic_angular_1.ToastController, sql_lite_1.SqlLite, user_1.User, http_client_1.HttpClient, app_1.App])
+        __metadata('design:paramtypes', [ionic_angular_1.NavParams, ionic_angular_1.NavController, ionic_angular_1.ToastController, sql_lite_1.SqlLite, user_1.User, http_client_1.HttpClient, app_1.App])
     ], OffensePaymentConfirmationPage);
     return OffensePaymentConfirmationPage;
 })();

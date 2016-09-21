@@ -195,6 +195,12 @@ var ReportOffencePage = (function () {
         if (this.selectedOffenses.length > 0) {
             this.loadingData = true;
             this.loadingMessages = [];
+            //let parameters = {
+            //  offenceId : 'eventId',
+            //  offenceListId : this.selectedOffenses
+            //};
+            //this.loadingData = false;
+            //this.navCtrl.push(OffensePaymentConfirmationPage,parameters);
             this.fetchingDriver();
         }
         else {
