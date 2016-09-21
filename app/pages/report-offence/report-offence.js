@@ -34,7 +34,6 @@ var ReportOffencePage = (function () {
         this.offenseList = [];
         this.programName = "Offence Event";
         this.offenceListDisplayName = "Nature";
-        this.offenseListCost = "Amount";
         this.isOffenceDataElementToBeDisplayed = {};
         this.currentUser = {};
         this.program = {};
@@ -70,6 +69,7 @@ var ReportOffencePage = (function () {
         });
     };
     ReportOffencePage.prototype.setProgramMetadata = function (programs) {
+        this.setGeoLocation();
         if (programs.length > 0) {
             this.program = programs[0];
             this.checkAndSetRelationDataElements();
@@ -158,10 +158,6 @@ var ReportOffencePage = (function () {
         offenceEventList.forEach(function (event) {
             _this.offenseList.push(event);
         });
-        ionic_native_1.Geolocation.getCurrentPosition().then(function (resp) {
-            _this.currentCoordinate = resp.coords;
-            //alert(JSON.stringify(resp));
-        });
     };
     ReportOffencePage.prototype.goToOffensePaymentConfirmation = function () {
         if (this.selectedOffenses.length > 0) {
@@ -227,15 +223,51 @@ var ReportOffencePage = (function () {
         }
     };
     ReportOffencePage.prototype.setVehicleDataValue = function (events, programName) {
+        var _this = this;
         if (events.length > 0) {
             var relationDataElementId = this.relationDataElementProgramMapping[programName];
             this.dataValues[relationDataElementId] = events[0].event;
-            this.loadingData = false;
+            this.setLoadingMessages('Prepare offence information to save');
+            this.eventProvider.formatDataValuesToEventObject(this.dataValues, this.program, this.currentUser, this.currentCoordinate).then(function (event) {
+                _this.setLoadingMessages('Saving offence information');
+                _this.eventProvider.saveEvent(event, _this.currentUser).then(function (result) {
+                    _this.savingOffenceList(result);
+                }, function (error) {
+                    _this.loadingData = false;
+                    _this.setToasterMessage('Fail to save offense information to the server');
+                });
+            });
         }
         else {
             this.loadingData = false;
             this.setToasterMessage('Vehicle has not found');
         }
+    };
+    ReportOffencePage.prototype.savingOffenceList = function (result) {
+        this.loadingData = false;
+        var eventId = result.response.importSummaries[0].reference;
+        alert(eventId);
+        //alert('selectedOffenses :: ' + JSON.stringify(this.selectedOffenses));
+        //alert(JSON.stringify(this.currentCoordinate));
+        //@todo saving offense as well as offence list
+        // this.navCtrl.push(OffensePaymentConfirmationPage);
+    };
+    ReportOffencePage.prototype.setGeoLocation = function () {
+        var _this = this;
+        ionic_native_1.Geolocation.getCurrentPosition().then(function (resp) {
+            if (resp.coords.latitude) {
+                _this.currentCoordinate.latitude = resp.coords.latitude;
+            }
+            else {
+                _this.currentCoordinate.latitude = '0';
+            }
+            if (resp.coords.longitude) {
+                _this.currentCoordinate.longitude = resp.coords.longitude;
+            }
+            else {
+                _this.currentCoordinate.longitude = '0';
+            }
+        });
     };
     ReportOffencePage.prototype.setLoadingMessages = function (message) {
         this.loadingMessages.push(message);

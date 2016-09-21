@@ -25,7 +25,6 @@ export class ReportOffencePage {
   private offenseList : any = [];
   private programName: string = "Offence Event";
   private offenceListDisplayName = "Nature";
-  private offenseListCost = "Amount";
   private isOffenceDataElementToBeDisplayed : any = {};
   private currentUser :any = {};
   private program : any = {};
@@ -65,6 +64,7 @@ export class ReportOffencePage {
   }
 
   setProgramMetadata(programs){
+    this.setGeoLocation();
     if(programs.length > 0){
       this.program = programs[0];
       this.checkAndSetRelationDataElements();
@@ -109,8 +109,6 @@ export class ReportOffencePage {
   setRelationProgramMetadata(programs,programName){
     this.relationPrograms[programName] = programs[0];
   }
-
-
 
   loadingOffenseRegistryProgram(){
     this.setLoadingMessages('Loading offence(s) list metadata');
@@ -159,10 +157,7 @@ export class ReportOffencePage {
     offenceEventList.forEach(event=>{
       this.offenseList.push(event);
     });
-    Geolocation.getCurrentPosition().then((resp) => {
-      this.currentCoordinate = resp.coords;
-      //alert(JSON.stringify(resp));
-    });
+
   }
 
   goToOffensePaymentConfirmation(){
@@ -231,16 +226,47 @@ export class ReportOffencePage {
     if(events.length > 0){
       let relationDataElementId  = this.relationDataElementProgramMapping[programName];
       this.dataValues[relationDataElementId] = events[0].event;
-      this.loadingData = false;
-      //alert('selectedOffenses :: ' + JSON.stringify(this.selectedOffenses));
-      //alert('dataValues :: ' + JSON.stringify(this.dataValues));
-      //alert(JSON.stringify(this.currentCoordinate));
-      //@todo saving offense as well as offence list
-      // this.navCtrl.push(OffensePaymentConfirmationPage);
+      this.setLoadingMessages('Prepare offence information to save');
+      this.eventProvider.formatDataValuesToEventObject(this.dataValues,this.program,this.currentUser,this.currentCoordinate).then(event=>{
+        this.setLoadingMessages('Saving offence information');
+        this.eventProvider.saveEvent(event,this.currentUser).then(result=>{
+          this.savingOffenceList(result);
+        },error=>{
+          this.loadingData = false;
+          this.setToasterMessage('Fail to save offense information to the server')
+        });
+      });
+
     }else{
       this.loadingData = false;
       this.setToasterMessage('Vehicle has not found');
     }
+  }
+
+  savingOffenceList(result){
+    this.loadingData = false;
+    let eventId = result.response.importSummaries[0].reference;
+    alert(eventId);
+    //alert('selectedOffenses :: ' + JSON.stringify(this.selectedOffenses));
+    //alert(JSON.stringify(this.currentCoordinate));
+    //@todo saving offense as well as offence list
+    // this.navCtrl.push(OffensePaymentConfirmationPage);
+
+  }
+
+  setGeoLocation(){
+    Geolocation.getCurrentPosition().then((resp) => {
+      if(resp.coords.latitude){
+        this.currentCoordinate.latitude = resp.coords.latitude;
+      }else{
+        this.currentCoordinate.latitude = '0';
+      }
+      if(resp.coords.longitude){
+        this.currentCoordinate.longitude = resp.coords.longitude;
+      }else{
+        this.currentCoordinate.longitude = '0';
+      }
+    });
   }
 
   setLoadingMessages(message){
