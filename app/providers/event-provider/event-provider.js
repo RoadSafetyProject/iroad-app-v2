@@ -34,6 +34,23 @@ var EventProvider = (function () {
         });
         return dataElementId;
     };
+    EventProvider.prototype.saveEventList = function (eventList, user) {
+        var self = this;
+        var promises = [];
+        return new Promise(function (resolve, reject) {
+            eventList.forEach(function (event) {
+                promises.push(self.saveEvent(event, user).then(function (response) {
+                    //saving success
+                }, function (error) {
+                }));
+            });
+            Rx_1.Observable.forkJoin(promises).subscribe(function () {
+                resolve();
+            }, function (error) {
+                reject();
+            });
+        });
+    };
     EventProvider.prototype.saveEvent = function (event, user) {
         var self = this;
         var url = '/api/events';

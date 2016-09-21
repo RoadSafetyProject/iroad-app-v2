@@ -30,6 +30,29 @@ export class EventProvider {
     return dataElementId;
   }
 
+  saveEventList(eventList,user){
+    let self = this;
+    let promises = [];
+
+    return new Promise(function(resolve, reject) {
+      eventList.forEach(event=>{
+        promises.push(
+          self.saveEvent(event,user).then((response)=>{
+            //saving success
+          },(error) => {
+          })
+        );
+      });
+
+      Observable.forkJoin(promises).subscribe(() => {
+          resolve();
+        },
+        (error) => {
+          reject();
+        })
+    });
+  }
+
   saveEvent(event,user){
     let self = this;
     let url = '/api/events';
