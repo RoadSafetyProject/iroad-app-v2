@@ -24,6 +24,8 @@ export class ReportOffencePage {
 
   private offenseList : any = [];
   private programName: string = "Offence Event";
+  private programOffenceRegistryName: string = 'Offence Registry';
+  private programOffence : any = {};
   private offenceListDisplayName = "Nature";
   private isOffenceDataElementToBeDisplayed : any = {};
   private currentUser :any = {};
@@ -35,6 +37,7 @@ export class ReportOffencePage {
   private loadingMessages : any = [];
   private relationDataElements:any = {};
   private relationDataElementProgramMapping : any = {};
+  private offenseListMetadataMapping : any = {};
   private relationDataElementPrefix : string = "Program_";
   private relationPrograms :any = {};
   private data : any = {};
@@ -69,6 +72,7 @@ export class ReportOffencePage {
       this.program = programs[0];
       this.checkAndSetRelationDataElements();
       this.loadingOffenseRegistryProgram();
+      this.loadingOffenceListMetadata();
     }else{
       this.loadingData = false;
     }
@@ -126,6 +130,33 @@ export class ReportOffencePage {
     })
   }
 
+  loadingOffenceListMetadata(){
+    this.setLoadingMessages('Loading Offence list metadata');
+    let resource = 'programs';
+    let attribute = 'name';
+    let attributeValue =[];
+    attributeValue.push('Offence');
+
+    this.sqlLite.getDataFromTableByAttributes(resource,attribute,attributeValue,this.currentUser.currentDatabase).then((programs)=>{
+      this.setOffenceListMetadata(programs);
+    },error=>{
+      this.loadingData = false;
+      let message = "Fail to loading programs " + error;
+      this.setStickToasterMessage(message);
+    });
+  }
+
+  setOffenceListMetadata(programs){
+    this.programOffence = programs[0];
+    programs[0].programStages[0].programStageDataElements.forEach(programStageDataElement =>{
+      if(programStageDataElement.dataElement.name == 'Program_'+this.programName.replace(' ','_')){
+        this.offenseListMetadataMapping[this.programName] = programStageDataElement.dataElement.id;
+      }else if(programStageDataElement.dataElement.name == 'Program_'+this.programOffenceRegistryName.replace(' ','_')){
+        this.offenseListMetadataMapping[this.programOffenceRegistryName] = programStageDataElement.dataElement.id;
+      }
+    });
+  }
+
   getOffenceEventList(programs){
     this.setLoadingMessages('Loading offence(s) list from local storage');
     let resource = 'events';
@@ -160,7 +191,7 @@ export class ReportOffencePage {
 
   }
 
-  goToOffensePaymentConfirmation(){
+  prepareSavingOffenceInformation(){
     if(this.selectedOffenses.length > 0){
       this.loadingData = true;
       this.loadingMessages = [];
@@ -227,10 +258,10 @@ export class ReportOffencePage {
       let relationDataElementId  = this.relationDataElementProgramMapping[programName];
       this.dataValues[relationDataElementId] = events[0].event;
       this.setLoadingMessages('Prepare offence information to save');
-      this.eventProvider.formatDataValuesToEventObject(this.dataValues,this.program,this.currentUser,this.currentCoordinate).then(event=>{
+      this.eventProvider.getFormattedDataValuesToEventObject(this.dataValues,this.program,this.currentUser,this.currentCoordinate).then(event=>{
         this.setLoadingMessages('Saving offence information');
         this.eventProvider.saveEvent(event,this.currentUser).then(result=>{
-          this.savingOffenceList(result);
+          this.prepareSavingOffenceList(result);
         },error=>{
           this.loadingData = false;
           this.setToasterMessage('Fail to save offense information to the server')
@@ -243,15 +274,39 @@ export class ReportOffencePage {
     }
   }
 
-  savingOffenceList(result){
-    this.loadingData = false;
+  prepareSavingOffenceList(result){
     let eventId = result.response.importSummaries[0].reference;
-    alert(eventId);
-    //alert('selectedOffenses :: ' + JSON.stringify(this.selectedOffenses));
-    //alert(JSON.stringify(this.currentCoordinate));
-    //@todo saving offense as well as offence list
-    // this.navCtrl.push(OffensePaymentConfirmationPage);
+    let dataValuesArray = [];
+    this.selectedOffenses.forEach(offenseId=>{
+      let dataValue = {};
+      dataValue[this.offenseListMetadataMapping[this.programOffenceRegistryName]] = offenseId;
+      dataValue[this.offenseListMetadataMapping[this.programName]] = eventId;
+      dataValuesArray.push(dataValue);
+    });
 
+    this.setLoadingMessages('Prepare Offence list information');
+    this.eventProvider.getFormattedDataValuesArrayToEventObjectList(dataValuesArray,this.programOffence,this.currentUser).then(eventList=>{
+      this.setLoadingMessages('Saving Offence list information');
+      this.eventProvider.saveEventList(eventList,this.currentUser).then(()=>{
+        this.goToOffensePaymentConfirmation(eventId);
+      },()=>{
+        this.loadingData = false;
+        this.setToasterMessage('Fail to save offense list information');
+      });
+    },error=>{
+      this.loadingData = false;
+      this.setToasterMessage('Fail to prepare offense list information');
+    });
+
+  }
+
+  goToOffensePaymentConfirmation(eventId){
+    let parameters = {
+      offenceId : eventId,
+      offenceListId : this.selectedOffenses
+    };
+    this.loadingData = false;
+    this.navCtrl.push(OffensePaymentConfirmationPage,parameters);
   }
 
   setGeoLocation(){

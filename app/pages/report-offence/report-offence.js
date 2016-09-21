@@ -9,6 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var core_1 = require('@angular/core');
 var ionic_angular_1 = require('ionic-angular');
+var offense_payment_confirmation_1 = require("../offense-payment-confirmation/offense-payment-confirmation");
 var ionic_native_1 = require('ionic-native');
 var app_1 = require('../../providers/app/app');
 var user_1 = require('../../providers/user/user');
@@ -33,6 +34,8 @@ var ReportOffencePage = (function () {
         this.app = app;
         this.offenseList = [];
         this.programName = "Offence Event";
+        this.programOffenceRegistryName = 'Offence Registry';
+        this.programOffence = {};
         this.offenceListDisplayName = "Nature";
         this.isOffenceDataElementToBeDisplayed = {};
         this.currentUser = {};
@@ -44,6 +47,7 @@ var ReportOffencePage = (function () {
         this.loadingMessages = [];
         this.relationDataElements = {};
         this.relationDataElementProgramMapping = {};
+        this.offenseListMetadataMapping = {};
         this.relationDataElementPrefix = "Program_";
         this.relationPrograms = {};
         this.data = {};
@@ -74,6 +78,7 @@ var ReportOffencePage = (function () {
             this.program = programs[0];
             this.checkAndSetRelationDataElements();
             this.loadingOffenseRegistryProgram();
+            this.loadingOffenceListMetadata();
         }
         else {
             this.loadingData = false;
@@ -127,6 +132,33 @@ var ReportOffencePage = (function () {
             _this.setStickToasterMessage(message);
         });
     };
+    ReportOffencePage.prototype.loadingOffenceListMetadata = function () {
+        var _this = this;
+        this.setLoadingMessages('Loading Offence list metadata');
+        var resource = 'programs';
+        var attribute = 'name';
+        var attributeValue = [];
+        attributeValue.push('Offence');
+        this.sqlLite.getDataFromTableByAttributes(resource, attribute, attributeValue, this.currentUser.currentDatabase).then(function (programs) {
+            _this.setOffenceListMetadata(programs);
+        }, function (error) {
+            _this.loadingData = false;
+            var message = "Fail to loading programs " + error;
+            _this.setStickToasterMessage(message);
+        });
+    };
+    ReportOffencePage.prototype.setOffenceListMetadata = function (programs) {
+        var _this = this;
+        this.programOffence = programs[0];
+        programs[0].programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
+            if (programStageDataElement.dataElement.name == 'Program_' + _this.programName.replace(' ', '_')) {
+                _this.offenseListMetadataMapping[_this.programName] = programStageDataElement.dataElement.id;
+            }
+            else if (programStageDataElement.dataElement.name == 'Program_' + _this.programOffenceRegistryName.replace(' ', '_')) {
+                _this.offenseListMetadataMapping[_this.programOffenceRegistryName] = programStageDataElement.dataElement.id;
+            }
+        });
+    };
     ReportOffencePage.prototype.getOffenceEventList = function (programs) {
         var _this = this;
         this.setLoadingMessages('Loading offence(s) list from local storage');
@@ -159,7 +191,7 @@ var ReportOffencePage = (function () {
             _this.offenseList.push(event);
         });
     };
-    ReportOffencePage.prototype.goToOffensePaymentConfirmation = function () {
+    ReportOffencePage.prototype.prepareSavingOffenceInformation = function () {
         if (this.selectedOffenses.length > 0) {
             this.loadingData = true;
             this.loadingMessages = [];
@@ -228,10 +260,10 @@ var ReportOffencePage = (function () {
             var relationDataElementId = this.relationDataElementProgramMapping[programName];
             this.dataValues[relationDataElementId] = events[0].event;
             this.setLoadingMessages('Prepare offence information to save');
-            this.eventProvider.formatDataValuesToEventObject(this.dataValues, this.program, this.currentUser, this.currentCoordinate).then(function (event) {
+            this.eventProvider.getFormattedDataValuesToEventObject(this.dataValues, this.program, this.currentUser, this.currentCoordinate).then(function (event) {
                 _this.setLoadingMessages('Saving offence information');
                 _this.eventProvider.saveEvent(event, _this.currentUser).then(function (result) {
-                    _this.savingOffenceList(result);
+                    _this.prepareSavingOffenceList(result);
                 }, function (error) {
                     _this.loadingData = false;
                     _this.setToasterMessage('Fail to save offense information to the server');
@@ -243,14 +275,37 @@ var ReportOffencePage = (function () {
             this.setToasterMessage('Vehicle has not found');
         }
     };
-    ReportOffencePage.prototype.savingOffenceList = function (result) {
-        this.loadingData = false;
+    ReportOffencePage.prototype.prepareSavingOffenceList = function (result) {
+        var _this = this;
         var eventId = result.response.importSummaries[0].reference;
-        alert(eventId);
-        //alert('selectedOffenses :: ' + JSON.stringify(this.selectedOffenses));
-        //alert(JSON.stringify(this.currentCoordinate));
-        //@todo saving offense as well as offence list
-        // this.navCtrl.push(OffensePaymentConfirmationPage);
+        var dataValuesArray = [];
+        this.selectedOffenses.forEach(function (offenseId) {
+            var dataValue = {};
+            dataValue[_this.offenseListMetadataMapping[_this.programOffenceRegistryName]] = offenseId;
+            dataValue[_this.offenseListMetadataMapping[_this.programName]] = eventId;
+            dataValuesArray.push(dataValue);
+        });
+        this.setLoadingMessages('Prepare Offence list information');
+        this.eventProvider.getFormattedDataValuesArrayToEventObjectList(dataValuesArray, this.programOffence, this.currentUser).then(function (eventList) {
+            _this.setLoadingMessages('Saving Offence list information');
+            _this.eventProvider.saveEventList(eventList, _this.currentUser).then(function () {
+                _this.goToOffensePaymentConfirmation(eventId);
+            }, function () {
+                _this.loadingData = false;
+                _this.setToasterMessage('Fail to save offense list information');
+            });
+        }, function (error) {
+            _this.loadingData = false;
+            _this.setToasterMessage('Fail to prepare offense list information');
+        });
+    };
+    ReportOffencePage.prototype.goToOffensePaymentConfirmation = function (eventId) {
+        var parameters = {
+            offenceId: eventId,
+            offenceListId: this.selectedOffenses
+        };
+        this.loadingData = false;
+        this.navCtrl.push(offense_payment_confirmation_1.OffensePaymentConfirmationPage, parameters);
     };
     ReportOffencePage.prototype.setGeoLocation = function () {
         var _this = this;
