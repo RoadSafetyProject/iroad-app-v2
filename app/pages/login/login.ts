@@ -37,7 +37,7 @@ export class LoginPage {
         this.navCtrl.setRoot(HomePage);
       }else if(user.serverUrl){
         this.loginData.serverUrl = user.serverUrl;
-        if(this.loginData.username){
+        if(user.username){
           this.loginData.username = user.username;
         }
       }
@@ -70,6 +70,7 @@ export class LoginPage {
                     data => {
                       data = data.json();
                       this.user.setUserData(data).then(userData=>{
+                        this.loginData.orgUnit = userData.organisationUnits[0].id;
                         this.downloadingPrograms(user,databaseName);
                       });
                     },

@@ -43,7 +43,7 @@ var LoginPage = (function () {
             }
             else if (user.serverUrl) {
                 _this.loginData.serverUrl = user.serverUrl;
-                if (_this.loginData.username) {
+                if (user.username) {
                     _this.loginData.username = user.username;
                 }
             }
@@ -76,6 +76,7 @@ var LoginPage = (function () {
                                 _this.httpClient.get('/api/me.json?' + fields, user).subscribe(function (data) {
                                     data = data.json();
                                     _this.user.setUserData(data).then(function (userData) {
+                                        _this.loginData.orgUnit = userData.organisationUnits[0].id;
                                         _this.downloadingPrograms(user, databaseName);
                                     });
                                 }, function (err) {
