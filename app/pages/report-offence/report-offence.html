@@ -29,17 +29,18 @@
   </div>
 
   <div *ngIf="!loadingData">
+    <div >{{ dataValues|json}}</div>
     <ion-list>
 
-      <ion-item >
-        <ion-label floating>Vehicle plate number</ion-label>
-        <ion-input type="text" [(ngModel)]="data.plateNumber"></ion-input>
-      </ion-item>
       <ion-item >
         <ion-label floating >Driver Licence Number</ion-label>
         <ion-input type="text" [(ngModel)]="data.licenceNumber" ></ion-input>
       </ion-item>
 
+      <ion-item >
+        <ion-label floating>Vehicle plate number</ion-label>
+        <ion-input type="text" [(ngModel)]="data.plateNumber"></ion-input>
+      </ion-item>
 
       <div *ngIf="program.programStages">
         <div *ngIf="program.programStages.length > 0">

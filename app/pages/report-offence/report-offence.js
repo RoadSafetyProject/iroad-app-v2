@@ -14,15 +14,17 @@ var app_1 = require('../../providers/app/app');
 var user_1 = require('../../providers/user/user');
 var http_client_1 = require('../../providers/http-client/http-client');
 var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
+var event_provider_1 = require("../../providers/event-provider/event-provider");
 /*
-  Generated class for the ReportOffencePage page.
+ Generated class for the ReportOffencePage page.
 
-  See http://ionicframework.com/docs/v2/components/#navigation for more info on
-  Ionic pages and navigation.
-*/
+ See http://ionicframework.com/docs/v2/components/#navigation for more info on
+ Ionic pages and navigation.
+ */
 var ReportOffencePage = (function () {
-    function ReportOffencePage(navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
+    function ReportOffencePage(eventProvider, navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
         var _this = this;
+        this.eventProvider = eventProvider;
         this.navCtrl = navCtrl;
         this.toastCtrl = toastCtrl;
         this.sqlLite = sqlLite;
@@ -42,7 +44,9 @@ var ReportOffencePage = (function () {
         this.loadingData = false;
         this.loadingMessages = [];
         this.relationDataElements = {};
+        this.relationDataElementProgramMapping = {};
         this.relationDataElementPrefix = "Program_";
+        this.relationPrograms = {};
         this.data = {};
         this.user.getCurrentUser().then(function (currentUser) {
             _this.currentUser = JSON.parse(currentUser);
@@ -68,24 +72,45 @@ var ReportOffencePage = (function () {
     ReportOffencePage.prototype.setProgramMetadata = function (programs) {
         if (programs.length > 0) {
             this.program = programs[0];
-            this.checkingRelationDataElements();
+            this.checkAndSetRelationDataElements();
             this.loadingOffenseRegistryProgram();
         }
         else {
             this.loadingData = false;
         }
     };
-    ReportOffencePage.prototype.checkingRelationDataElements = function () {
+    ReportOffencePage.prototype.checkAndSetRelationDataElements = function () {
         var _this = this;
+        var programNames = [];
         this.program.programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
             if (programStageDataElement.dataElement.name.startsWith(_this.relationDataElementPrefix)) {
                 var programName = programStageDataElement.dataElement.name.replace(_this.relationDataElementPrefix, "");
+                programNames.push(programName);
+                _this.relationDataElementProgramMapping[programName] = programStageDataElement.dataElement.id;
                 _this.relationDataElements[programStageDataElement.dataElement.id] = {
                     program: programName,
                 };
             }
         });
-        alert(JSON.stringify(this.relationDataElements));
+        this.fetchingPrograms(programNames);
+    };
+    ReportOffencePage.prototype.fetchingPrograms = function (programNames) {
+        var _this = this;
+        this.relationPrograms = {};
+        this.setLoadingMessages('Loading Relation programs metadata');
+        programNames.forEach(function (programName) {
+            var resource = 'programs';
+            var attribute = 'name';
+            var attributeValue = [];
+            attributeValue.push(programName);
+            _this.sqlLite.getDataFromTableByAttributes(resource, attribute, attributeValue, _this.currentUser.currentDatabase).then(function (programs) {
+                _this.setRelationProgramMetadata(programs, programName);
+            }, function (error) {
+            });
+        });
+    };
+    ReportOffencePage.prototype.setRelationProgramMetadata = function (programs, programName) {
+        this.relationPrograms[programName] = programs[0];
     };
     ReportOffencePage.prototype.loadingOffenseRegistryProgram = function () {
         var _this = this;
@@ -140,10 +165,76 @@ var ReportOffencePage = (function () {
     };
     ReportOffencePage.prototype.goToOffensePaymentConfirmation = function () {
         if (this.selectedOffenses.length > 0) {
-            alert(JSON.stringify(this.data));
+            this.loadingData = true;
+            this.loadingMessages = [];
+            this.fetchingDriver();
         }
         else {
             this.setToasterMessage('Please select at least one offence from offence list');
+        }
+    };
+    ReportOffencePage.prototype.fetchingDriver = function () {
+        var _this = this;
+        if (this.data.licenceNumber) {
+            this.setLoadingMessages('Fetching driver information');
+            var programName = 'Driver';
+            var program = this.relationPrograms[programName];
+            var relationDataElementId = this.eventProvider.getRelationDataElementIdForSqlView(program.programStages[0].programStageDataElements, programName);
+            this.eventProvider.findEventsByDataValue(relationDataElementId, this.data.licenceNumber, program.id, this.currentUser).then(function (events) {
+                _this.setDriverDataValue(events, programName);
+            }, function (error) {
+                _this.loadingData = false;
+                _this.setToasterMessage('Fail to verify driver');
+            });
+        }
+        else {
+            this.loadingData = false;
+            this.setToasterMessage('Please Enter Driver licence number');
+        }
+    };
+    ReportOffencePage.prototype.setDriverDataValue = function (events, programName) {
+        if (events.length > 0) {
+            var relationDataElementId = this.relationDataElementProgramMapping[programName];
+            this.dataValues[relationDataElementId] = events[0].event;
+            this.fetchingVehicle();
+        }
+        else {
+            this.loadingData = false;
+            this.setToasterMessage('Driver has not found');
+        }
+    };
+    ReportOffencePage.prototype.fetchingVehicle = function () {
+        var _this = this;
+        if (this.data.plateNumber) {
+            this.setLoadingMessages('Fetching vehicle information');
+            var programName = 'Vehicle';
+            this.data.plateNumber = this.data.plateNumber.toUpperCase();
+            if (this.data.plateNumber.length == 7) {
+                this.data.plateNumber = this.data.plateNumber.substr(0, 4) + ' ' + this.data.plateNumber.substr(4);
+            }
+            var program = this.relationPrograms[programName];
+            var relationDataElementId = this.eventProvider.getRelationDataElementIdForSqlView(program.programStages[0].programStageDataElements, programName);
+            this.eventProvider.findEventsByDataValue(relationDataElementId, this.data.plateNumber, program.id, this.currentUser).then(function (events) {
+                _this.setVehicleDataValue(events, programName);
+            }, function (error) {
+                _this.loadingData = false;
+                _this.setToasterMessage('Fail to verify vehicle');
+            });
+        }
+        else {
+            this.loadingData = false;
+            this.setToasterMessage('Please Enter Vehicle plate number');
+        }
+    };
+    ReportOffencePage.prototype.setVehicleDataValue = function (events, programName) {
+        if (events.length > 0) {
+            var relationDataElementId = this.relationDataElementProgramMapping[programName];
+            this.dataValues[relationDataElementId] = events[0].event;
+            this.loadingData = false;
+        }
+        else {
+            this.loadingData = false;
+            this.setToasterMessage('Vehicle has not found');
         }
     };
     ReportOffencePage.prototype.setLoadingMessages = function (message) {
@@ -166,9 +257,9 @@ var ReportOffencePage = (function () {
     ReportOffencePage = __decorate([
         core_1.Component({
             templateUrl: 'build/pages/report-offence/report-offence.html',
-            providers: [app_1.App, http_client_1.HttpClient, user_1.User, sql_lite_1.SqlLite]
+            providers: [app_1.App, http_client_1.HttpClient, user_1.User, sql_lite_1.SqlLite, event_provider_1.EventProvider]
         }), 
-        __metadata('design:paramtypes', [ionic_angular_1.NavController, ionic_angular_1.ToastController, sql_lite_1.SqlLite, user_1.User, http_client_1.HttpClient, app_1.App])
+        __metadata('design:paramtypes', [event_provider_1.EventProvider, ionic_angular_1.NavController, ionic_angular_1.ToastController, sql_lite_1.SqlLite, user_1.User, http_client_1.HttpClient, app_1.App])
     ], ReportOffencePage);
     return ReportOffencePage;
 })();

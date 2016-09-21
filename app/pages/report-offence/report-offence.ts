@@ -8,16 +8,17 @@ import { App } from '../../providers/app/app';
 import {User } from '../../providers/user/user';
 import {HttpClient} from '../../providers/http-client/http-client';
 import {SqlLite} from "../../providers/sql-lite/sql-lite";
+import {EventProvider} from "../../providers/event-provider/event-provider";
 
 /*
-  Generated class for the ReportOffencePage page.
+ Generated class for the ReportOffencePage page.
 
-  See http://ionicframework.com/docs/v2/components/#navigation for more info on
-  Ionic pages and navigation.
-*/
+ See http://ionicframework.com/docs/v2/components/#navigation for more info on
+ Ionic pages and navigation.
+ */
 @Component({
   templateUrl: 'build/pages/report-offence/report-offence.html',
-  providers: [App,HttpClient,User,SqlLite]
+  providers: [App,HttpClient,User,SqlLite,EventProvider]
 })
 export class ReportOffencePage {
 
@@ -34,10 +35,12 @@ export class ReportOffencePage {
   private loadingData : boolean = false;
   private loadingMessages : any = [];
   private relationDataElements:any = {};
+  private relationDataElementProgramMapping : any = {};
   private relationDataElementPrefix : string = "Program_";
+  private relationPrograms :any = {};
   private data : any = {};
 
-  constructor(private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
+  constructor(private eventProvider : EventProvider,private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
     this.user.getCurrentUser().then(currentUser=>{
       this.currentUser = JSON.parse(currentUser);
       this.loadingProgram();
@@ -64,25 +67,49 @@ export class ReportOffencePage {
   setProgramMetadata(programs){
     if(programs.length > 0){
       this.program = programs[0];
-      this.checkingRelationDataElements();
+      this.checkAndSetRelationDataElements();
       this.loadingOffenseRegistryProgram();
     }else{
       this.loadingData = false;
     }
   }
 
-  checkingRelationDataElements(){
+  checkAndSetRelationDataElements(){
+    let programNames = [];
     this.program.programStages[0].programStageDataElements.forEach(programStageDataElement=>{
       if(programStageDataElement.dataElement.name.startsWith(this.relationDataElementPrefix)){
         let programName = programStageDataElement.dataElement.name.replace(this.relationDataElementPrefix,"");
+        programNames.push(programName);
+        this.relationDataElementProgramMapping[programName] = programStageDataElement.dataElement.id;
         this.relationDataElements[programStageDataElement.dataElement.id] = {
           program : programName,
         }
+
       }
     });
-    alert(JSON.stringify(this.relationDataElements));
-
+    this.fetchingPrograms(programNames);
   }
+
+  fetchingPrograms(programNames){
+    this.relationPrograms = {};
+    this.setLoadingMessages('Loading Relation programs metadata');
+    programNames.forEach(programName=>{
+      let resource = 'programs';
+      let attribute = 'name';
+      let attributeValue =[];
+      attributeValue.push(programName);
+
+      this.sqlLite.getDataFromTableByAttributes(resource,attribute,attributeValue,this.currentUser.currentDatabase).then((programs)=>{
+        this.setRelationProgramMetadata(programs,programName);
+      },error=>{
+      })
+    });
+  }
+
+  setRelationProgramMetadata(programs,programName){
+    this.relationPrograms[programName] = programs[0];
+  }
+
 
 
   loadingOffenseRegistryProgram(){
@@ -140,16 +167,80 @@ export class ReportOffencePage {
 
   goToOffensePaymentConfirmation(){
     if(this.selectedOffenses.length > 0){
-      alert(JSON.stringify(this.data));
+      this.loadingData = true;
+      this.loadingMessages = [];
+      this.fetchingDriver();
+    }else{
+      this.setToasterMessage('Please select at least one offence from offence list');
+    }
+  }
+
+  fetchingDriver(){
+    if(this.data.licenceNumber){
+      this.setLoadingMessages('Fetching driver information');
+      let programName = 'Driver';
+      let program = this.relationPrograms[programName];
+      let relationDataElementId = this.eventProvider.getRelationDataElementIdForSqlView(program.programStages[0].programStageDataElements,programName);
+      this.eventProvider.findEventsByDataValue(relationDataElementId,this.data.licenceNumber,program.id,this.currentUser).then(events=>{
+        this.setDriverDataValue(events,programName);
+      },error=>{
+        this.loadingData = false;
+        this.setToasterMessage('Fail to verify driver');
+      });
+    }else{
+      this.loadingData = false;
+      this.setToasterMessage('Please Enter Driver licence number');
+    }
+  }
+
+  setDriverDataValue(events,programName){
+    if(events.length > 0){
+      let relationDataElementId  = this.relationDataElementProgramMapping[programName];
+      this.dataValues[relationDataElementId] = events[0].event;
+      this.fetchingVehicle();
+    }else{
+      this.loadingData = false;
+      this.setToasterMessage('Driver has not found');
+    }
+
+  }
+
+  fetchingVehicle(){
+    if(this.data.plateNumber){
+      this.setLoadingMessages('Fetching vehicle information');
+      let programName = 'Vehicle';
+      this.data.plateNumber = this.data.plateNumber.toUpperCase();
+      if(this.data.plateNumber.length == 7){
+        this.data.plateNumber =  this.data.plateNumber.substr(0,4) + ' ' + this.data.plateNumber.substr(4);
+      }
+      let program = this.relationPrograms[programName];
+      let relationDataElementId = this.eventProvider.getRelationDataElementIdForSqlView(program.programStages[0].programStageDataElements,programName);
+      this.eventProvider.findEventsByDataValue(relationDataElementId,this.data.plateNumber,program.id,this.currentUser).then(events=>{
+        this.setVehicleDataValue(events,programName);
+      },error=>{
+        this.loadingData = false;
+        this.setToasterMessage('Fail to verify vehicle');
+      });
+    }else{
+      this.loadingData = false;
+      this.setToasterMessage('Please Enter Vehicle plate number');
+    }
+  }
+
+  setVehicleDataValue(events,programName){
+    if(events.length > 0){
+      let relationDataElementId  = this.relationDataElementProgramMapping[programName];
+      this.dataValues[relationDataElementId] = events[0].event;
+      this.loadingData = false;
       //alert('selectedOffenses :: ' + JSON.stringify(this.selectedOffenses));
       //alert('dataValues :: ' + JSON.stringify(this.dataValues));
       //alert(JSON.stringify(this.currentCoordinate));
       //@todo saving offense as well as offence list
-     // this.navCtrl.push(OffensePaymentConfirmationPage);
+      // this.navCtrl.push(OffensePaymentConfirmationPage);
     }else{
-      this.setToasterMessage('Please select at least one offence from offence list');
+      this.loadingData = false;
+      this.setToasterMessage('Vehicle has not found');
     }
-
   }
 
   setLoadingMessages(message){

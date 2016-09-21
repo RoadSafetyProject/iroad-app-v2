@@ -22,6 +22,17 @@ var EventProvider = (function () {
         this.http = http;
         this.httpClient = httpClient;
     }
+    EventProvider.prototype.getRelationDataElementIdForSqlView = function (programStageDataElements, programName) {
+        var dataElementId = "";
+        var relationDataElementCode = "id_" + programName;
+        relationDataElementCode = relationDataElementCode.toLocaleLowerCase();
+        programStageDataElements.forEach(function (programStageDataElement) {
+            if (programStageDataElement.dataElement.code && programStageDataElement.dataElement.code.toLowerCase() == relationDataElementCode) {
+                dataElementId = programStageDataElement.dataElement.id;
+            }
+        });
+        return dataElementId;
+    };
     EventProvider.prototype.findEventsByDataValue = function (dataElementId, value, programId, user) {
         var self = this;
         var sqlViewUrl = "/api/sqlViews.json?filter=name:eq:Find Event";

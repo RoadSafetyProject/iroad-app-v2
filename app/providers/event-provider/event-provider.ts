@@ -18,6 +18,18 @@ export class EventProvider {
 
   }
 
+  getRelationDataElementIdForSqlView(programStageDataElements,programName){
+    let dataElementId = "";
+    let relationDataElementCode = "id_" + programName;
+    relationDataElementCode = relationDataElementCode.toLocaleLowerCase();
+    programStageDataElements.forEach(programStageDataElement=>{
+      if(programStageDataElement.dataElement.code && programStageDataElement.dataElement.code.toLowerCase() ==relationDataElementCode){
+        dataElementId = programStageDataElement.dataElement.id;
+      }
+    });
+    return dataElementId;
+  }
+
   findEventsByDataValue(dataElementId,value,programId,user){
     let self = this;
     let sqlViewUrl = "/api/sqlViews.json?filter=name:eq:Find Event";
