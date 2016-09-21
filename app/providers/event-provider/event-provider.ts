@@ -30,6 +30,45 @@ export class EventProvider {
     return dataElementId;
   }
 
+  saveEvent(event,user){
+    let self = this;
+    let url = '/api/events';
+    return new Promise(function(resolve, reject){
+      self.httpClient.post(url,event,user).subscribe(response=>{
+        response = response.json();
+        resolve(response);
+      },error=>{
+        alert(JSON.stringify(error));
+        reject(error);
+      })
+    });
+  }
+
+  formatDataValuesToEventObject(dataValues,program,user,currentCoordinate){
+
+    return new Promise(function(resolve){
+      let event = {
+        program : program.id,
+        orgUnit : user.orgUnit,
+        eventDate : new Date(),
+        status : "COMPLETED",
+        storedBy : user.username,
+        coordinate : currentCoordinate,
+        dataValues : []
+      };
+      program.programStages[0].programStageDataElements.forEach(programStageDataElement=>{
+        let dataElementId = programStageDataElement.dataElement.id;
+        if(dataValues[dataElementId]){
+          event.dataValues.push({
+            dataElement : dataElementId,
+            value : dataValues[dataElementId]
+          })
+        }
+      });
+      resolve(event)
+    });
+  }
+
   findEventsByDataValue(dataElementId,value,programId,user){
     let self = this;
     let sqlViewUrl = "/api/sqlViews.json?filter=name:eq:Find Event";

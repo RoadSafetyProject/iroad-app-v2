@@ -33,6 +33,42 @@ var EventProvider = (function () {
         });
         return dataElementId;
     };
+    EventProvider.prototype.saveEvent = function (event, user) {
+        var self = this;
+        var url = '/api/events';
+        return new Promise(function (resolve, reject) {
+            self.httpClient.post(url, event, user).subscribe(function (response) {
+                response = response.json();
+                resolve(response);
+            }, function (error) {
+                alert(JSON.stringify(error));
+                reject(error);
+            });
+        });
+    };
+    EventProvider.prototype.formatDataValuesToEventObject = function (dataValues, program, user, currentCoordinate) {
+        return new Promise(function (resolve) {
+            var event = {
+                program: program.id,
+                orgUnit: user.orgUnit,
+                eventDate: new Date(),
+                status: "COMPLETED",
+                storedBy: user.username,
+                coordinate: currentCoordinate,
+                dataValues: []
+            };
+            program.programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
+                var dataElementId = programStageDataElement.dataElement.id;
+                if (dataValues[dataElementId]) {
+                    event.dataValues.push({
+                        dataElement: dataElementId,
+                        value: dataValues[dataElementId]
+                    });
+                }
+            });
+            resolve(event);
+        });
+    };
     EventProvider.prototype.findEventsByDataValue = function (dataElementId, value, programId, user) {
         var self = this;
         var sqlViewUrl = "/api/sqlViews.json?filter=name:eq:Find Event";
