@@ -67,7 +67,6 @@ export class App {
     let self = this;
 
     return new Promise(function(resolve, reject) {
-      let counter = 1;
       if(resourceValues.length == 0){
         resolve();
       }

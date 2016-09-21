@@ -11,6 +11,7 @@ var core_1 = require('@angular/core');
 var http_1 = require('@angular/http');
 require('rxjs/add/operator/map');
 var http_client_1 = require('../../providers/http-client/http-client');
+var Rx_1 = require('rxjs/Rx');
 /*
   Generated class for the EventProvider provider.
 
@@ -46,7 +47,30 @@ var EventProvider = (function () {
             });
         });
     };
-    EventProvider.prototype.formatDataValuesToEventObject = function (dataValues, program, user, currentCoordinate) {
+    EventProvider.prototype.getFormattedDataValuesArrayToEventObjectList = function (dataValuesArray, program, user) {
+        var self = this;
+        var currentCoordinate = {
+            latitude: '0',
+            longitude: '0'
+        };
+        var promises = [];
+        var eventList = [];
+        return new Promise(function (resolve, reject) {
+            dataValuesArray.forEach(function (dataValues) {
+                promises.push(self.getFormattedDataValuesToEventObject(dataValues, program, user, currentCoordinate).then(function (event) {
+                    //saving success
+                    eventList.push(event);
+                }, function (error) {
+                }));
+            });
+            Rx_1.Observable.forkJoin(promises).subscribe(function () {
+                resolve(eventList);
+            }, function (error) {
+                reject();
+            });
+        });
+    };
+    EventProvider.prototype.getFormattedDataValuesToEventObject = function (dataValues, program, user, currentCoordinate) {
         return new Promise(function (resolve) {
             var event = {
                 program: program.id,

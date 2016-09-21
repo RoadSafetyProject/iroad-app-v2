@@ -44,7 +44,38 @@ export class EventProvider {
     });
   }
 
-  formatDataValuesToEventObject(dataValues,program,user,currentCoordinate){
+  getFormattedDataValuesArrayToEventObjectList(dataValuesArray,program,user){
+    let self = this;
+    let currentCoordinate = {
+      latitude : '0',
+      longitude : '0'
+    };
+    let promises = [];
+    let eventList = [];
+
+    return new Promise(function(resolve, reject) {
+      dataValuesArray.forEach(dataValues=>{
+        promises.push(
+          self.getFormattedDataValuesToEventObject(dataValues,program,user,currentCoordinate).then((event)=>{
+            //saving success
+            eventList.push(event);
+          },(error) => {
+          })
+        );
+      });
+
+      Observable.forkJoin(promises).subscribe(() => {
+          resolve(eventList);
+        },
+        (error) => {
+          reject();
+        })
+    });
+
+
+  }
+
+  getFormattedDataValuesToEventObject(dataValues,program,user,currentCoordinate){
 
     return new Promise(function(resolve){
       let event = {

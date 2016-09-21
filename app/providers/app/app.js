@@ -65,7 +65,6 @@ var App = (function () {
         var promises = [];
         var self = this;
         return new Promise(function (resolve, reject) {
-            var counter = 1;
             if (resourceValues.length == 0) {
                 resolve();
             }
