@@ -22,7 +22,7 @@ export class OffencePaymentPage {
 
   private offenceId : string;
   private offenceListIds : any = [];
-  private programPaymentReciept : string = 'Payment Reciept';
+  private programPaymentReceipt : string = 'Payment Receipt';
   private programOffenceEvent :string = 'Offence Event';
   private relationDataElementPrefix : string = "Program_";
   private relationDataElements:any = {};
@@ -49,6 +49,10 @@ export class OffencePaymentPage {
     let attribute = 'name';
     let attributeValue =[];
     attributeValue.push(this.programName);
+  }
+
+  setPaymentReceipt(programs){
+    this.program = program[0];
   }
 
 

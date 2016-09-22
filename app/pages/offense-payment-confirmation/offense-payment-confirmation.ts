@@ -6,7 +6,7 @@ import {User } from '../../providers/user/user';
 import {HttpClient} from '../../providers/http-client/http-client';
 import {SqlLite} from "../../providers/sql-lite/sql-lite";
 
-import {OffensePaymentCodePage} from "../offense-payment-code/offense-payment-code";
+import {HomePage} from "../home/home";
 
 /*
   Generated class for the OffensePaymentConfirmationPage page.
@@ -105,12 +105,38 @@ export class OffensePaymentConfirmationPage {
   }
 
   goToOffensePaymentCode(){
-    this.setToasterMessage('Pay later with code code');
-    //this.navCtrl.push(OffensePaymentCodePage);
+    this.loadingData = true;
+    this.loadingMessages = [];
+    let message = this.getOffenseNotificationMessage();
+    let number = '+255718922311';
+    //let number = '+255717154006';
+    this.setLoadingMessages('Sending message');
+    this.app.sendSms(number,message).then(()=>{
+      this.setToasterMessage('Payment details has been sent');
+      this.loadingData = false;
+      this.navCtrl.setRoot(HomePage);
+    },error=>{
+      this.loadingData = false;
+      this.setToasterMessage('Fail to send payment details,please try to resend');
+    });
+
   }
 
   goToOffensePayment(){
     this.setToasterMessage('Pay now');
+  }
+
+  getOffenseNotificationMessage(){
+    this.setLoadingMessages('Composing message');
+    let message = "OFFENCE NOTIFICATION\n Dear Joseph Chingalo,you have committed "+this.selectedOffences.length +" offences .\n";
+    let total = 0;
+    this.selectedOffences.forEach(selectedOffence=>{
+      total += parseInt(selectedOffence.cost);
+    });
+    message +='Total cost Tsh ' + total + '. \n';
+    message +='Payment code is ' + this.offenceId;
+    message +="\nIt's just testing from mobile app";
+    return message;
   }
 
   setLoadingMessages(message){

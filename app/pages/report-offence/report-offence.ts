@@ -196,14 +196,14 @@ export class ReportOffencePage {
       this.loadingData = true;
       this.loadingMessages = [];
 
-      //let parameters = {
-      //  offenceId : 'eventId',
-      //  offenceListId : this.selectedOffenses
-      //};
-      //this.loadingData = false;
-      //this.navCtrl.push(OffensePaymentConfirmationPage,parameters);
+      let parameters = {
+        offenceId : 'eventId',
+        offenceListId : this.selectedOffenses
+      };
+      this.loadingData = false;
+      this.navCtrl.push(OffensePaymentConfirmationPage,parameters);
 
-      this.fetchingDriver();
+      //this.fetchingDriver();
     }else{
       this.setToasterMessage('Please select at least one offence from offence list');
     }

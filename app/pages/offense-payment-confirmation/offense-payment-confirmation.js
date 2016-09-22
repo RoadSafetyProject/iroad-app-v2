@@ -13,6 +13,7 @@ var app_1 = require('../../providers/app/app');
 var user_1 = require('../../providers/user/user');
 var http_client_1 = require('../../providers/http-client/http-client');
 var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
+var home_1 = require("../home/home");
 /*
   Generated class for the OffensePaymentConfirmationPage page.
 
@@ -109,11 +110,36 @@ var OffensePaymentConfirmationPage = (function () {
         this.loadingData = false;
     };
     OffensePaymentConfirmationPage.prototype.goToOffensePaymentCode = function () {
-        this.setToasterMessage('Pay later with code code');
-        //this.navCtrl.push(OffensePaymentCodePage);
+        var _this = this;
+        this.loadingData = true;
+        this.loadingMessages = [];
+        var message = this.getOffenseNotificationMessage();
+        var number = '+255718922311';
+        //let number = '+255717154006';
+        this.setLoadingMessages('Sending message');
+        this.app.sendSms(number, message).then(function () {
+            _this.setToasterMessage('Payment details has been sent');
+            _this.loadingData = false;
+            _this.navCtrl.setRoot(home_1.HomePage);
+        }, function (error) {
+            _this.loadingData = false;
+            _this.setToasterMessage('Fail to send payment details,please try to resend');
+        });
     };
     OffensePaymentConfirmationPage.prototype.goToOffensePayment = function () {
         this.setToasterMessage('Pay now');
+    };
+    OffensePaymentConfirmationPage.prototype.getOffenseNotificationMessage = function () {
+        this.setLoadingMessages('Composing message');
+        var message = "OFFENCE NOTIFICATION\n Dear Joseph Chingalo,you have committed " + this.selectedOffences.length + " offences .\n";
+        var total = 0;
+        this.selectedOffences.forEach(function (selectedOffence) {
+            total += parseInt(selectedOffence.cost);
+        });
+        message += 'Total cost Tsh ' + total + '. \n';
+        message += 'Payment code is ' + this.offenceId;
+        message += "\nIt's just testing from mobile app";
+        return message;
     };
     OffensePaymentConfirmationPage.prototype.setLoadingMessages = function (message) {
         this.loadingMessages.push(message);

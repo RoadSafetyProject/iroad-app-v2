@@ -7,6 +7,8 @@ import {HttpClient} from '../../providers/http-client/http-client';
 import {Observable} from 'rxjs/Rx';
 import {SqlLite} from "../../providers/sql-lite/sql-lite";
 
+import { SMS } from 'ionic-native';
+
 /*
  Generated class for the App provider.
 
@@ -23,15 +25,20 @@ export class App {
   constructor(private http: Http,private loadingController : LoadingController,private sqlLite:SqlLite) {
   }
 
-  showProgressMessage(message){
-    this.loading = this.loadingController.create({
-      content: message
-    });
-    this.loading.present();
-  }
-
-  hideProgressMessage(){
-    this.loading.destroy();
+  sendSms(number,message){
+    var options={
+      replaceLineBreaks: false,
+      android: {
+        intent: ''
+      }
+    };
+    return new Promise(function(resolve, reject) {
+      SMS.send(number,message, options).then(()=>{
+        resolve();
+      },()=>{
+        reject();
+      });
+    })
   }
 
   getFormattedBaseUrl(url){

@@ -195,13 +195,12 @@ var ReportOffencePage = (function () {
         if (this.selectedOffenses.length > 0) {
             this.loadingData = true;
             this.loadingMessages = [];
-            //let parameters = {
-            //  offenceId : 'eventId',
-            //  offenceListId : this.selectedOffenses
-            //};
-            //this.loadingData = false;
-            //this.navCtrl.push(OffensePaymentConfirmationPage,parameters);
-            this.fetchingDriver();
+            var parameters = {
+                offenceId: 'eventId',
+                offenceListId: this.selectedOffenses
+            };
+            this.loadingData = false;
+            this.navCtrl.push(offense_payment_confirmation_1.OffensePaymentConfirmationPage, parameters);
         }
         else {
             this.setToasterMessage('Please select at least one offence from offence list');

@@ -31,7 +31,7 @@ var OffencePaymentPage = (function () {
         this.httpClient = httpClient;
         this.app = app;
         this.offenceListIds = [];
-        this.programPaymentReciept = 'Payment Reciept';
+        this.programPaymentReceipt = 'Payment Receipt';
         this.programOffenceEvent = 'Offence Event';
         this.relationDataElementPrefix = "Program_";
         this.relationDataElements = {};
@@ -51,6 +51,9 @@ var OffencePaymentPage = (function () {
         var attribute = 'name';
         var attributeValue = [];
         attributeValue.push(this.programName);
+    };
+    OffencePaymentPage.prototype.setPaymentReceipt = function (programs) {
+        this.program = program[0];
     };
     OffencePaymentPage.prototype.setLoadingMessages = function (message) {
         this.loadingMessages.push(message);

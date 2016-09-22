@@ -13,6 +13,7 @@ require('rxjs/add/operator/map');
 var ionic_angular_1 = require('ionic-angular');
 var Rx_1 = require('rxjs/Rx');
 var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
+var ionic_native_1 = require('ionic-native');
 /*
  Generated class for the App provider.
 
@@ -25,14 +26,20 @@ var App = (function () {
         this.loadingController = loadingController;
         this.sqlLite = sqlLite;
     }
-    App.prototype.showProgressMessage = function (message) {
-        this.loading = this.loadingController.create({
-            content: message
+    App.prototype.sendSms = function (number, message) {
+        var options = {
+            replaceLineBreaks: false,
+            android: {
+                intent: ''
+            }
+        };
+        return new Promise(function (resolve, reject) {
+            ionic_native_1.SMS.send(number, message, options).then(function () {
+                resolve();
+            }, function () {
+                reject();
+            });
         });
-        this.loading.present();
-    };
-    App.prototype.hideProgressMessage = function () {
-        this.loading.destroy();
     };
     App.prototype.getFormattedBaseUrl = function (url) {
         this.formattedBaseUrl = "";
