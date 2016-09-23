@@ -14,27 +14,28 @@
 </ion-header>
 
 <ion-content padding class="vehicle-verification">
+
+  <div *ngIf="!loadingData">
+    <ion-row>
+      <ion-col width-100>
+        <ion-item>
+          <ion-label floating>Vehicle Plate Number</ion-label>
+          <ion-input type="text" [(ngModel)]="vehicle.plateNumber"></ion-input>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col width-100>
+        <button (click)="verifyVehicle()" full >
+          Verify Vehicle
+        </button>
+      </ion-col>
+    </ion-row>
+  </div>
+
   <ion-row>
     <ion-col width-100>
-      <ion-item>
-        <ion-label floating>Vehicle Plate Number</ion-label>
-        <ion-input type="text" [(ngModel)]="vehicle.plateNumber"></ion-input>
-      </ion-item>
-    </ion-col>
-  </ion-row>
-
-
-  <ion-row>
-    <ion-col width-100>
-      <button (click)="verifyVehicle()" full >
-        Verify Vehicle
-      </button>
-    </ion-col>
-  </ion-row>
-
-  <ion-row>
-    <ion-col width-100>
-
       <div *ngIf="loadingData">
         <ion-list>
           <ion-item *ngFor="let message of loadingMessages; let currentIndex = index">

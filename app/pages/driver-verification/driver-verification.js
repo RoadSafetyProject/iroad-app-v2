@@ -33,6 +33,10 @@ var DriverVerificationPage = (function () {
         this.app = app;
         this.driver = {};
         this.programName = "Driver";
+        this.programAccidentVehicle = "Accident Vehicle";
+        this.programOffenceEvent = "Offence Event";
+        this.programNameDataElementMapping = {};
+        this.relationDataElementPrefix = "Program_";
         this.currentUser = {};
         this.program = {};
         this.verificationData = [];
@@ -44,6 +48,93 @@ var DriverVerificationPage = (function () {
             _this.loadingProgram();
         });
     }
+    DriverVerificationPage.prototype.loadingProgram = function () {
+        var _this = this;
+        this.loadingData = true;
+        this.loadingMessages = [];
+        var resource = 'programs';
+        var attribute = 'name';
+        var attributeValue = [];
+        attributeValue.push(this.programName);
+        this.setLoadingMessages('Loading Driver metadata');
+        this.sqlLite.getDataFromTableByAttributes(resource, attribute, attributeValue, this.currentUser.currentDatabase).then(function (programs) {
+            _this.setProgramMetadata(programs);
+        }, function (error) {
+            _this.loadingData = false;
+            var message = "Fail to loading programs " + error;
+            _this.setStickToasterMessage(message);
+        });
+    };
+    DriverVerificationPage.prototype.setProgramMetadata = function (programs) {
+        if (programs.length > 0) {
+            this.setLoadingMessages('Set Driver metadata');
+            this.relationDataElement = {};
+            this.program = programs[0];
+            this.setRelationDataElement();
+        }
+        else {
+            this.loadingData = false;
+        }
+    };
+    DriverVerificationPage.prototype.setRelationDataElement = function () {
+        var _this = this;
+        if (this.program.programStages.length > 0) {
+            var relationDataElementCode = "id_" + this.programName;
+            relationDataElementCode = relationDataElementCode.toLocaleLowerCase();
+            this.program.programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
+                _this.dataElementListObject[programStageDataElement.dataElement.id] = {
+                    name: programStageDataElement.dataElement.name,
+                    displayInReports: programStageDataElement.displayInReports,
+                    compulsory: programStageDataElement.compulsory
+                };
+                if (programStageDataElement.dataElement.code && programStageDataElement.dataElement.code.toLowerCase() == relationDataElementCode) {
+                    _this.relationDataElement = programStageDataElement.dataElement;
+                }
+            });
+            this.loadingAccidentMetadata();
+        }
+    };
+    DriverVerificationPage.prototype.loadingAccidentMetadata = function () {
+        var _this = this;
+        var resource = 'programs';
+        var attribute = 'name';
+        var attributeValue = [];
+        attributeValue.push(this.programAccidentVehicle);
+        this.setLoadingMessages('Loading accident vehicle Relation metadata');
+        this.sqlLite.getDataFromTableByAttributes(resource, attribute, attributeValue, this.currentUser.currentDatabase).then(function (programs) {
+            _this.setProgramNameDataElementMapping(programs);
+            _this.loadingOffenseEventMeData();
+        }, function (error) {
+            _this.loadingData = false;
+            var message = "Fail to loading accident vehicle Relation metadata ";
+            _this.setStickToasterMessage(message);
+        });
+    };
+    DriverVerificationPage.prototype.loadingOffenseEventMeData = function () {
+        var _this = this;
+        var resource = 'programs';
+        var attribute = 'name';
+        var attributeValue = [];
+        attributeValue.push(this.programOffenceEvent);
+        this.setLoadingMessages('Loading offence Relation metadata');
+        this.sqlLite.getDataFromTableByAttributes(resource, attribute, attributeValue, this.currentUser.currentDatabase).then(function (programs) {
+            _this.setProgramNameDataElementMapping(programs);
+            _this.loadingData = false;
+        }, function (error) {
+            _this.loadingData = false;
+            var message = "Fail to loading offence Relation metadata ";
+            _this.setStickToasterMessage(message);
+        });
+    };
+    DriverVerificationPage.prototype.setProgramNameDataElementMapping = function (programs) {
+        var _this = this;
+        var programName = programs[0].name;
+        programs[0].programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
+            if ((_this.relationDataElementPrefix + _this.programName.replace(' ', '_')).toLowerCase() == programStageDataElement.dataElement.name.toLowerCase()) {
+                _this.programNameDataElementMapping[programName] = programStageDataElement.dataElement.id;
+            }
+        });
+    };
     DriverVerificationPage.prototype.scanBarcode = function () {
         var _this = this;
         ionic_native_1.BarcodeScanner.scan().then(function (barcodeData) {
@@ -95,45 +186,8 @@ var DriverVerificationPage = (function () {
             this.setToasterMessage('Driver does not exist in the system');
         }
     };
-    DriverVerificationPage.prototype.loadingProgram = function () {
-        var _this = this;
-        var resource = 'programs';
-        var attribute = 'name';
-        var attributeValue = [];
-        attributeValue.push(this.programName);
-        this.sqlLite.getDataFromTableByAttributes(resource, attribute, attributeValue, this.currentUser.currentDatabase).then(function (programs) {
-            _this.setProgramMetadata(programs);
-        }, function (error) {
-            var message = "Fail to loading programs " + error;
-            _this.setStickToasterMessage(message);
-        });
-    };
     DriverVerificationPage.prototype.setLoadingMessages = function (message) {
         this.loadingMessages.push(message);
-    };
-    DriverVerificationPage.prototype.setProgramMetadata = function (programs) {
-        if (programs.length > 0) {
-            this.relationDataElement = {};
-            this.program = programs[0];
-            this.setRelationDataElement();
-        }
-    };
-    DriverVerificationPage.prototype.setRelationDataElement = function () {
-        var _this = this;
-        if (this.program.programStages.length > 0) {
-            var relationDataElementCode = "id_" + this.programName;
-            relationDataElementCode = relationDataElementCode.toLocaleLowerCase();
-            this.program.programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
-                _this.dataElementListObject[programStageDataElement.dataElement.id] = {
-                    name: programStageDataElement.dataElement.name,
-                    displayInReports: programStageDataElement.displayInReports,
-                    compulsory: programStageDataElement.compulsory
-                };
-                if (programStageDataElement.dataElement.code && programStageDataElement.dataElement.code.toLowerCase() == relationDataElementCode) {
-                    _this.relationDataElement = programStageDataElement.dataElement;
-                }
-            });
-        }
     };
     DriverVerificationPage.prototype.setToasterMessage = function (message) {
         var toast = this.toastCtrl.create({

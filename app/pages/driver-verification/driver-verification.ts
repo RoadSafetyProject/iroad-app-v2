@@ -22,6 +22,10 @@ export class DriverVerificationPage {
 
   private driver : any ={};
   private programName: string = "Driver";
+  private programAccidentVehicle :string = "Accident Vehicle";
+  private programOffenceEvent :string = "Offence Event";
+  private programNameDataElementMapping : any = {};
+  private relationDataElementPrefix : string = "Program_";
   private relationDataElement : any;
   private currentUser :any = {};
   private program : any ={};
@@ -35,6 +39,97 @@ export class DriverVerificationPage {
     this.user.getCurrentUser().then(currentUser=>{
       this.currentUser = JSON.parse(currentUser);
       this.loadingProgram();
+    })
+  }
+
+
+  loadingProgram(){
+    this.loadingData = true;
+    this.loadingMessages = [];
+    let resource = 'programs';
+    let attribute = 'name';
+    let attributeValue =[];
+    attributeValue.push(this.programName);
+
+    this.setLoadingMessages('Loading Driver metadata');
+    this.sqlLite.getDataFromTableByAttributes(resource,attribute,attributeValue,this.currentUser.currentDatabase).then((programs)=>{
+      this.setProgramMetadata(programs);
+    },error=>{
+      this.loadingData = false;
+      let message = "Fail to loading programs " + error;
+      this.setStickToasterMessage(message);
+    })
+  }
+
+  setProgramMetadata(programs){
+    if(programs.length > 0){
+      this.setLoadingMessages('Set Driver metadata');
+      this.relationDataElement = {};
+      this.program = programs[0];
+      this.setRelationDataElement();
+    }else{
+      this.loadingData = false;
+    }
+  }
+
+  setRelationDataElement(){
+    if(this.program.programStages.length > 0){
+      let relationDataElementCode = "id_"+this.programName;
+      relationDataElementCode = relationDataElementCode.toLocaleLowerCase();
+      this.program.programStages[0].programStageDataElements.forEach(programStageDataElement=>{
+        this.dataElementListObject[programStageDataElement.dataElement.id] = {
+          name : programStageDataElement.dataElement.name,
+          displayInReports : programStageDataElement.displayInReports,
+          compulsory : programStageDataElement.compulsory
+        };
+        if(programStageDataElement.dataElement.code && programStageDataElement.dataElement.code.toLowerCase() ==relationDataElementCode){
+          this.relationDataElement = programStageDataElement.dataElement;
+        }
+      });
+      this.loadingAccidentMetadata();
+    }
+  }
+
+  loadingAccidentMetadata(){
+    let resource = 'programs';
+    let attribute = 'name';
+    let attributeValue =[];
+    attributeValue.push(this.programAccidentVehicle);
+
+    this.setLoadingMessages('Loading accident vehicle Relation metadata');
+    this.sqlLite.getDataFromTableByAttributes(resource,attribute,attributeValue,this.currentUser.currentDatabase).then((programs)=>{
+      this.setProgramNameDataElementMapping(programs);
+      this.loadingOffenseEventMeData();
+    },error=>{
+      this.loadingData = false;
+      let message = "Fail to loading accident vehicle Relation metadata " ;
+      this.setStickToasterMessage(message);
+    })
+  }
+
+  loadingOffenseEventMeData(){
+    let resource = 'programs';
+    let attribute = 'name';
+    let attributeValue =[];
+    attributeValue.push(this.programOffenceEvent);
+
+    this.setLoadingMessages('Loading offence Relation metadata');
+    this.sqlLite.getDataFromTableByAttributes(resource,attribute,attributeValue,this.currentUser.currentDatabase).then((programs)=>{
+      this.setProgramNameDataElementMapping(programs);
+      this.loadingData = false;
+    },error=>{
+      this.loadingData= false;
+      let message = "Fail to loading offence Relation metadata " ;
+      this.setStickToasterMessage(message);
+    })
+  }
+
+  setProgramNameDataElementMapping(programs){
+    let programName = programs[0].name;
+    programs[0].programStages[0].programStageDataElements.forEach(programStageDataElement=>{
+      if((this.relationDataElementPrefix+this.programName.replace(' ','_')).toLowerCase() == programStageDataElement.dataElement.name.toLowerCase()){
+        this.programNameDataElementMapping[programName] = programStageDataElement.dataElement.id;
+      }
     })
   }
 
@@ -88,46 +183,10 @@ export class DriverVerificationPage {
   }
 
 
-  loadingProgram(){
-    let resource = 'programs';
-    let attribute = 'name';
-    let attributeValue =[];
-    attributeValue.push(this.programName);
 
-    this.sqlLite.getDataFromTableByAttributes(resource,attribute,attributeValue,this.currentUser.currentDatabase).then((programs)=>{
-      this.setProgramMetadata(programs);
-    },error=>{
-      let message = "Fail to loading programs " + error;
-      this.setStickToasterMessage(message);
-    })
-  }
 
   setLoadingMessages(message){
     this.loadingMessages.push(message);
-  }
-  setProgramMetadata(programs){
-    if(programs.length > 0){
-      this.relationDataElement = {};
-      this.program = programs[0];
-      this.setRelationDataElement();
-    }
-  }
-
-  setRelationDataElement(){
-    if(this.program.programStages.length > 0){
-      let relationDataElementCode = "id_"+this.programName;
-      relationDataElementCode = relationDataElementCode.toLocaleLowerCase();
-      this.program.programStages[0].programStageDataElements.forEach(programStageDataElement=>{
-        this.dataElementListObject[programStageDataElement.dataElement.id] = {
-          name : programStageDataElement.dataElement.name,
-          displayInReports : programStageDataElement.displayInReports,
-          compulsory : programStageDataElement.compulsory
-        };
-        if(programStageDataElement.dataElement.code && programStageDataElement.dataElement.code.toLowerCase() ==relationDataElementCode){
-          this.relationDataElement = programStageDataElement.dataElement;
-        }
-      })
-    }
   }
 
   setToasterMessage(message){

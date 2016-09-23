@@ -15,28 +15,29 @@
 
 <ion-content padding class="driver-verification">
 
-  <ion-row>
-    <ion-col width-100>
-      <ion-item>
-        <ion-label floating>Driver Licence</ion-label>
-        <ion-input type="text" [(ngModel)]="driver.driverLisence"></ion-input>
-      </ion-item>
-    </ion-col>
-  </ion-row>
+  <div *ngIf="!loadingData">
+    <ion-row>
+      <ion-col width-100>
+        <ion-item>
+          <ion-label floating>Driver Licence</ion-label>
+          <ion-input type="text" [(ngModel)]="driver.driverLisence"></ion-input>
+        </ion-item>
+      </ion-col>
+    </ion-row>
 
-
-  <ion-row>
-    <ion-col width-80>
-      <button (click)="verifyDriver()"  full>
-        Verify Driver
-      </button>
-    </ion-col>
-    <ion-col width-20>
-      <button (click)="scanBarcode()" full>
-        <ion-icon ios="ios-barcode" md="md-barcode"></ion-icon>
-      </button>
-    </ion-col>
-  </ion-row>
+    <ion-row>
+      <ion-col width-80>
+        <button (click)="verifyDriver()"  full>
+          Verify Driver
+        </button>
+      </ion-col>
+      <ion-col width-20>
+        <button (click)="scanBarcode()" full>
+          <ion-icon ios="ios-barcode" md="md-barcode"></ion-icon>
+        </button>
+      </ion-col>
+    </ion-row>
+  </div>
 
   <ion-row>
     <ion-col width-100>

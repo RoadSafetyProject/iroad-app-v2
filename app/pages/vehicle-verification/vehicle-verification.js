@@ -32,6 +32,10 @@ var VehicleVerificationPage = (function () {
         this.app = app;
         this.vehicle = {};
         this.programName = "Vehicle";
+        this.programAccidentVehicle = "Accident Vehicle";
+        this.programOffenceEvent = "Offence Event";
+        this.programNameDataElementMapping = {};
+        this.relationDataElementPrefix = "Program_";
         this.currentUser = {};
         this.program = {};
         this.verificationData = [];
@@ -43,6 +47,93 @@ var VehicleVerificationPage = (function () {
             _this.loadingProgram();
         });
     }
+    VehicleVerificationPage.prototype.loadingProgram = function () {
+        var _this = this;
+        this.loadingData = true;
+        this.loadingMessages = [];
+        var resource = 'programs';
+        var attribute = 'name';
+        var attributeValue = [];
+        attributeValue.push(this.programName);
+        this.setLoadingMessages('Loading Vehicle metadata');
+        this.sqlLite.getDataFromTableByAttributes(resource, attribute, attributeValue, this.currentUser.currentDatabase).then(function (programs) {
+            _this.setProgramMetadata(programs);
+        }, function (error) {
+            _this.loadingData = false;
+            var message = "Fail to loading programs " + error;
+            _this.setStickToasterMessage(message);
+        });
+    };
+    VehicleVerificationPage.prototype.setProgramMetadata = function (programs) {
+        if (programs.length > 0) {
+            this.setLoadingMessages('Set Vehicle metadata');
+            this.relationDataElement = {};
+            this.program = programs[0];
+            this.setRelationDataElement();
+        }
+        else {
+            this.loadingData = false;
+        }
+    };
+    VehicleVerificationPage.prototype.setRelationDataElement = function () {
+        var _this = this;
+        if (this.program.programStages.length > 0) {
+            var relationDataElementCode = "id_" + this.programName;
+            relationDataElementCode = relationDataElementCode.toLocaleLowerCase();
+            this.program.programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
+                _this.dataElementListObject[programStageDataElement.dataElement.id] = {
+                    name: programStageDataElement.dataElement.name,
+                    displayInReports: programStageDataElement.displayInReports,
+                    compulsory: programStageDataElement.compulsory
+                };
+                if (programStageDataElement.dataElement.code && programStageDataElement.dataElement.code.toLowerCase() == relationDataElementCode) {
+                    _this.relationDataElement = programStageDataElement.dataElement;
+                }
+            });
+            this.loadingAccidentMetadata();
+        }
+    };
+    VehicleVerificationPage.prototype.loadingAccidentMetadata = function () {
+        var _this = this;
+        var resource = 'programs';
+        var attribute = 'name';
+        var attributeValue = [];
+        attributeValue.push(this.programAccidentVehicle);
+        this.setLoadingMessages('Loading accident vehicle Relation metadata');
+        this.sqlLite.getDataFromTableByAttributes(resource, attribute, attributeValue, this.currentUser.currentDatabase).then(function (programs) {
+            _this.setProgramNameDataElementMapping(programs);
+            _this.loadingOffenseEventMeData();
+        }, function (error) {
+            _this.loadingData = false;
+            var message = "Fail to loading accident vehicle Relation metadata ";
+            _this.setStickToasterMessage(message);
+        });
+    };
+    VehicleVerificationPage.prototype.loadingOffenseEventMeData = function () {
+        var _this = this;
+        var resource = 'programs';
+        var attribute = 'name';
+        var attributeValue = [];
+        attributeValue.push(this.programOffenceEvent);
+        this.setLoadingMessages('Loading offence Relation metadata');
+        this.sqlLite.getDataFromTableByAttributes(resource, attribute, attributeValue, this.currentUser.currentDatabase).then(function (programs) {
+            _this.setProgramNameDataElementMapping(programs);
+            _this.loadingData = false;
+        }, function (error) {
+            _this.loadingData = false;
+            var message = "Fail to loading offence Relation metadata ";
+            _this.setStickToasterMessage(message);
+        });
+    };
+    VehicleVerificationPage.prototype.setProgramNameDataElementMapping = function (programs) {
+        var _this = this;
+        var programName = programs[0].name;
+        programs[0].programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
+            if ((_this.relationDataElementPrefix + _this.programName.replace(' ', '_')).toLowerCase() == programStageDataElement.dataElement.name.toLowerCase()) {
+                _this.programNameDataElementMapping[programName] = programStageDataElement.dataElement.id;
+            }
+        });
+    };
     VehicleVerificationPage.prototype.verifyVehicle = function () {
         if (this.vehicle.plateNumber) {
             this.vehicle.plateNumber = this.vehicle.plateNumber.toUpperCase();
@@ -83,45 +174,8 @@ var VehicleVerificationPage = (function () {
             this.setToasterMessage('Vehicle does not exist in the system');
         }
     };
-    VehicleVerificationPage.prototype.loadingProgram = function () {
-        var _this = this;
-        var resource = 'programs';
-        var attribute = 'name';
-        var attributeValue = [];
-        attributeValue.push(this.programName);
-        this.sqlLite.getDataFromTableByAttributes(resource, attribute, attributeValue, this.currentUser.currentDatabase).then(function (programs) {
-            _this.setProgramMetadata(programs);
-        }, function (error) {
-            var message = "Fail to loading programs " + error;
-            _this.setStickToasterMessage(message);
-        });
-    };
     VehicleVerificationPage.prototype.setLoadingMessages = function (message) {
         this.loadingMessages.push(message);
-    };
-    VehicleVerificationPage.prototype.setProgramMetadata = function (programs) {
-        if (programs.length > 0) {
-            this.relationDataElement = {};
-            this.program = programs[0];
-            this.setRelationDataElement();
-        }
-    };
-    VehicleVerificationPage.prototype.setRelationDataElement = function () {
-        var _this = this;
-        if (this.program.programStages.length > 0) {
-            var relationDataElementCode = "id_" + this.programName;
-            relationDataElementCode = relationDataElementCode.toLocaleLowerCase();
-            this.program.programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
-                _this.dataElementListObject[programStageDataElement.dataElement.id] = {
-                    name: programStageDataElement.dataElement.name,
-                    displayInReports: programStageDataElement.displayInReports,
-                    compulsory: programStageDataElement.compulsory
-                };
-                if (programStageDataElement.dataElement.code && programStageDataElement.dataElement.code.toLowerCase() == relationDataElementCode) {
-                    _this.relationDataElement = programStageDataElement.dataElement;
-                }
-            });
-        }
     };
     VehicleVerificationPage.prototype.setToasterMessage = function (message) {
         var toast = this.toastCtrl.create({
