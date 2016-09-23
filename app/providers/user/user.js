@@ -26,6 +26,10 @@ var User = (function () {
         this.localStorage.set('user', JSON.stringify(user));
         return Promise.resolve(user);
     };
+    User.prototype.setUserSystemInformation = function (systemInformation) {
+        this.localStorage.set('systemInformation', JSON.stringify(systemInformation));
+        return Promise.resolve(systemInformation);
+    };
     User.prototype.setUserData = function (userDataResponse) {
         //userDataResponse= eval('('++')');
         var userData = {
@@ -45,6 +49,9 @@ var User = (function () {
     };
     User.prototype.getUserData = function () {
         return this.localStorage.get('userData');
+    };
+    User.prototype.getUserSystemInformation = function () {
+        return this.localStorage.get('systemInformation');
     };
     User.prototype.getCurrentUser = function () {
         return this.localStorage.get('user');

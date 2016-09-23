@@ -23,6 +23,10 @@ export class User {
     return Promise.resolve(user);
   }
 
+  setUserSystemInformation(systemInformation){
+    this.localStorage.set('systemInformation',JSON.stringify(systemInformation));
+    return Promise.resolve(systemInformation);
+  }
   setUserData(userDataResponse){
     //userDataResponse= eval('('++')');
     let userData ={
@@ -45,6 +49,9 @@ export class User {
 
   getUserData(){
     return this.localStorage.get('userData');
+  }
+  getUserSystemInformation(){
+    return this.localStorage.get('systemInformation');
   }
 
   getCurrentUser(){
