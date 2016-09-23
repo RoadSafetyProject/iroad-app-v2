@@ -13,6 +13,8 @@ var app_1 = require('../../providers/app/app');
 var user_1 = require('../../providers/user/user');
 var http_client_1 = require('../../providers/http-client/http-client');
 var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
+var home_1 = require("../home/home");
+var event_provider_1 = require("../../providers/event-provider/event-provider");
 /*
   Generated class for the OffencePaymentPage page.
 
@@ -21,8 +23,9 @@ var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
 */
 var OffencePaymentPage = (function () {
     //@todo incorporate Transaction Number and Reference Number
-    //@todo send sms to driver or vehicle's owner mobile number
-    function OffencePaymentPage(params, navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
+    function OffencePaymentPage(eventProvider, params, navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
+        var _this = this;
+        this.eventProvider = eventProvider;
         this.params = params;
         this.navCtrl = navCtrl;
         this.toastCtrl = toastCtrl;
@@ -30,10 +33,10 @@ var OffencePaymentPage = (function () {
         this.user = user;
         this.httpClient = httpClient;
         this.app = app;
-        this.offenceListIds = [];
         this.programPaymentReceipt = 'Payment Receipt';
         this.programOffenceEvent = 'Offence Event';
         this.relationDataElementPrefix = "Program_";
+        this.paymentAmountName = "Amount";
         this.relationDataElements = {};
         this.currentUser = {};
         this.program = {};
@@ -41,19 +44,74 @@ var OffencePaymentPage = (function () {
         this.loadingData = false;
         this.loadingMessages = [];
         this.offenceId = this.params.get('offenceId');
-        this.offenceListIds = this.params.get('offenceListId');
-        this.loadingPaymentReceipt();
+        this.selectedOffences = this.params.get('selectedOffences');
+        this.user.getCurrentUser().then(function (currentUser) {
+            _this.currentUser = JSON.parse(currentUser);
+            _this.loadingPaymentReceipt();
+        });
     }
     OffencePaymentPage.prototype.loadingPaymentReceipt = function () {
+        var _this = this;
         this.loadingData = true;
         this.setLoadingMessages('Loading payment receipt metadata');
         var resource = 'programs';
         var attribute = 'name';
         var attributeValue = [];
-        attributeValue.push(this.programName);
+        attributeValue.push(this.programPaymentReceipt);
+        this.sqlLite.getDataFromTableByAttributes(resource, attribute, attributeValue, this.currentUser.currentDatabase).then(function (programs) {
+            _this.setPaymentReceipt(programs);
+        }, function (error) {
+            _this.loadingData = false;
+            _this.setToasterMessage('Fail to load payment receipt metadata');
+        });
     };
     OffencePaymentPage.prototype.setPaymentReceipt = function (programs) {
-        this.program = program[0];
+        this.program = programs[0];
+        this.checkAndSetRelationData();
+    };
+    OffencePaymentPage.prototype.checkAndSetRelationData = function () {
+        var _this = this;
+        this.setLoadingMessages('Checking for relation metadata');
+        this.program.programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
+            if (programStageDataElement.dataElement.name == _this.paymentAmountName) {
+                var total = 0;
+                _this.selectedOffences.forEach(function (selectedOffence) {
+                    total += parseInt(selectedOffence.cost);
+                });
+                _this.dataValues[programStageDataElement.dataElement.id] = total;
+            }
+            else if (programStageDataElement.dataElement.name.toLowerCase() == (_this.relationDataElementPrefix + _this.programOffenceEvent.replace(' ', '_')).toLowerCase()) {
+                _this.dataValues[programStageDataElement.dataElement.id] = _this.offenceId;
+                _this.relationDataElements[programStageDataElement.dataElement.id] = {
+                    program: _this.programOffenceEvent
+                };
+            }
+        });
+        this.loadingData = false;
+    };
+    OffencePaymentPage.prototype.savePayment = function () {
+        var _this = this;
+        this.loadingData = true;
+        this.loadingMessages = [];
+        var currentCoordinate = {
+            latitude: '0',
+            longitude: '0'
+        };
+        this.setLoadingMessages('Preparing payment information for saving');
+        this.eventProvider.getFormattedDataValuesToEventObject(this.dataValues, this.program, this.currentUser, currentCoordinate).then(function (event) {
+            _this.setLoadingMessages('Saving payment information');
+            _this.eventProvider.saveEvent(event, _this.currentUser).then(function (result) {
+                _this.loadingData = false;
+                _this.setToasterMessage('Payment information has been saved successfully');
+                _this.navCtrl.setRoot(home_1.HomePage);
+            }, function (error) {
+                _this.loadingData = false;
+                _this.setToasterMessage('Fail to prepare payment information');
+            });
+        }, function (error) {
+            _this.loadingData = false;
+            _this.setToasterMessage('Fail to prepare payment information');
+        });
     };
     OffencePaymentPage.prototype.setLoadingMessages = function (message) {
         this.loadingMessages.push(message);
@@ -75,9 +133,9 @@ var OffencePaymentPage = (function () {
     OffencePaymentPage = __decorate([
         core_1.Component({
             templateUrl: 'build/pages/offence-payment/offence-payment.html',
-            providers: [app_1.App, http_client_1.HttpClient, user_1.User, sql_lite_1.SqlLite]
+            providers: [app_1.App, http_client_1.HttpClient, user_1.User, sql_lite_1.SqlLite, event_provider_1.EventProvider]
         }), 
-        __metadata('design:paramtypes', [ionic_angular_1.NavParams, ionic_angular_1.NavController, ionic_angular_1.ToastController, sql_lite_1.SqlLite, user_1.User, http_client_1.HttpClient, app_1.App])
+        __metadata('design:paramtypes', [event_provider_1.EventProvider, ionic_angular_1.NavParams, ionic_angular_1.NavController, ionic_angular_1.ToastController, sql_lite_1.SqlLite, user_1.User, http_client_1.HttpClient, app_1.App])
     ], OffencePaymentPage);
     return OffencePaymentPage;
 })();

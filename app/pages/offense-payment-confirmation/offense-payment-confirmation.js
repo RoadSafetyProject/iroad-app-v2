@@ -14,6 +14,7 @@ var user_1 = require('../../providers/user/user');
 var http_client_1 = require('../../providers/http-client/http-client');
 var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
 var home_1 = require("../home/home");
+var offence_payment_1 = require('../offence-payment/offence-payment');
 /*
   Generated class for the OffensePaymentConfirmationPage page.
 
@@ -21,6 +22,8 @@ var home_1 = require("../home/home");
   Ionic pages and navigation.
 */
 var OffensePaymentConfirmationPage = (function () {
+    //@todo customization of offence notifications
+    //@todo send sms to driver or vehicle's owner mobile number
     function OffensePaymentConfirmationPage(params, navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
         var _this = this;
         this.params = params;
@@ -123,11 +126,15 @@ var OffensePaymentConfirmationPage = (function () {
             _this.navCtrl.setRoot(home_1.HomePage);
         }, function (error) {
             _this.loadingData = false;
-            _this.setToasterMessage('Fail to send payment details,please try to resend');
+            _this.setToasterMessage('Fail to send payment details to ' + number + ',please try to resend');
         });
     };
     OffensePaymentConfirmationPage.prototype.goToOffensePayment = function () {
-        this.setToasterMessage('Pay now');
+        var parameters = {
+            offenceId: this.offenceId,
+            selectedOffences: this.selectedOffences
+        };
+        this.navCtrl.push(offence_payment_1.OffencePaymentPage, parameters);
     };
     OffensePaymentConfirmationPage.prototype.getOffenseNotificationMessage = function () {
         this.setLoadingMessages('Composing message');

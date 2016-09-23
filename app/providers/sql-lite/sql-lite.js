@@ -175,7 +175,7 @@ var SqlLite = (function () {
                     reject(error.failure);
                 });
             }, function (error) {
-                reject(error.failure);
+                reject(error);
             });
         });
     };

@@ -186,7 +186,7 @@ export class SqlLite {
           reject(error.failure);
         });
       }, (error) => {
-        reject(error.failure);
+        reject(error);
       });
     });
 

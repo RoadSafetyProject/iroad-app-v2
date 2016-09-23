@@ -7,6 +7,7 @@ import {HttpClient} from '../../providers/http-client/http-client';
 import {SqlLite} from "../../providers/sql-lite/sql-lite";
 
 import {HomePage} from "../home/home";
+import {OffencePaymentPage} from '../offence-payment/offence-payment';
 
 /*
   Generated class for the OffensePaymentConfirmationPage page.
@@ -33,6 +34,8 @@ export class OffensePaymentConfirmationPage {
   private loadingData : boolean = false;
   private loadingMessages : any = [];
 
+  //@todo customization of offence notifications
+  //@todo send sms to driver or vehicle's owner mobile number
   constructor(private params: NavParams,private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
     this.user.getCurrentUser().then(currentUser=>{
       this.currentUser = JSON.parse(currentUser);
@@ -117,13 +120,17 @@ export class OffensePaymentConfirmationPage {
       this.navCtrl.setRoot(HomePage);
     },error=>{
       this.loadingData = false;
-      this.setToasterMessage('Fail to send payment details,please try to resend');
+      this.setToasterMessage('Fail to send payment details to '+number+',please try to resend');
     });
 
   }
 
   goToOffensePayment(){
-    this.setToasterMessage('Pay now');
+    let parameters = {
+      offenceId : this.offenceId,
+      selectedOffences : this.selectedOffences
+    };
+    this.navCtrl.push(OffencePaymentPage,parameters);
   }
 
   getOffenseNotificationMessage(){

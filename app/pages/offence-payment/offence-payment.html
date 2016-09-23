@@ -6,13 +6,94 @@
 -->
 <ion-header>
 
-  <ion-navbar>
-    <ion-title>offencePayment</ion-title>
+  <ion-navbar primary>
+    <ion-title>Offence Payment</ion-title>
   </ion-navbar>
 
 </ion-header>
 
 
-<ion-content padding>
+<ion-content padding class="offence-payment">
+
+  <div *ngIf="loadingData">
+    <ion-list>
+      <ion-item *ngFor="let message of loadingMessages; let currentIndex = index">
+        {{ message }}
+        <ion-icon *ngIf="(currentIndex + 1) < loadingMessages.length" name="done-all" item-right></ion-icon>
+        <div style="text-align: center" item-right *ngIf="(currentIndex + 1) >= loadingMessages.length">
+          <ion-spinner name="crescent"></ion-spinner>
+        </div>
+      </ion-item>
+    </ion-list>
+  </div>
+
+  <div *ngIf="!loadingData">
+    <ion-list>
+      <div *ngIf="program.programStages">
+        <div *ngIf="program.programStages.length > 0">
+          <div *ngFor="let programStageDataElement of program.programStages[0].programStageDataElements">
+            <div *ngIf="programStageDataElement.displayInReports && !relationDataElements[programStageDataElement.dataElement.id]">
+              <div *ngIf="!programStageDataElement.dataElement.optionSetValue">
+
+                <ion-item *ngIf="programStageDataElement.dataElement.valueType =='BOOLEAN' ">
+                  <ion-label>{{ programStageDataElement.dataElement.name }}</ion-label>
+                  <ion-select [(ngModel)]="dataValues[programStageDataElement.dataElement.id]">
+                    <ion-option value="true">Yes</ion-option>
+                    <ion-option value="false">No</ion-option>
+                  </ion-select>
+                </ion-item>
+
+                <ion-item *ngIf="programStageDataElement.dataElement.valueType =='TRUE_ONLY' ">
+                  <ion-label>{{ programStageDataElement.dataElement.name }}</ion-label>
+                  <ion-select [(ngModel)]="dataValues[programStageDataElement.dataElement.id]">
+                    <ion-option value="true">Yes</ion-option>
+                  </ion-select>
+                </ion-item>
+
+                <ion-item *ngIf="programStageDataElement.dataElement.valueType =='DATE' ">
+                  <ion-label floating>{{ programStageDataElement.dataElement.name }}</ion-label>
+                  <ion-input type="date" [(ngModel)]="dataValues[programStageDataElement.dataElement.id]"></ion-input>
+                </ion-item>
+
+                <ion-item *ngIf="programStageDataElement.dataElement.valueType =='TEXT' ">
+                  <ion-label floating>{{ programStageDataElement.dataElement.name }}</ion-label>
+                  <ion-input type="text" [(ngModel)]="dataValues[programStageDataElement.dataElement.id]"></ion-input>
+                </ion-item>
+
+                <ion-item *ngIf="programStageDataElement.dataElement.valueType =='LONG_TEXT' ">
+                  <ion-label floating>{{ programStageDataElement.dataElement.name }}</ion-label>
+                  <ion-textarea [(ngModel)]="dataValues[programStageDataElement.dataElement.id]"></ion-textarea>
+                </ion-item>
+
+                <ion-item *ngIf="programStageDataElement.dataElement.valueType =='NUMBER' || programStageDataElement.dataElement.valueType =='INTEGER' ">
+                  <ion-label floating>{{ programStageDataElement.dataElement.name }}</ion-label>
+                  <ion-input type="number" [(ngModel)]="dataValues[programStageDataElement.dataElement.id]"></ion-input>
+                </ion-item>
+
+                <ion-item *ngIf="programStageDataElement.dataElement.valueType =='INTEGER_ZERO_OR_POSITIVE' ">
+                  <ion-label floating>{{ programStageDataElement.dataElement.name }}</ion-label>
+                  <ion-input type="number" min="0" [(ngModel)]="dataValues[programStageDataElement.dataElement.id]"></ion-input>
+                </ion-item>
+
+              </div>
+              <div *ngIf="programStageDataElement.dataElement.optionSetValue">
+                <ion-item>
+                  <ion-label>{{ programStageDataElement.dataElement.name }}</ion-label>
+                  <ion-select [(ngModel)]="dataValues[programStageDataElement.dataElement.id]">
+                    <div *ngFor="let option of programStageDataElement.dataElement.optionSet.options">
+                      <ion-option value="{{ option.code }}">{{ option.name }}</ion-option>
+                    </div>
+                  </ion-select>
+                </ion-item>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </ion-list>
+
+    <button full (click)="savePayment()">Save Payment</button>
+  </div>
 
 </ion-content>
