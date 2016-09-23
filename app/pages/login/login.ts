@@ -71,7 +71,23 @@ export class LoginPage {
                       data = data.json();
                       this.user.setUserData(data).then(userData=>{
                         this.loginData.orgUnit = userData.organisationUnits[0].id;
-                        this.downloadingPrograms(user,databaseName);
+                        this.setLoadingMessages('Loading server information');
+                        this.httpClient.get('/api/system/info',user).subscribe(
+                          data =>{
+                            data = data.json();
+                            this.setLoadingMessages('Saving system information');
+                            this.user.setUserSystemInformation(data).then(systemInformation=>{
+                              this.downloadingPrograms(user,databaseName);
+                            },error=>{
+                              this.setToasterMessage('Fail to save system information');
+                            })
+                          },
+                          error=>{
+                            this.loadingData = false;
+                            this.setToasterMessage('Fail to load server information');
+                          }
+                        );
+
                       });
                     },
                     err => {

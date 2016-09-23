@@ -77,7 +77,19 @@ var LoginPage = (function () {
                                     data = data.json();
                                     _this.user.setUserData(data).then(function (userData) {
                                         _this.loginData.orgUnit = userData.organisationUnits[0].id;
-                                        _this.downloadingPrograms(user, databaseName);
+                                        _this.setLoadingMessages('Loading server information');
+                                        _this.httpClient.get('/api/system/info', user).subscribe(function (data) {
+                                            data = data.json();
+                                            _this.setLoadingMessages('Saving system information');
+                                            _this.user.setUserSystemInformation(data).then(function (systemInformation) {
+                                                _this.downloadingPrograms(user, databaseName);
+                                            }, function (error) {
+                                                _this.setToasterMessage('Fail to save system information');
+                                            });
+                                        }, function (error) {
+                                            _this.loadingData = false;
+                                            _this.setToasterMessage('Fail to load server information');
+                                        });
                                     });
                                 }, function (err) {
                                     _this.loadingData = false;
