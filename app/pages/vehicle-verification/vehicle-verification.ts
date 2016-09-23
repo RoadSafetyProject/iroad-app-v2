@@ -25,6 +25,9 @@ export class VehicleVerificationPage {
   private programOffenceEvent :string = "Offence Event";
   private programNameDataElementMapping : any = {};
   private relationDataElementPrefix : string = "Program_";
+  private programNameProgramMapping : any = {};
+  private accidentVehicleHistory : any = [];
+  private offenceHistory : any = [];
   private relationDataElement : any;
   private currentUser :any = {};
   private program : any ={};
@@ -125,6 +128,7 @@ export class VehicleVerificationPage {
 
   setProgramNameDataElementMapping(programs){
     let programName = programs[0].name;
+    this.programNameProgramMapping[programName] = programs[0].id;
     programs[0].programStages[0].programStageDataElements.forEach(programStageDataElement=>{
       if((this.relationDataElementPrefix+this.programName.replace(' ','_')).toLowerCase() == programStageDataElement.dataElement.name.toLowerCase()){
         this.programNameDataElementMapping[programName] = programStageDataElement.dataElement.id;
@@ -162,13 +166,51 @@ export class VehicleVerificationPage {
   }
 
   setLoadedData(events){
-    this.loadingData = false;
     if(events.length> 0){
       this.vehicle.events = events[0];
       this.verificationData = events[0].dataValues;
+      this.loadingAccidentVehicleHistory();
     }else{
+      this.loadingData = false;
       this.setToasterMessage('Vehicle does not exist in the system');
     }
+  }
+
+  loadingAccidentVehicleHistory(){
+    this.setLoadingMessages('Loading accident history');
+    let dataElementId = this.programNameDataElementMapping[this.programAccidentVehicle];
+    let value = this.vehicle.events.event;
+    let programId = this.programNameProgramMapping[this.programAccidentVehicle];
+    this.eventProvider.findEventsByDataValue(dataElementId,value,programId,this.currentUser).then(events=>{
+      this.setAccidentVehicleHistory(events);
+    },error=>{
+      this.loadingData = false;
+      this.setToasterMessage('Fail to load accident history');
+    })
+
+  }
+  setAccidentVehicleHistory(events){
+    this.accidentVehicleHistory = events;
+    this.loadingOffenceHistory();
+  }
+
+  loadingOffenceHistory(){
+    this.setLoadingMessages('Loading accident history');
+    let dataElementId = this.programNameDataElementMapping[this.programOffenceEvent];
+    let value = this.vehicle.events.event;
+    let programId = this.programNameProgramMapping[this.programOffenceEvent];
+    this.eventProvider.findEventsByDataValue(dataElementId,value,programId,this.currentUser).then(events=>{
+      this.setOffenceHistory(events);
+    },error=>{
+      this.loadingData = false;
+      this.setToasterMessage('Fail to load accident history');
+    })
+
+  }
+
+  setOffenceHistory(events){
+    this.offenceHistory = events;
+    this.loadingData = false;
   }
 
   setLoadingMessages(message){

@@ -36,6 +36,9 @@ var VehicleVerificationPage = (function () {
         this.programOffenceEvent = "Offence Event";
         this.programNameDataElementMapping = {};
         this.relationDataElementPrefix = "Program_";
+        this.programNameProgramMapping = {};
+        this.accidentVehicleHistory = [];
+        this.offenceHistory = [];
         this.currentUser = {};
         this.program = {};
         this.verificationData = [];
@@ -128,6 +131,7 @@ var VehicleVerificationPage = (function () {
     VehicleVerificationPage.prototype.setProgramNameDataElementMapping = function (programs) {
         var _this = this;
         var programName = programs[0].name;
+        this.programNameProgramMapping[programName] = programs[0].id;
         programs[0].programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
             if ((_this.relationDataElementPrefix + _this.programName.replace(' ', '_')).toLowerCase() == programStageDataElement.dataElement.name.toLowerCase()) {
                 _this.programNameDataElementMapping[programName] = programStageDataElement.dataElement.id;
@@ -165,14 +169,49 @@ var VehicleVerificationPage = (function () {
         });
     };
     VehicleVerificationPage.prototype.setLoadedData = function (events) {
-        this.loadingData = false;
         if (events.length > 0) {
             this.vehicle.events = events[0];
             this.verificationData = events[0].dataValues;
+            this.loadingAccidentVehicleHistory();
         }
         else {
+            this.loadingData = false;
             this.setToasterMessage('Vehicle does not exist in the system');
         }
+    };
+    VehicleVerificationPage.prototype.loadingAccidentVehicleHistory = function () {
+        var _this = this;
+        this.setLoadingMessages('Loading accident history');
+        var dataElementId = this.programNameDataElementMapping[this.programAccidentVehicle];
+        var value = this.vehicle.events.event;
+        var programId = this.programNameProgramMapping[this.programAccidentVehicle];
+        this.eventProvider.findEventsByDataValue(dataElementId, value, programId, this.currentUser).then(function (events) {
+            _this.setAccidentVehicleHistory(events);
+        }, function (error) {
+            _this.loadingData = false;
+            _this.setToasterMessage('Fail to load accident history');
+        });
+    };
+    VehicleVerificationPage.prototype.setAccidentVehicleHistory = function (events) {
+        this.accidentVehicleHistory = events;
+        this.loadingOffenceHistory();
+    };
+    VehicleVerificationPage.prototype.loadingOffenceHistory = function () {
+        var _this = this;
+        this.setLoadingMessages('Loading accident history');
+        var dataElementId = this.programNameDataElementMapping[this.programOffenceEvent];
+        var value = this.vehicle.events.event;
+        var programId = this.programNameProgramMapping[this.programOffenceEvent];
+        this.eventProvider.findEventsByDataValue(dataElementId, value, programId, this.currentUser).then(function (events) {
+            _this.setOffenceHistory(events);
+        }, function (error) {
+            _this.loadingData = false;
+            _this.setToasterMessage('Fail to load accident history');
+        });
+    };
+    VehicleVerificationPage.prototype.setOffenceHistory = function (events) {
+        this.offenceHistory = events;
+        this.loadingData = false;
     };
     VehicleVerificationPage.prototype.setLoadingMessages = function (message) {
         this.loadingMessages.push(message);
