@@ -8,8 +8,8 @@ import {User } from '../../providers/user/user';
 import {HttpClient} from '../../providers/http-client/http-client';
 import {SqlLite} from "../../providers/sql-lite/sql-lite";
 
-
 import {AccidentVehiclePage} from '../accident-vehicle/accident-vehicle';
+import {EventProvider} from "../../providers/event-provider/event-provider";
 
 /*
   Generated class for the AccidentBasicInformationPage page.
@@ -19,7 +19,7 @@ import {AccidentVehiclePage} from '../accident-vehicle/accident-vehicle';
 */
 @Component({
   templateUrl: 'build/pages/accident-basic-information/accident-basic-information.html',
-  providers: [App,HttpClient,User,SqlLite]
+  providers: [App,HttpClient,User,SqlLite,EventProvider]
 })
 export class AccidentBasicInformationPage {
 
@@ -31,7 +31,7 @@ export class AccidentBasicInformationPage {
   private loadingData : boolean = false;
   private loadingMessages : any = [];
 
-  constructor(private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
+  constructor(private eventProvider : EventProvider,private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
     this.user.getCurrentUser().then(currentUser=>{
       this.currentUser = JSON.parse(currentUser);
       this.loadingProgram();
@@ -60,21 +60,56 @@ export class AccidentBasicInformationPage {
     if(programs.length > 0){
       this.program = programs[0];
     }
-    Geolocation.getCurrentPosition().then((resp) => {
-      this.currentCoordinate = resp.coords;
-      //alert(JSON.stringify(resp));
-    });
+    this.setGeoLocation();
     this.loadingData = false;
   }
 
 
-  goToAccidentVehicle(){
-    alert('dataValues :: ' + JSON.stringify(this.dataValues));
-    this.navCtrl.push(AccidentVehiclePage);
+  prepareToSaveBasicInformation(){
+    //@todo checking for required fields
+    this.loadingData = true;
+    this.loadingMessages = [];
+    this.setLoadingMessages('Preparing accident basic information');
+    this.eventProvider.getFormattedDataValuesToEventObject(this.dataValues,this.program,this.currentUser,this.currentCoordinate).then(event=>{
+      this.setLoadingMessages('Saving accident basic information');
+      this.eventProvider.saveEvent(event,this.currentUser).then(result=>{
+        this.goToAccidentVehicle(result);
+      },error=>{
+        this.loadingData = false;
+        this.setToasterMessage('Fail to save accident basic information');
+      });
+    },error=>{
+      this.loadingData = false;
+      this.setToasterMessage('Fail to prepare accident basic information');
+    });
+  }
+
+  goToAccidentVehicle(result){
+    let eventId = result.response.importSummaries[0].reference;
+    let parameter = {
+      accidentId : eventId
+    };
+    this.loadingData = false;
+    this.navCtrl.push(AccidentVehiclePage,parameter);
   }
 
   setLoadingMessages(message){
     this.loadingMessages.push(message);
+  }
+
+  setGeoLocation(){
+    Geolocation.getCurrentPosition().then((resp) => {
+      if(resp.coords.latitude){
+        this.currentCoordinate.latitude = resp.coords.latitude;
+      }else{
+        this.currentCoordinate.latitude = '0';
+      }
+      if(resp.coords.longitude){
+        this.currentCoordinate.longitude = resp.coords.longitude;
+      }else{
+        this.currentCoordinate.longitude = '0';
+      }
+    });
   }
 
   setToasterMessage(message){

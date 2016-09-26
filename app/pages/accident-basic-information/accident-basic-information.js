@@ -15,6 +15,7 @@ var user_1 = require('../../providers/user/user');
 var http_client_1 = require('../../providers/http-client/http-client');
 var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
 var accident_vehicle_1 = require('../accident-vehicle/accident-vehicle');
+var event_provider_1 = require("../../providers/event-provider/event-provider");
 /*
   Generated class for the AccidentBasicInformationPage page.
 
@@ -22,8 +23,9 @@ var accident_vehicle_1 = require('../accident-vehicle/accident-vehicle');
   Ionic pages and navigation.
 */
 var AccidentBasicInformationPage = (function () {
-    function AccidentBasicInformationPage(navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
+    function AccidentBasicInformationPage(eventProvider, navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
         var _this = this;
+        this.eventProvider = eventProvider;
         this.navCtrl = navCtrl;
         this.toastCtrl = toastCtrl;
         this.sqlLite = sqlLite;
@@ -60,22 +62,58 @@ var AccidentBasicInformationPage = (function () {
         });
     };
     AccidentBasicInformationPage.prototype.setProgramMetadata = function (programs) {
-        var _this = this;
         if (programs.length > 0) {
             this.program = programs[0];
         }
-        ionic_native_1.Geolocation.getCurrentPosition().then(function (resp) {
-            _this.currentCoordinate = resp.coords;
-            //alert(JSON.stringify(resp));
-        });
+        this.setGeoLocation();
         this.loadingData = false;
     };
-    AccidentBasicInformationPage.prototype.goToAccidentVehicle = function () {
-        alert('dataValues :: ' + JSON.stringify(this.dataValues));
-        this.navCtrl.push(accident_vehicle_1.AccidentVehiclePage);
+    AccidentBasicInformationPage.prototype.prepareToSaveBasicInformation = function () {
+        var _this = this;
+        //@todo checking for required fields
+        this.loadingData = true;
+        this.loadingMessages = [];
+        this.setLoadingMessages('Preparing accident basic information');
+        this.eventProvider.getFormattedDataValuesToEventObject(this.dataValues, this.program, this.currentUser, this.currentCoordinate).then(function (event) {
+            _this.setLoadingMessages('Saving accident basic information');
+            _this.eventProvider.saveEvent(event, _this.currentUser).then(function (result) {
+                _this.goToAccidentVehicle(result);
+            }, function (error) {
+                _this.loadingData = false;
+                _this.setToasterMessage('Fail to save accident basic information');
+            });
+        }, function (error) {
+            _this.loadingData = false;
+            _this.setToasterMessage('Fail to prepare accident basic information');
+        });
+    };
+    AccidentBasicInformationPage.prototype.goToAccidentVehicle = function (result) {
+        var eventId = result.response.importSummaries[0].reference;
+        var parameter = {
+            accidentId: eventId
+        };
+        this.loadingData = false;
+        this.navCtrl.push(accident_vehicle_1.AccidentVehiclePage, parameter);
     };
     AccidentBasicInformationPage.prototype.setLoadingMessages = function (message) {
         this.loadingMessages.push(message);
+    };
+    AccidentBasicInformationPage.prototype.setGeoLocation = function () {
+        var _this = this;
+        ionic_native_1.Geolocation.getCurrentPosition().then(function (resp) {
+            if (resp.coords.latitude) {
+                _this.currentCoordinate.latitude = resp.coords.latitude;
+            }
+            else {
+                _this.currentCoordinate.latitude = '0';
+            }
+            if (resp.coords.longitude) {
+                _this.currentCoordinate.longitude = resp.coords.longitude;
+            }
+            else {
+                _this.currentCoordinate.longitude = '0';
+            }
+        });
     };
     AccidentBasicInformationPage.prototype.setToasterMessage = function (message) {
         var toast = this.toastCtrl.create({
@@ -94,9 +132,9 @@ var AccidentBasicInformationPage = (function () {
     AccidentBasicInformationPage = __decorate([
         core_1.Component({
             templateUrl: 'build/pages/accident-basic-information/accident-basic-information.html',
-            providers: [app_1.App, http_client_1.HttpClient, user_1.User, sql_lite_1.SqlLite]
+            providers: [app_1.App, http_client_1.HttpClient, user_1.User, sql_lite_1.SqlLite, event_provider_1.EventProvider]
         }), 
-        __metadata('design:paramtypes', [ionic_angular_1.NavController, ionic_angular_1.ToastController, sql_lite_1.SqlLite, user_1.User, http_client_1.HttpClient, app_1.App])
+        __metadata('design:paramtypes', [event_provider_1.EventProvider, ionic_angular_1.NavController, ionic_angular_1.ToastController, sql_lite_1.SqlLite, user_1.User, http_client_1.HttpClient, app_1.App])
     ], AccidentBasicInformationPage);
     return AccidentBasicInformationPage;
 })();

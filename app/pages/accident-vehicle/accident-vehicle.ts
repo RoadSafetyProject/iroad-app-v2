@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController,ToastController } from 'ionic-angular';
+import { NavController,ToastController,NavParams } from 'ionic-angular';
 
 import { Geolocation } from 'ionic-native';
 
@@ -29,10 +29,13 @@ export class AccidentVehiclePage {
   private currentCoordinate : any = {};
   private loadingData : boolean = false;
   private loadingMessages : any = [];
+  private accidentId :string;
 
-  constructor(private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
+  constructor(private params: NavParams,private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
     this.user.getCurrentUser().then(currentUser=>{
       this.currentUser = JSON.parse(currentUser);
+      this.accidentId = this.params.get('accidentId');
+      alert(this.accidentId);
       this.loadingProgram();
     });
   }
@@ -58,12 +61,13 @@ export class AccidentVehiclePage {
   setProgramMetadata(programs){
     if(programs.length > 0){
       this.program = programs[0];
+      this.setGeoLocation();
+      this.loadingData = false;
+    }else{
+      this.loadingData = false;
     }
-    Geolocation.getCurrentPosition().then((resp) => {
-      this.currentCoordinate = resp.coords;
-      //alert(JSON.stringify(resp));
-    });
-    this.loadingData = false;
+
+
   }
 
 
@@ -74,6 +78,21 @@ export class AccidentVehiclePage {
 
   setLoadingMessages(message){
     this.loadingMessages.push(message);
+  }
+
+  setGeoLocation(){
+    Geolocation.getCurrentPosition().then((resp) => {
+      if(resp.coords.latitude){
+        this.currentCoordinate.latitude = resp.coords.latitude;
+      }else{
+        this.currentCoordinate.latitude = '0';
+      }
+      if(resp.coords.longitude){
+        this.currentCoordinate.longitude = resp.coords.longitude;
+      }else{
+        this.currentCoordinate.longitude = '0';
+      }
+    });
   }
 
   setToasterMessage(message){
