@@ -27,6 +27,7 @@ export class AccidentVehiclePage {
   private program : any = {};
   //private dataValues : any = {};
   private dataValuesArray : any = [];
+  private data :any = [];
   private currentCoordinate : any = {};
   private loadingData : boolean = false;
   private loadingMessages : any = [];
@@ -78,8 +79,6 @@ export class AccidentVehiclePage {
     }
   }
 
-
-
   setAndCheckingForRelationMetaData(){
     this.program.programStages[0].programStageDataElements.forEach(programStageDataElement=>{
       let dataElementName = programStageDataElement.dataElement.name;
@@ -125,10 +124,13 @@ export class AccidentVehiclePage {
     this.currentVehicle = "" + vehicleIndex;
   }
 
-
   goToAccidentWitness(){
     alert('dataValuesArray :: ' + JSON.stringify(this.dataValuesArray));
-    //this.navCtrl.push(AccidentWitnessPage);
+    let parameter = {
+      accidentId : this.accidentId
+    };
+    alert(parameter);
+    this.navCtrl.push(AccidentWitnessPage,parameter);
   }
 
   setLoadingMessages(message){

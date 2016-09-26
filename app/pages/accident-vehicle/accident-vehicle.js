@@ -14,6 +14,7 @@ var app_1 = require('../../providers/app/app');
 var user_1 = require('../../providers/user/user');
 var http_client_1 = require('../../providers/http-client/http-client');
 var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
+var accident_witness_1 = require('../accident-witness/accident-witness');
 /*
   Generated class for the AccidentVehiclePage page.
 
@@ -35,6 +36,7 @@ var AccidentVehiclePage = (function () {
         this.program = {};
         //private dataValues : any = {};
         this.dataValuesArray = [];
+        this.data = [];
         this.currentCoordinate = {};
         this.loadingData = false;
         this.loadingMessages = [];
@@ -124,7 +126,11 @@ var AccidentVehiclePage = (function () {
     };
     AccidentVehiclePage.prototype.goToAccidentWitness = function () {
         alert('dataValuesArray :: ' + JSON.stringify(this.dataValuesArray));
-        //this.navCtrl.push(AccidentWitnessPage);
+        var parameter = {
+            accidentId: this.accidentId
+        };
+        alert(parameter);
+        this.navCtrl.push(accident_witness_1.AccidentWitnessPage, parameter);
     };
     AccidentVehiclePage.prototype.setLoadingMessages = function (message) {
         this.loadingMessages.push(message);

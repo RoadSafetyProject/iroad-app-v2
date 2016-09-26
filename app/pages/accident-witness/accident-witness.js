@@ -14,7 +14,6 @@ var app_1 = require('../../providers/app/app');
 var user_1 = require('../../providers/user/user');
 var http_client_1 = require('../../providers/http-client/http-client');
 var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
-var home_1 = require('../home/home');
 /*
   Generated class for the AccidentWitnessPage page.
 
@@ -22,8 +21,9 @@ var home_1 = require('../home/home');
   Ionic pages and navigation.
 */
 var AccidentWitnessPage = (function () {
-    function AccidentWitnessPage(navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
+    function AccidentWitnessPage(params, navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
         var _this = this;
+        this.params = params;
         this.navCtrl = navCtrl;
         this.toastCtrl = toastCtrl;
         this.sqlLite = sqlLite;
@@ -33,12 +33,19 @@ var AccidentWitnessPage = (function () {
         this.programName = "Accident Witness";
         this.currentUser = {};
         this.program = {};
-        this.dataValues = {};
+        //private dataValues : any = {};
+        this.dataValuesArray = [];
         this.currentCoordinate = {};
         this.loadingData = false;
         this.loadingMessages = [];
+        this.currentWitness = "0";
+        this.relationDataElements = {};
+        this.programNameRelationDataElementMapping = {};
+        this.relationDataElementPrefix = "Program_";
+        this.programAccident = 'Accident';
         this.user.getCurrentUser().then(function (currentUser) {
             _this.currentUser = JSON.parse(currentUser);
+            _this.accidentId = _this.params.get('accidentId');
             _this.loadingProgram();
         });
     }
@@ -60,19 +67,66 @@ var AccidentWitnessPage = (function () {
         });
     };
     AccidentWitnessPage.prototype.setProgramMetadata = function (programs) {
-        var _this = this;
         if (programs.length > 0) {
             this.program = programs[0];
+            this.setGeoLocation();
+            this.setAndCheckingForRelationMetaData();
         }
-        ionic_native_1.Geolocation.getCurrentPosition().then(function (resp) {
-            _this.currentCoordinate = resp.coords;
-            //alert(JSON.stringify(resp));
+        else {
+            this.loadingData = false;
+        }
+    };
+    AccidentWitnessPage.prototype.setAndCheckingForRelationMetaData = function () {
+        var _this = this;
+        this.program.programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
+            var dataElementName = programStageDataElement.dataElement.name;
+            if (dataElementName.toLowerCase() == (_this.relationDataElementPrefix + _this.programAccident.replace(' ', '_')).toLowerCase()) {
+                _this.relationDataElements[programStageDataElement.dataElement.id] = {
+                    name: programStageDataElement.dataElement.name
+                };
+                _this.programAccidentId = programStageDataElement.dataElement.id;
+            }
         });
+        this.addWitness();
         this.loadingData = false;
     };
+    AccidentWitnessPage.prototype.addWitness = function () {
+        var dataValue = {};
+        dataValue[this.programAccidentId] = this.accidentId;
+        this.dataValuesArray.push(dataValue);
+    };
+    AccidentWitnessPage.prototype.removeWitness = function (witnessIndex) {
+        this.dataValuesArray.splice(witnessIndex, 1);
+        if (this.dataValuesArray.length == 1) {
+            this.currentWitness = "0";
+        }
+        else if (parseInt(this.currentWitness) == this.dataValuesArray.length) {
+            this.currentWitness = "" + (this.dataValuesArray.length - 1);
+        }
+    };
+    AccidentWitnessPage.prototype.showSegment = function (witnessIndex) {
+        this.currentWitness = "" + witnessIndex;
+    };
+    AccidentWitnessPage.prototype.setGeoLocation = function () {
+        var _this = this;
+        ionic_native_1.Geolocation.getCurrentPosition().then(function (resp) {
+            if (resp.coords.latitude) {
+                _this.currentCoordinate.latitude = resp.coords.latitude;
+            }
+            else {
+                _this.currentCoordinate.latitude = '0';
+            }
+            if (resp.coords.longitude) {
+                _this.currentCoordinate.longitude = resp.coords.longitude;
+            }
+            else {
+                _this.currentCoordinate.longitude = '0';
+            }
+        });
+    };
     AccidentWitnessPage.prototype.goToHome = function () {
-        alert('dataValues :: ' + JSON.stringify(this.dataValues));
-        this.navCtrl.setRoot(home_1.HomePage);
+        alert('dataValues :: ' + JSON.stringify(this.dataValuesArray));
+        //this.navCtrl.setRoot(HomePage);
     };
     AccidentWitnessPage.prototype.setLoadingMessages = function (message) {
         this.loadingMessages.push(message);
@@ -96,7 +150,7 @@ var AccidentWitnessPage = (function () {
             templateUrl: 'build/pages/accident-witness/accident-witness.html',
             providers: [app_1.App, http_client_1.HttpClient, user_1.User, sql_lite_1.SqlLite]
         }), 
-        __metadata('design:paramtypes', [ionic_angular_1.NavController, ionic_angular_1.ToastController, sql_lite_1.SqlLite, user_1.User, http_client_1.HttpClient, app_1.App])
+        __metadata('design:paramtypes', [ionic_angular_1.NavParams, ionic_angular_1.NavController, ionic_angular_1.ToastController, sql_lite_1.SqlLite, user_1.User, http_client_1.HttpClient, app_1.App])
     ], AccidentWitnessPage);
     return AccidentWitnessPage;
 })();

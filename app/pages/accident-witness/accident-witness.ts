@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController,ToastController } from 'ionic-angular';
+import { NavController,ToastController ,NavParams} from 'ionic-angular';
 
 import { Geolocation } from 'ionic-native';
 
@@ -25,14 +25,24 @@ export class AccidentWitnessPage {
   private programName: string = "Accident Witness";
   private currentUser :any = {};
   private program : any = {};
-  private dataValues : any = {};
+  //private dataValues : any = {};
+  private dataValuesArray : any = [];
   private currentCoordinate : any = {};
   private loadingData : boolean = false;
   private loadingMessages : any = [];
 
-  constructor(private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
+  private accidentId :string;
+  private currentWitness : string = "0";
+  private relationDataElements : any = {};
+  private programNameRelationDataElementMapping :any = {};
+  private relationDataElementPrefix : string = "Program_";
+  private programAccident : string = 'Accident';
+  private programAccidentId :string ;
+
+  constructor(private params: NavParams,private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
     this.user.getCurrentUser().then(currentUser=>{
       this.currentUser = JSON.parse(currentUser);
+      this.accidentId = this.params.get('accidentId');
       this.loadingProgram();
     });
   }
@@ -58,18 +68,64 @@ export class AccidentWitnessPage {
   setProgramMetadata(programs){
     if(programs.length > 0){
       this.program = programs[0];
+      this.setGeoLocation();
+      this.setAndCheckingForRelationMetaData();
+    }else{
+      this.loadingData = false;
     }
-    Geolocation.getCurrentPosition().then((resp) => {
-      this.currentCoordinate = resp.coords;
-      //alert(JSON.stringify(resp));
+  }
+
+  setAndCheckingForRelationMetaData(){
+    this.program.programStages[0].programStageDataElements.forEach(programStageDataElement=>{
+      let dataElementName = programStageDataElement.dataElement.name;
+      if(dataElementName.toLowerCase() == (this.relationDataElementPrefix + this.programAccident.replace(' ','_')).toLowerCase()){
+        this.relationDataElements[programStageDataElement.dataElement.id] = {
+          name : programStageDataElement.dataElement.name
+        };
+        this.programAccidentId = programStageDataElement.dataElement.id;
+      }
     });
+    this.addWitness();
     this.loadingData = false;
   }
 
+  addWitness(){
+    let dataValue = {};
+    dataValue[this.programAccidentId] = this.accidentId;
+    this.dataValuesArray.push(dataValue)
+  }
+
+  removeWitness(witnessIndex){
+    this.dataValuesArray.splice(witnessIndex, 1);
+    if(this.dataValuesArray.length == 1){
+      this.currentWitness = "0";
+    }else if(parseInt(this.currentWitness) == this.dataValuesArray.length){
+      this.currentWitness = "" + (this.dataValuesArray.length - 1);
+    }
+  }
+
+  showSegment(witnessIndex){
+    this.currentWitness = "" + witnessIndex;
+  }
+
+  setGeoLocation(){
+    Geolocation.getCurrentPosition().then((resp) => {
+      if(resp.coords.latitude){
+        this.currentCoordinate.latitude = resp.coords.latitude;
+      }else{
+        this.currentCoordinate.latitude = '0';
+      }
+      if(resp.coords.longitude){
+        this.currentCoordinate.longitude = resp.coords.longitude;
+      }else{
+        this.currentCoordinate.longitude = '0';
+      }
+    });
+  }
 
   goToHome(){
-    alert('dataValues :: ' + JSON.stringify(this.dataValues));
-    this.navCtrl.setRoot(HomePage);
+    alert('dataValues :: ' + JSON.stringify(this.dataValuesArray));
+    //this.navCtrl.setRoot(HomePage);
   }
 
   setLoadingMessages(message){
