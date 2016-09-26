@@ -25,7 +25,7 @@ export class AccidentVehiclePage {
   private programName: string = "Accident Vehicle";
   private currentUser :any = {};
   private program : any = {};
-  private dataValues : any = {};
+  //private dataValues : any = {};
   private dataValuesArray : any = [];
   private currentCoordinate : any = {};
   private loadingData : boolean = false;
@@ -113,7 +113,12 @@ export class AccidentVehiclePage {
   }
 
   removeVehicle(vehicleIndex){
-    alert(vehicleIndex);
+    this.dataValuesArray.splice(vehicleIndex, 1);
+    if(this.dataValuesArray.length == 1){
+      this.currentVehicle = "0";
+    }else if(parseInt(this.currentVehicle) == this.dataValuesArray.length){
+      this.currentVehicle = "" + (this.dataValuesArray.length - 1);
+    }
   }
 
   showSegment(vehicleIndex){
@@ -123,7 +128,6 @@ export class AccidentVehiclePage {
 
   goToAccidentWitness(){
     alert('dataValuesArray :: ' + JSON.stringify(this.dataValuesArray));
-    alert('dataValues :: ' + JSON.stringify(this.dataValues));
     //this.navCtrl.push(AccidentWitnessPage);
   }
 

@@ -33,7 +33,7 @@ var AccidentVehiclePage = (function () {
         this.programName = "Accident Vehicle";
         this.currentUser = {};
         this.program = {};
-        this.dataValues = {};
+        //private dataValues : any = {};
         this.dataValuesArray = [];
         this.currentCoordinate = {};
         this.loadingData = false;
@@ -111,14 +111,19 @@ var AccidentVehiclePage = (function () {
         this.dataValuesArray.push(dataValue);
     };
     AccidentVehiclePage.prototype.removeVehicle = function (vehicleIndex) {
-        alert(vehicleIndex);
+        this.dataValuesArray.splice(vehicleIndex, 1);
+        if (this.dataValuesArray.length == 1) {
+            this.currentVehicle = "0";
+        }
+        else if (parseInt(this.currentVehicle) == this.dataValuesArray.length) {
+            this.currentVehicle = "" + (this.dataValuesArray.length - 1);
+        }
     };
     AccidentVehiclePage.prototype.showSegment = function (vehicleIndex) {
         this.currentVehicle = "" + vehicleIndex;
     };
     AccidentVehiclePage.prototype.goToAccidentWitness = function () {
         alert('dataValuesArray :: ' + JSON.stringify(this.dataValuesArray));
-        alert('dataValues :: ' + JSON.stringify(this.dataValues));
         //this.navCtrl.push(AccidentWitnessPage);
     };
     AccidentVehiclePage.prototype.setLoadingMessages = function (message) {
