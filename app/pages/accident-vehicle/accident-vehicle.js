@@ -14,7 +14,6 @@ var app_1 = require('../../providers/app/app');
 var user_1 = require('../../providers/user/user');
 var http_client_1 = require('../../providers/http-client/http-client');
 var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
-var accident_witness_1 = require('../accident-witness/accident-witness');
 /*
   Generated class for the AccidentVehiclePage page.
 
@@ -35,13 +34,20 @@ var AccidentVehiclePage = (function () {
         this.currentUser = {};
         this.program = {};
         this.dataValues = {};
+        this.dataValuesArray = [];
         this.currentCoordinate = {};
         this.loadingData = false;
         this.loadingMessages = [];
+        this.currentVehicle = "0";
+        this.relationDataElements = {};
+        this.programNameRelationDataElementMapping = {};
+        this.relationDataElementPrefix = "Program_";
+        this.programDriver = 'Driver';
+        this.programVehicle = 'Vehicle';
+        this.programAccident = 'Accident';
         this.user.getCurrentUser().then(function (currentUser) {
             _this.currentUser = JSON.parse(currentUser);
             _this.accidentId = _this.params.get('accidentId');
-            alert(_this.accidentId);
             _this.loadingProgram();
         });
     }
@@ -49,12 +55,13 @@ var AccidentVehiclePage = (function () {
         var _this = this;
         this.loadingData = true;
         this.loadingMessages = [];
-        this.setLoadingMessages('Loading accident basic information metadata');
         var resource = 'programs';
         var attribute = 'name';
         var attributeValue = [];
         attributeValue.push(this.programName);
+        this.setLoadingMessages('Loading accident vehicle metadata');
         this.sqlLite.getDataFromTableByAttributes(resource, attribute, attributeValue, this.currentUser.currentDatabase).then(function (programs) {
+            _this.setLoadingMessages('Setting accident vehicle metadata');
             _this.setProgramMetadata(programs);
         }, function (error) {
             _this.loadingData = false;
@@ -66,15 +73,53 @@ var AccidentVehiclePage = (function () {
         if (programs.length > 0) {
             this.program = programs[0];
             this.setGeoLocation();
-            this.loadingData = false;
+            this.setAndCheckingForRelationMetaData();
         }
         else {
             this.loadingData = false;
         }
     };
+    AccidentVehiclePage.prototype.setAndCheckingForRelationMetaData = function () {
+        var _this = this;
+        this.program.programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
+            var dataElementName = programStageDataElement.dataElement.name;
+            if (dataElementName.toLowerCase() == (_this.relationDataElementPrefix + _this.programDriver.replace(' ', '_')).toLowerCase()) {
+                _this.relationDataElements[programStageDataElement.dataElement.id] = {
+                    name: programStageDataElement.dataElement.name
+                };
+                _this.programNameRelationDataElementMapping[_this.programDriver] = programStageDataElement.dataElement.id;
+            }
+            else if (dataElementName.toLowerCase() == (_this.relationDataElementPrefix + _this.programVehicle.replace(' ', '_')).toLowerCase()) {
+                _this.relationDataElements[programStageDataElement.dataElement.id] = {
+                    name: programStageDataElement.dataElement.name
+                };
+                _this.programNameRelationDataElementMapping[_this.programVehicle] = programStageDataElement.dataElement.id;
+            }
+            else if (dataElementName.toLowerCase() == (_this.relationDataElementPrefix + _this.programAccident.replace(' ', '_')).toLowerCase()) {
+                _this.relationDataElements[programStageDataElement.dataElement.id] = {
+                    name: programStageDataElement.dataElement.name
+                };
+                _this.programAccidentId = programStageDataElement.dataElement.id;
+            }
+        });
+        this.addVehicle();
+        this.loadingData = false;
+    };
+    AccidentVehiclePage.prototype.addVehicle = function () {
+        var dataValue = {};
+        dataValue[this.programAccidentId] = this.accidentId;
+        this.dataValuesArray.push(dataValue);
+    };
+    AccidentVehiclePage.prototype.removeVehicle = function (vehicleIndex) {
+        alert(vehicleIndex);
+    };
+    AccidentVehiclePage.prototype.showSegment = function (vehicleIndex) {
+        this.currentVehicle = "" + vehicleIndex;
+    };
     AccidentVehiclePage.prototype.goToAccidentWitness = function () {
+        alert('dataValuesArray :: ' + JSON.stringify(this.dataValuesArray));
         alert('dataValues :: ' + JSON.stringify(this.dataValues));
-        this.navCtrl.push(accident_witness_1.AccidentWitnessPage);
+        //this.navCtrl.push(AccidentWitnessPage);
     };
     AccidentVehiclePage.prototype.setLoadingMessages = function (message) {
         this.loadingMessages.push(message);

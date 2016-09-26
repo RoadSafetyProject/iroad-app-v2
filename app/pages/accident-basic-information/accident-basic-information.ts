@@ -72,12 +72,19 @@ export class AccidentBasicInformationPage {
     this.setLoadingMessages('Preparing accident basic information');
     this.eventProvider.getFormattedDataValuesToEventObject(this.dataValues,this.program,this.currentUser,this.currentCoordinate).then(event=>{
       this.setLoadingMessages('Saving accident basic information');
-      this.eventProvider.saveEvent(event,this.currentUser).then(result=>{
-        this.goToAccidentVehicle(result);
-      },error=>{
-        this.loadingData = false;
-        this.setToasterMessage('Fail to save accident basic information');
-      });
+
+      let parameter = {
+        accidentId : 'eventId'
+      };
+      this.loadingData = false;
+      this.navCtrl.push(AccidentVehiclePage,parameter);
+
+      //this.eventProvider.saveEvent(event,this.currentUser).then(result=>{
+      //  this.goToAccidentVehicle(result);
+      //},error=>{
+      //  this.loadingData = false;
+      //  this.setToasterMessage('Fail to save accident basic information');
+      //});
     },error=>{
       this.loadingData = false;
       this.setToasterMessage('Fail to prepare accident basic information');

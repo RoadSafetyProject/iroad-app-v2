@@ -26,16 +26,25 @@ export class AccidentVehiclePage {
   private currentUser :any = {};
   private program : any = {};
   private dataValues : any = {};
+  private dataValuesArray : any = [];
   private currentCoordinate : any = {};
   private loadingData : boolean = false;
   private loadingMessages : any = [];
+
   private accidentId :string;
+  private currentVehicle :string = "0";
+  private relationDataElements : any = {};
+  private programNameRelationDataElementMapping :any = {};
+  private relationDataElementPrefix : string = "Program_";
+  private programAccidentId :string ;
+  private programDriver :string = 'Driver';
+  private programVehicle : string = 'Vehicle';
+  private programAccident : string = 'Accident';
 
   constructor(private params: NavParams,private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
     this.user.getCurrentUser().then(currentUser=>{
       this.currentUser = JSON.parse(currentUser);
       this.accidentId = this.params.get('accidentId');
-      alert(this.accidentId);
       this.loadingProgram();
     });
   }
@@ -43,13 +52,14 @@ export class AccidentVehiclePage {
   loadingProgram(){
     this.loadingData = true;
     this.loadingMessages = [];
-    this.setLoadingMessages('Loading accident basic information metadata');
     let resource = 'programs';
     let attribute = 'name';
     let attributeValue =[];
     attributeValue.push(this.programName);
 
+    this.setLoadingMessages('Loading accident vehicle metadata');
     this.sqlLite.getDataFromTableByAttributes(resource,attribute,attributeValue,this.currentUser.currentDatabase).then((programs)=>{
+      this.setLoadingMessages('Setting accident vehicle metadata');
       this.setProgramMetadata(programs);
     },error=>{
       this.loadingData = false;
@@ -62,18 +72,59 @@ export class AccidentVehiclePage {
     if(programs.length > 0){
       this.program = programs[0];
       this.setGeoLocation();
-      this.loadingData = false;
+      this.setAndCheckingForRelationMetaData();
     }else{
       this.loadingData = false;
     }
+  }
 
 
+
+  setAndCheckingForRelationMetaData(){
+    this.program.programStages[0].programStageDataElements.forEach(programStageDataElement=>{
+      let dataElementName = programStageDataElement.dataElement.name;
+      if(dataElementName.toLowerCase() == (this.relationDataElementPrefix + this.programDriver.replace(' ','_')).toLowerCase()){
+        this.relationDataElements[programStageDataElement.dataElement.id] = {
+          name : programStageDataElement.dataElement.name
+        };
+        this.programNameRelationDataElementMapping[this.programDriver] = programStageDataElement.dataElement.id;
+
+      }else if(dataElementName.toLowerCase() == (this.relationDataElementPrefix + this.programVehicle.replace(' ','_')).toLowerCase()){
+        this.relationDataElements[programStageDataElement.dataElement.id] = {
+          name : programStageDataElement.dataElement.name
+        };
+        this.programNameRelationDataElementMapping[this.programVehicle] = programStageDataElement.dataElement.id;
+
+      }else if(dataElementName.toLowerCase() == (this.relationDataElementPrefix + this.programAccident.replace(' ','_')).toLowerCase()){
+        this.relationDataElements[programStageDataElement.dataElement.id] = {
+          name : programStageDataElement.dataElement.name
+        };
+        this.programAccidentId = programStageDataElement.dataElement.id;
+      }
+    });
+    this.addVehicle();
+    this.loadingData = false;
+  }
+
+  addVehicle(){
+    let dataValue = {};
+    dataValue[this.programAccidentId] = this.accidentId;
+    this.dataValuesArray.push(dataValue)
+  }
+
+  removeVehicle(vehicleIndex){
+    alert(vehicleIndex);
+  }
+
+  showSegment(vehicleIndex){
+    this.currentVehicle = "" + vehicleIndex;
   }
 
 
   goToAccidentWitness(){
+    alert('dataValuesArray :: ' + JSON.stringify(this.dataValuesArray));
     alert('dataValues :: ' + JSON.stringify(this.dataValues));
-    this.navCtrl.push(AccidentWitnessPage);
+    //this.navCtrl.push(AccidentWitnessPage);
   }
 
   setLoadingMessages(message){

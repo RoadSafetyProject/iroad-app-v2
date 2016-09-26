@@ -76,12 +76,17 @@ var AccidentBasicInformationPage = (function () {
         this.setLoadingMessages('Preparing accident basic information');
         this.eventProvider.getFormattedDataValuesToEventObject(this.dataValues, this.program, this.currentUser, this.currentCoordinate).then(function (event) {
             _this.setLoadingMessages('Saving accident basic information');
-            _this.eventProvider.saveEvent(event, _this.currentUser).then(function (result) {
-                _this.goToAccidentVehicle(result);
-            }, function (error) {
-                _this.loadingData = false;
-                _this.setToasterMessage('Fail to save accident basic information');
-            });
+            var parameter = {
+                accidentId: 'eventId'
+            };
+            _this.loadingData = false;
+            _this.navCtrl.push(accident_vehicle_1.AccidentVehiclePage, parameter);
+            //this.eventProvider.saveEvent(event,this.currentUser).then(result=>{
+            //  this.goToAccidentVehicle(result);
+            //},error=>{
+            //  this.loadingData = false;
+            //  this.setToasterMessage('Fail to save accident basic information');
+            //});
         }, function (error) {
             _this.loadingData = false;
             _this.setToasterMessage('Fail to prepare accident basic information');

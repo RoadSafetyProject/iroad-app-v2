@@ -27,11 +27,26 @@
   </div>
 
   <div *ngIf="!loadingData">
+
+    <ion-segment [(ngModel)]="currentVehicle">
+      <ion-segment-button *ngFor="let dataValues of dataValuesArray;let vehicleIndex = index" (click)="showSegment(vehicleIndex)" value="{{ vehicleIndex }}">
+        Vehicle {{ vehicleIndex + 1 }}
+      </ion-segment-button>
+    </ion-segment>
+
+    <div *ngFor="let dataValues of dataValuesArray;let vehicleIndex =index ">
+      <div *ngIf="currentVehicle == vehicleIndex">
+        {{ dataValues |json}}<br>
+        {{ vehicleIndex + 1 }}
+      </div>
+
+    </div>
+
     <ion-list>
       <div *ngIf="program.programStages">
         <div *ngIf="program.programStages.length > 0">
           <div *ngFor="let programStageDataElement of program.programStages[0].programStageDataElements">
-            <div *ngIf="programStageDataElement.displayInReports">
+            <div *ngIf="programStageDataElement.displayInReports && !relationDataElements[programStageDataElement.dataElement.id]">
               <div *ngIf="!programStageDataElement.dataElement.optionSetValue">
 
                 <ion-item *ngIf="programStageDataElement.dataElement.valueType =='BOOLEAN' ">
@@ -93,7 +108,20 @@
 
     </ion-list>
 
-    <button full (click)="goToAccidentWitness()">Accident Witness</button>
+
+    {{ dataValuesArray|json }}
+    <ion-grid>
+      <ion-row>
+        <ion-col width-50>
+          <button full (click)="addVehicle()">Add</button>
+        </ion-col>
+        <ion-col width-50>
+          <button full (click)="goToAccidentWitness()">Next
+          </button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
   </div>
 
 </ion-content>
