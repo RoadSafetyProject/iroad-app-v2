@@ -31,7 +31,6 @@ export class AccidentWitnessPage {
   private currentCoordinate : any = {};
   private loadingData : boolean = false;
   private loadingMessages : any = [];
-
   private accidentId :string;
   private currentWitness : string = "0";
   private relationDataElements : any = {};
@@ -137,6 +136,7 @@ export class AccidentWitnessPage {
         dataValuesArrayList.push(dataValues);
       }
     });
+
     this.eventProvider.getFormattedDataValuesArrayToEventObjectList(dataValuesArrayList,this.program,this.currentUser).then(eventList=>{
       this.setLoadingMessages('Saving accident witness information');
       this.eventProvider.saveEventList(eventList,this.currentUser).then(result=>{
