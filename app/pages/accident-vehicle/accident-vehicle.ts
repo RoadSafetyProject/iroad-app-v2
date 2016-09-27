@@ -9,6 +9,7 @@ import {HttpClient} from '../../providers/http-client/http-client';
 import {SqlLite} from "../../providers/sql-lite/sql-lite";
 
 import {AccidentWitnessPage} from '../accident-witness/accident-witness'
+import {EventProvider} from "../../providers/event-provider/event-provider";
 
 /*
   Generated class for the AccidentVehiclePage page.
@@ -18,7 +19,7 @@ import {AccidentWitnessPage} from '../accident-witness/accident-witness'
 */
 @Component({
   templateUrl: 'build/pages/accident-vehicle/accident-vehicle.html',
-  providers: [App,HttpClient,User,SqlLite]
+  providers: [App,HttpClient,User,SqlLite,EventProvider]
 })
 export class AccidentVehiclePage {
 
@@ -42,7 +43,7 @@ export class AccidentVehiclePage {
   private programVehicle : string = 'Vehicle';
   private programAccident : string = 'Accident';
 
-  constructor(private params: NavParams,private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
+  constructor(private eventProvider : EventProvider,private params: NavParams,private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
     this.user.getCurrentUser().then(currentUser=>{
       this.currentUser = JSON.parse(currentUser);
       this.accidentId = this.params.get('accidentId');
@@ -117,6 +118,8 @@ export class AccidentVehiclePage {
       this.currentVehicle = "0";
     }else if(parseInt(this.currentVehicle) == this.dataValuesArray.length){
       this.currentVehicle = "" + (this.dataValuesArray.length - 1);
+    }else{
+      this.currentVehicle = "" + (vehicleIndex - 1);
     }
   }
 
@@ -124,12 +127,25 @@ export class AccidentVehiclePage {
     this.currentVehicle = "" + vehicleIndex;
   }
 
+
+  prepareToSaveAccidentVehicle(){
+    this.eventProvider.getFormattedDataValuesArrayToEventObjectList(this.dataValuesArray,this.program,this.currentUser).then(eventList=>{
+      alert(JSON.stringify(eventList));
+
+      let parameter = {
+        accidentId : this.accidentId
+      };
+      this.navCtrl.push(AccidentWitnessPage,parameter);
+
+    },error=>{});
+  }
+
+
   goToAccidentWitness(){
     alert('dataValuesArray :: ' + JSON.stringify(this.dataValuesArray));
     let parameter = {
       accidentId : this.accidentId
     };
-    alert(parameter);
     this.navCtrl.push(AccidentWitnessPage,parameter);
   }
 

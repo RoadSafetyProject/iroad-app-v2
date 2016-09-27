@@ -14,6 +14,8 @@ var app_1 = require('../../providers/app/app');
 var user_1 = require('../../providers/user/user');
 var http_client_1 = require('../../providers/http-client/http-client');
 var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
+var home_1 = require('../home/home');
+var event_provider_1 = require("../../providers/event-provider/event-provider");
 /*
   Generated class for the AccidentWitnessPage page.
 
@@ -21,8 +23,9 @@ var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
   Ionic pages and navigation.
 */
 var AccidentWitnessPage = (function () {
-    function AccidentWitnessPage(params, navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
+    function AccidentWitnessPage(eventProvider, params, navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
         var _this = this;
+        this.eventProvider = eventProvider;
         this.params = params;
         this.navCtrl = navCtrl;
         this.toastCtrl = toastCtrl;
@@ -33,14 +36,12 @@ var AccidentWitnessPage = (function () {
         this.programName = "Accident Witness";
         this.currentUser = {};
         this.program = {};
-        //private dataValues : any = {};
         this.dataValuesArray = [];
         this.currentCoordinate = {};
         this.loadingData = false;
         this.loadingMessages = [];
         this.currentWitness = "0";
         this.relationDataElements = {};
-        this.programNameRelationDataElementMapping = {};
         this.relationDataElementPrefix = "Program_";
         this.programAccident = 'Accident';
         this.user.getCurrentUser().then(function (currentUser) {
@@ -53,12 +54,13 @@ var AccidentWitnessPage = (function () {
         var _this = this;
         this.loadingData = true;
         this.loadingMessages = [];
-        this.setLoadingMessages('Loading accident basic information metadata');
+        this.setLoadingMessages('Loading accident witness metadata');
         var resource = 'programs';
         var attribute = 'name';
         var attributeValue = [];
         attributeValue.push(this.programName);
         this.sqlLite.getDataFromTableByAttributes(resource, attribute, attributeValue, this.currentUser.currentDatabase).then(function (programs) {
+            _this.setLoadingMessages('Setting accident witness metadata');
             _this.setProgramMetadata(programs);
         }, function (error) {
             _this.loadingData = false;
@@ -103,6 +105,9 @@ var AccidentWitnessPage = (function () {
         else if (parseInt(this.currentWitness) == this.dataValuesArray.length) {
             this.currentWitness = "" + (this.dataValuesArray.length - 1);
         }
+        else {
+            this.currentWitness = "" + (witnessIndex - 1);
+        }
     };
     AccidentWitnessPage.prototype.showSegment = function (witnessIndex) {
         this.currentWitness = "" + witnessIndex;
@@ -124,9 +129,31 @@ var AccidentWitnessPage = (function () {
             }
         });
     };
-    AccidentWitnessPage.prototype.goToHome = function () {
-        alert('dataValues :: ' + JSON.stringify(this.dataValuesArray));
-        //this.navCtrl.setRoot(HomePage);
+    //@todo checking for required fields
+    AccidentWitnessPage.prototype.prepareToSaveAccidentWitness = function () {
+        var _this = this;
+        this.loadingData = true;
+        this.loadingMessages = [];
+        this.setLoadingMessages('Preparing to accident witness information');
+        var dataValuesArrayList = [];
+        this.dataValuesArray.forEach(function (dataValues) {
+            if (Object.keys(dataValues).length > 1) {
+                dataValuesArrayList.push(dataValues);
+            }
+        });
+        this.eventProvider.getFormattedDataValuesArrayToEventObjectList(dataValuesArrayList, this.program, this.currentUser).then(function (eventList) {
+            _this.setLoadingMessages('Saving accident witness information');
+            _this.eventProvider.saveEventList(eventList, _this.currentUser).then(function (result) {
+                _this.setToasterMessage('Accident witness information has been saved successfully');
+                _this.navCtrl.setRoot(home_1.HomePage);
+            }, function (error) {
+                _this.loadingData = false;
+                _this.setToasterMessage('Fail to save accident witness information');
+            });
+        }, function (error) {
+            _this.loadingData = false;
+            _this.setToasterMessage('Fail to prepare accident witness information');
+        });
     };
     AccidentWitnessPage.prototype.setLoadingMessages = function (message) {
         this.loadingMessages.push(message);
@@ -148,9 +175,9 @@ var AccidentWitnessPage = (function () {
     AccidentWitnessPage = __decorate([
         core_1.Component({
             templateUrl: 'build/pages/accident-witness/accident-witness.html',
-            providers: [app_1.App, http_client_1.HttpClient, user_1.User, sql_lite_1.SqlLite]
+            providers: [app_1.App, http_client_1.HttpClient, user_1.User, sql_lite_1.SqlLite, event_provider_1.EventProvider]
         }), 
-        __metadata('design:paramtypes', [ionic_angular_1.NavParams, ionic_angular_1.NavController, ionic_angular_1.ToastController, sql_lite_1.SqlLite, user_1.User, http_client_1.HttpClient, app_1.App])
+        __metadata('design:paramtypes', [event_provider_1.EventProvider, ionic_angular_1.NavParams, ionic_angular_1.NavController, ionic_angular_1.ToastController, sql_lite_1.SqlLite, user_1.User, http_client_1.HttpClient, app_1.App])
     ], AccidentWitnessPage);
     return AccidentWitnessPage;
 })();

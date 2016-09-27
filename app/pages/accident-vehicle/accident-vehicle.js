@@ -15,6 +15,7 @@ var user_1 = require('../../providers/user/user');
 var http_client_1 = require('../../providers/http-client/http-client');
 var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
 var accident_witness_1 = require('../accident-witness/accident-witness');
+var event_provider_1 = require("../../providers/event-provider/event-provider");
 /*
   Generated class for the AccidentVehiclePage page.
 
@@ -22,8 +23,9 @@ var accident_witness_1 = require('../accident-witness/accident-witness');
   Ionic pages and navigation.
 */
 var AccidentVehiclePage = (function () {
-    function AccidentVehiclePage(params, navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
+    function AccidentVehiclePage(eventProvider, params, navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
         var _this = this;
+        this.eventProvider = eventProvider;
         this.params = params;
         this.navCtrl = navCtrl;
         this.toastCtrl = toastCtrl;
@@ -120,16 +122,28 @@ var AccidentVehiclePage = (function () {
         else if (parseInt(this.currentVehicle) == this.dataValuesArray.length) {
             this.currentVehicle = "" + (this.dataValuesArray.length - 1);
         }
+        else {
+            this.currentVehicle = "" + (vehicleIndex - 1);
+        }
     };
     AccidentVehiclePage.prototype.showSegment = function (vehicleIndex) {
         this.currentVehicle = "" + vehicleIndex;
+    };
+    AccidentVehiclePage.prototype.prepareToSaveAccidentVehicle = function () {
+        var _this = this;
+        this.eventProvider.getFormattedDataValuesArrayToEventObjectList(this.dataValuesArray, this.program, this.currentUser).then(function (eventList) {
+            alert(JSON.stringify(eventList));
+            var parameter = {
+                accidentId: _this.accidentId
+            };
+            _this.navCtrl.push(accident_witness_1.AccidentWitnessPage, parameter);
+        }, function (error) { });
     };
     AccidentVehiclePage.prototype.goToAccidentWitness = function () {
         alert('dataValuesArray :: ' + JSON.stringify(this.dataValuesArray));
         var parameter = {
             accidentId: this.accidentId
         };
-        alert(parameter);
         this.navCtrl.push(accident_witness_1.AccidentWitnessPage, parameter);
     };
     AccidentVehiclePage.prototype.setLoadingMessages = function (message) {
@@ -169,9 +183,9 @@ var AccidentVehiclePage = (function () {
     AccidentVehiclePage = __decorate([
         core_1.Component({
             templateUrl: 'build/pages/accident-vehicle/accident-vehicle.html',
-            providers: [app_1.App, http_client_1.HttpClient, user_1.User, sql_lite_1.SqlLite]
+            providers: [app_1.App, http_client_1.HttpClient, user_1.User, sql_lite_1.SqlLite, event_provider_1.EventProvider]
         }), 
-        __metadata('design:paramtypes', [ionic_angular_1.NavParams, ionic_angular_1.NavController, ionic_angular_1.ToastController, sql_lite_1.SqlLite, user_1.User, http_client_1.HttpClient, app_1.App])
+        __metadata('design:paramtypes', [event_provider_1.EventProvider, ionic_angular_1.NavParams, ionic_angular_1.NavController, ionic_angular_1.ToastController, sql_lite_1.SqlLite, user_1.User, http_client_1.HttpClient, app_1.App])
     ], AccidentVehiclePage);
     return AccidentVehiclePage;
 })();
