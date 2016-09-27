@@ -131,13 +131,43 @@ var AccidentVehiclePage = (function () {
     };
     AccidentVehiclePage.prototype.prepareToSaveAccidentVehicle = function () {
         var _this = this;
-        this.eventProvider.getFormattedDataValuesArrayToEventObjectList(this.dataValuesArray, this.program, this.currentUser).then(function (eventList) {
-            alert(JSON.stringify(eventList));
-            var parameter = {
-                accidentId: _this.accidentId
-            };
-            _this.navCtrl.push(accident_witness_1.AccidentWitnessPage, parameter);
-        }, function (error) { });
+        this.loadingData = true;
+        this.loadingMessages = [];
+        this.setLoadingMessages('Preparing accident vehicle information');
+        var dataValuesArrayList = [];
+        this.dataValuesArray.forEach(function (dataValues, index) {
+            if (Object.keys(dataValues).length > 1) {
+                if (_this.hasVehiclePlateNumberAndDriverLicence(dataValues, index)) {
+                    dataValuesArrayList.push(dataValues);
+                }
+            }
+        });
+        if (dataValuesArrayList.length > 0) {
+            this.dataValuesArray = dataValuesArrayList;
+            this.eventProvider.getFormattedDataValuesArrayToEventObjectList(this.dataValuesArray, this.program, this.currentUser).then(function (eventList) {
+                alert(JSON.stringify(eventList));
+                _this.loadingData = false;
+            }, function (error) {
+                _this.loadingData = false;
+            });
+        }
+        else {
+            this.loadingData = false;
+        }
+    };
+    AccidentVehiclePage.prototype.hasVehiclePlateNumberAndDriverLicence = function (dataValues, index) {
+        var result = true;
+        var driverLicenceId = this.programNameRelationDataElementMapping[this.programDriver];
+        var vehiclePlateNumberId = this.programNameRelationDataElementMapping[this.programVehicle];
+        if (!dataValues[driverLicenceId]) {
+            this.setToasterMessage('Please enter driver licence for vehicle ' + (index + 1));
+            result = false;
+        }
+        else if (!dataValues[vehiclePlateNumberId]) {
+            this.setToasterMessage('Please enter vehicle plate number for vehicle ' + (index + 1));
+            result = false;
+        }
+        return result;
     };
     AccidentVehiclePage.prototype.goToAccidentWitness = function () {
         alert('dataValuesArray :: ' + JSON.stringify(this.dataValuesArray));

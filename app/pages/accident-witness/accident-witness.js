@@ -141,19 +141,24 @@ var AccidentWitnessPage = (function () {
                 dataValuesArrayList.push(dataValues);
             }
         });
-        this.eventProvider.getFormattedDataValuesArrayToEventObjectList(dataValuesArrayList, this.program, this.currentUser).then(function (eventList) {
-            _this.setLoadingMessages('Saving accident witness information');
-            _this.eventProvider.saveEventList(eventList, _this.currentUser).then(function (result) {
-                _this.setToasterMessage('Accident witness information has been saved successfully');
-                _this.navCtrl.setRoot(home_1.HomePage);
+        if (dataValuesArrayList.length > 0) {
+            this.eventProvider.getFormattedDataValuesArrayToEventObjectList(dataValuesArrayList, this.program, this.currentUser).then(function (eventList) {
+                _this.setLoadingMessages('Saving accident witness information');
+                _this.eventProvider.saveEventList(eventList, _this.currentUser).then(function (result) {
+                    _this.setToasterMessage('Accident witness information has been saved successfully');
+                    _this.navCtrl.setRoot(home_1.HomePage);
+                }, function (error) {
+                    _this.loadingData = false;
+                    _this.setToasterMessage('Fail to save accident witness information');
+                });
             }, function (error) {
                 _this.loadingData = false;
-                _this.setToasterMessage('Fail to save accident witness information');
+                _this.setToasterMessage('Fail to prepare accident witness information');
             });
-        }, function (error) {
-            _this.loadingData = false;
-            _this.setToasterMessage('Fail to prepare accident witness information');
-        });
+        }
+        else {
+            this.loadingData = false;
+        }
     };
     AccidentWitnessPage.prototype.setLoadingMessages = function (message) {
         this.loadingMessages.push(message);

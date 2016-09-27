@@ -129,15 +129,43 @@ export class AccidentVehiclePage {
 
 
   prepareToSaveAccidentVehicle(){
-    this.eventProvider.getFormattedDataValuesArrayToEventObjectList(this.dataValuesArray,this.program,this.currentUser).then(eventList=>{
-      alert(JSON.stringify(eventList));
+    this.loadingData = true;
+    this.loadingMessages = [];
+    this.setLoadingMessages('Preparing accident vehicle information');
+    let dataValuesArrayList = [];
+    this.dataValuesArray.forEach((dataValues:any,index : any)=>{
+      if(Object.keys(dataValues).length > 1){
+        if(this.hasVehiclePlateNumberAndDriverLicence(dataValues,index)){
+          dataValuesArrayList.push(dataValues);
+        }
+      }
+    });
+    if(dataValuesArrayList.length > 0){
+      this.dataValuesArray = dataValuesArrayList;
+      this.eventProvider.getFormattedDataValuesArrayToEventObjectList(this.dataValuesArray,this.program,this.currentUser).then(eventList=>{
+        alert(JSON.stringify(eventList));
+        this.loadingData = false;
+      },error=>{
+        this.loadingData = false;
+      });
+    }else{
+      this.loadingData = false;
+    }
 
-      let parameter = {
-        accidentId : this.accidentId
-      };
-      this.navCtrl.push(AccidentWitnessPage,parameter);
+  }
 
-    },error=>{});
+  hasVehiclePlateNumberAndDriverLicence(dataValues,index){
+    let result = true;
+    let driverLicenceId = this.programNameRelationDataElementMapping[this.programDriver];
+    let vehiclePlateNumberId = this.programNameRelationDataElementMapping[this.programVehicle];
+    if(!dataValues[driverLicenceId]){
+      this.setToasterMessage('Please enter driver licence for vehicle ' + (index +1));
+      result = false;
+    }else if(!dataValues[vehiclePlateNumberId]){
+      this.setToasterMessage('Please enter vehicle plate number for vehicle ' + (index +1));
+      result = false;
+    }
+    return result;
   }
 
 
