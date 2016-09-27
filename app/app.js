@@ -24,7 +24,6 @@ var MyApp = (function () {
         this.user = user;
         this.rootPage = login_1.LoginPage;
         this.initializeApp();
-        // used for an example of ngFor and navigation
         this.pages = [
             { title: 'Home', component: home_1.HomePage },
             { title: 'Report Accident', component: report_accident_1.ReportAccidentPage },
@@ -36,15 +35,11 @@ var MyApp = (function () {
     }
     MyApp.prototype.initializeApp = function () {
         this.platform.ready().then(function () {
-            // Okay, so the platform is ready and our plugins are available.
-            // Here you can do any higher level native things you might need.
             ionic_native_1.StatusBar.styleDefault();
             ionic_native_1.Splashscreen.hide();
         });
     };
     MyApp.prototype.openPage = function (page) {
-        // Reset the content nav to have just this page
-        // we wouldn't want the back button to show in this scenario
         this.nav.setRoot(page.component);
     };
     MyApp.prototype.logOut = function () {

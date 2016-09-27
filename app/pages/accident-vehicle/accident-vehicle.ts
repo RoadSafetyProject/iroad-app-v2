@@ -39,8 +39,12 @@ export class AccidentVehiclePage {
   private programNameRelationDataElementMapping :any = {};
   private relationDataElementPrefix : string = "Program_";
   private programAccidentId :string ;
-  private programDriver :string = 'Driver';
-  private programVehicle : string = 'Vehicle';
+  private programDriverName :string = 'Driver';
+  private programDriver : any  = {};
+  private programVehicle : any = {};
+  private driversObjectData : any = [];
+  private vehiclesObjectData : any = [];
+  private programVehicleName : string = 'Vehicle';
   private programAccident : string = 'Accident';
 
   constructor(private eventProvider : EventProvider,private params: NavParams,private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
@@ -83,17 +87,17 @@ export class AccidentVehiclePage {
   setAndCheckingForRelationMetaData(){
     this.program.programStages[0].programStageDataElements.forEach(programStageDataElement=>{
       let dataElementName = programStageDataElement.dataElement.name;
-      if(dataElementName.toLowerCase() == (this.relationDataElementPrefix + this.programDriver.replace(' ','_')).toLowerCase()){
+      if(dataElementName.toLowerCase() == (this.relationDataElementPrefix + this.programDriverName.replace(' ','_')).toLowerCase()){
         this.relationDataElements[programStageDataElement.dataElement.id] = {
           name : programStageDataElement.dataElement.name
         };
-        this.programNameRelationDataElementMapping[this.programDriver] = programStageDataElement.dataElement.id;
+        this.programNameRelationDataElementMapping[this.programDriverName] = programStageDataElement.dataElement.id;
 
-      }else if(dataElementName.toLowerCase() == (this.relationDataElementPrefix + this.programVehicle.replace(' ','_')).toLowerCase()){
+      }else if(dataElementName.toLowerCase() == (this.relationDataElementPrefix + this.programVehicleName.replace(' ','_')).toLowerCase()){
         this.relationDataElements[programStageDataElement.dataElement.id] = {
           name : programStageDataElement.dataElement.name
         };
-        this.programNameRelationDataElementMapping[this.programVehicle] = programStageDataElement.dataElement.id;
+        this.programNameRelationDataElementMapping[this.programVehicleName] = programStageDataElement.dataElement.id;
 
       }else if(dataElementName.toLowerCase() == (this.relationDataElementPrefix + this.programAccident.replace(' ','_')).toLowerCase()){
         this.relationDataElements[programStageDataElement.dataElement.id] = {
@@ -102,14 +106,60 @@ export class AccidentVehiclePage {
         this.programAccidentId = programStageDataElement.dataElement.id;
       }
     });
+    this.loadDriverMetadata();
+  }
+
+  loadDriverMetadata(){
+    let resource = 'programs';
+    let attribute = 'name';
+    let attributeValue =[];
+    attributeValue.push(this.programDriverName);
+
+    this.setLoadingMessages('Loading driver metadata');
+    this.sqlLite.getDataFromTableByAttributes(resource,attribute,attributeValue,this.currentUser.currentDatabase).then((programs)=>{
+      this.setLoadingMessages('Setting driver metadata');
+      this.setDriverMetadata(programs);
+    },error=>{
+      this.loadingData = false;
+      let message = "Fail to loading programs " + error;
+      this.setStickToasterMessage(message);
+    })
+  }
+
+  setDriverMetadata(programs){
+    this.programDriver = programs[0];
+    this.loadVehicleMetadata();
+  }
+
+  loadVehicleMetadata(){
+    let resource = 'programs';
+    let attribute = 'name';
+    let attributeValue =[];
+    attributeValue.push(this.programVehicleName);
+
+    this.setLoadingMessages('Loading vehicle metadata');
+    this.sqlLite.getDataFromTableByAttributes(resource,attribute,attributeValue,this.currentUser.currentDatabase).then((programs)=>{
+      this.setLoadingMessages('Setting vehicle metadata');
+      this.setVehicleMetadata(programs);
+    },error=>{
+      this.loadingData = false;
+      let message = "Fail to loading programs " + error;
+      this.setStickToasterMessage(message);
+    })
+  }
+
+  setVehicleMetadata(programs){
+    this.programVehicle = programs[0];
     this.addVehicle();
     this.loadingData = false;
   }
 
+
   addVehicle(){
     let dataValue = {};
     dataValue[this.programAccidentId] = this.accidentId;
-    this.dataValuesArray.push(dataValue)
+    this.dataValuesArray.push(dataValue);
+    this.currentVehicle = "" + (this.dataValuesArray.length - 1);
   }
 
   removeVehicle(vehicleIndex){
@@ -141,7 +191,6 @@ export class AccidentVehiclePage {
       }
     });
     if(dataValuesArrayList.length == this.dataValuesArray.length ){
-      this.loadingData = false;
       this.fetchingDrivers();
     }else{
       this.loadingData = false;
@@ -151,8 +200,8 @@ export class AccidentVehiclePage {
 
   hasVehiclePlateNumberAndDriverLicence(dataValues,index){
     let result = true;
-    let driverLicenceId = this.programNameRelationDataElementMapping[this.programDriver];
-    let vehiclePlateNumberId = this.programNameRelationDataElementMapping[this.programVehicle];
+    let driverLicenceId = this.programNameRelationDataElementMapping[this.programDriverName];
+    let vehiclePlateNumberId = this.programNameRelationDataElementMapping[this.programVehicleName];
     if(!dataValues[driverLicenceId]){
       this.setToasterMessage('Please enter driver licence for vehicle ' + (index +1));
       result = false;
@@ -164,33 +213,88 @@ export class AccidentVehiclePage {
   }
 
   fetchingDrivers(){
-    let driverLicenceId = this.programNameRelationDataElementMapping[this.programDriver];
-    let driversObjectData = [];
+    this.setLoadingMessages("Fetching driver's information");
+    let driverLicenceId = this.programNameRelationDataElementMapping[this.programDriverName];
+    this.driversObjectData = [];
     this.dataValuesArray.forEach(dataValues=>{
       if(dataValues[driverLicenceId]){
-        driversObjectData.push({
+        this.driversObjectData.push({
+          dataElementId : this.eventProvider.getRelationDataElementIdForSqlView(this.programDriver.programStages[0].programStageDataElements,this.programDriverName),
+          driverLicenceId : driverLicenceId,
           value : dataValues[driverLicenceId],
-          event : {}
+          eventData : []
         })
       }
     });
-    alert(JSON.stringify(driversObjectData));
-    this.fetchingVehicles();
+    this.eventProvider.findAndSetEventsToRelationDataValuesList(this.driversObjectData,this.programDriver.id,this.currentUser).then(RelationDataValuesList=>{
+      this.setLoadingMessages("Setting driver's information");
+      this.setDrivers(RelationDataValuesList);
+    },error=>{
+      this.loadingData = false;
+      this.setToasterMessage("Fail to fetch driver's information ");
+    });
+  }
+
+  setDrivers(RelationDataValuesList){
+    let shouldContinue = true;
+    RelationDataValuesList.forEach((dataValues:any,index:any)=>{
+      if(dataValues.eventData.length == 0){
+        shouldContinue = false;
+        this.setToasterMessage('Driver licence for vehicle ' + (index + 1) + ' has not found');
+      }
+    });
+    if(shouldContinue){
+      this.driversObjectData = RelationDataValuesList;
+      this.fetchingVehicles();
+    }else{
+      this.loadingData = false;
+    }
   }
 
   fetchingVehicles(){
-    let vehiclePlateNumberId = this.programNameRelationDataElementMapping[this.programVehicle];
-    let vehiclesObjectData = [];
+    this.setLoadingMessages("Fetching vehicle's information");
+    let vehiclePlateNumberId = this.programNameRelationDataElementMapping[this.programVehicleName];
+    this.vehiclesObjectData = [];
     this.dataValuesArray.forEach(dataValues=>{
       if(dataValues[vehiclePlateNumberId]){
-        vehiclesObjectData.push({
-          value : dataValues[vehiclePlateNumberId],
-          event : {}
+        let plateNumber = dataValues[vehiclePlateNumberId].toUpperCase();
+
+        if(plateNumber.length == 7){
+          plateNumber =  plateNumber.substr(0,4) + ' ' + plateNumber.substr(4);
+        }
+        this.vehiclesObjectData.push({
+          dataElementId : this.eventProvider.getRelationDataElementIdForSqlView(this.programVehicle.programStages[0].programStageDataElements,this.programVehicleName),
+          vehiclePlateNumberId: vehiclePlateNumberId,
+          value : plateNumber,
+          eventData : []
         })
       }
     });
-    alert(JSON.stringify(vehiclesObjectData));
 
+    this.eventProvider.findAndSetEventsToRelationDataValuesList(this.vehiclesObjectData,this.programVehicle.id,this.currentUser).then(RelationDataValuesList=>{
+      this.setLoadingMessages('');
+      this.setVehicles(RelationDataValuesList);
+    },error=>{
+      this.setToasterMessage("Fail to fetch vehicle's information");
+      this.loadingData = false;
+    });
+  }
+
+  setVehicles(RelationDataValuesList){
+    let shouldContinue = true;
+    RelationDataValuesList.forEach((dataValues:any,index:any)=>{
+      if(dataValues.eventData == 0){
+        shouldContinue = false;
+        this.setToasterMessage('Vehicle plate number for vehicle ' + (index + 1) + ' has not found');
+      }
+    });
+    if(shouldContinue){
+      this.vehiclesObjectData = RelationDataValuesList;
+      alert('Ready to save');
+      this.loadingData = false;
+    }else{
+      this.loadingData = false;
+    }
   }
 
   goToAccidentWitness(){

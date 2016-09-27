@@ -92,7 +92,8 @@ export class AccidentWitnessPage {
   addWitness(){
     let dataValue = {};
     dataValue[this.programAccidentId] = this.accidentId;
-    this.dataValuesArray.push(dataValue)
+    this.dataValuesArray.push(dataValue);
+    this.currentWitness = "" + (this.dataValuesArray.length - 1);
   }
 
   removeWitness(witnessIndex){

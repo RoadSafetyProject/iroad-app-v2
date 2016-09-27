@@ -96,6 +96,7 @@ var AccidentWitnessPage = (function () {
         var dataValue = {};
         dataValue[this.programAccidentId] = this.accidentId;
         this.dataValuesArray.push(dataValue);
+        this.currentWitness = "" + (this.dataValuesArray.length - 1);
     };
     AccidentWitnessPage.prototype.removeWitness = function (witnessIndex) {
         this.dataValuesArray.splice(witnessIndex, 1);

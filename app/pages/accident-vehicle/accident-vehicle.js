@@ -46,8 +46,12 @@ var AccidentVehiclePage = (function () {
         this.relationDataElements = {};
         this.programNameRelationDataElementMapping = {};
         this.relationDataElementPrefix = "Program_";
-        this.programDriver = 'Driver';
-        this.programVehicle = 'Vehicle';
+        this.programDriverName = 'Driver';
+        this.programDriver = {};
+        this.programVehicle = {};
+        this.driversObjectData = [];
+        this.vehiclesObjectData = [];
+        this.programVehicleName = 'Vehicle';
         this.programAccident = 'Accident';
         this.user.getCurrentUser().then(function (currentUser) {
             _this.currentUser = JSON.parse(currentUser);
@@ -87,17 +91,17 @@ var AccidentVehiclePage = (function () {
         var _this = this;
         this.program.programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
             var dataElementName = programStageDataElement.dataElement.name;
-            if (dataElementName.toLowerCase() == (_this.relationDataElementPrefix + _this.programDriver.replace(' ', '_')).toLowerCase()) {
+            if (dataElementName.toLowerCase() == (_this.relationDataElementPrefix + _this.programDriverName.replace(' ', '_')).toLowerCase()) {
                 _this.relationDataElements[programStageDataElement.dataElement.id] = {
                     name: programStageDataElement.dataElement.name
                 };
-                _this.programNameRelationDataElementMapping[_this.programDriver] = programStageDataElement.dataElement.id;
+                _this.programNameRelationDataElementMapping[_this.programDriverName] = programStageDataElement.dataElement.id;
             }
-            else if (dataElementName.toLowerCase() == (_this.relationDataElementPrefix + _this.programVehicle.replace(' ', '_')).toLowerCase()) {
+            else if (dataElementName.toLowerCase() == (_this.relationDataElementPrefix + _this.programVehicleName.replace(' ', '_')).toLowerCase()) {
                 _this.relationDataElements[programStageDataElement.dataElement.id] = {
                     name: programStageDataElement.dataElement.name
                 };
-                _this.programNameRelationDataElementMapping[_this.programVehicle] = programStageDataElement.dataElement.id;
+                _this.programNameRelationDataElementMapping[_this.programVehicleName] = programStageDataElement.dataElement.id;
             }
             else if (dataElementName.toLowerCase() == (_this.relationDataElementPrefix + _this.programAccident.replace(' ', '_')).toLowerCase()) {
                 _this.relationDataElements[programStageDataElement.dataElement.id] = {
@@ -106,6 +110,46 @@ var AccidentVehiclePage = (function () {
                 _this.programAccidentId = programStageDataElement.dataElement.id;
             }
         });
+        this.loadDriverMetadata();
+    };
+    AccidentVehiclePage.prototype.loadDriverMetadata = function () {
+        var _this = this;
+        var resource = 'programs';
+        var attribute = 'name';
+        var attributeValue = [];
+        attributeValue.push(this.programDriverName);
+        this.setLoadingMessages('Loading driver metadata');
+        this.sqlLite.getDataFromTableByAttributes(resource, attribute, attributeValue, this.currentUser.currentDatabase).then(function (programs) {
+            _this.setLoadingMessages('Setting driver metadata');
+            _this.setDriverMetadata(programs);
+        }, function (error) {
+            _this.loadingData = false;
+            var message = "Fail to loading programs " + error;
+            _this.setStickToasterMessage(message);
+        });
+    };
+    AccidentVehiclePage.prototype.setDriverMetadata = function (programs) {
+        this.programDriver = programs[0];
+        this.loadVehicleMetadata();
+    };
+    AccidentVehiclePage.prototype.loadVehicleMetadata = function () {
+        var _this = this;
+        var resource = 'programs';
+        var attribute = 'name';
+        var attributeValue = [];
+        attributeValue.push(this.programVehicleName);
+        this.setLoadingMessages('Loading vehicle metadata');
+        this.sqlLite.getDataFromTableByAttributes(resource, attribute, attributeValue, this.currentUser.currentDatabase).then(function (programs) {
+            _this.setLoadingMessages('Setting vehicle metadata');
+            _this.setVehicleMetadata(programs);
+        }, function (error) {
+            _this.loadingData = false;
+            var message = "Fail to loading programs " + error;
+            _this.setStickToasterMessage(message);
+        });
+    };
+    AccidentVehiclePage.prototype.setVehicleMetadata = function (programs) {
+        this.programVehicle = programs[0];
         this.addVehicle();
         this.loadingData = false;
     };
@@ -113,6 +157,7 @@ var AccidentVehiclePage = (function () {
         var dataValue = {};
         dataValue[this.programAccidentId] = this.accidentId;
         this.dataValuesArray.push(dataValue);
+        this.currentVehicle = "" + (this.dataValuesArray.length - 1);
     };
     AccidentVehiclePage.prototype.removeVehicle = function (vehicleIndex) {
         this.dataValuesArray.splice(vehicleIndex, 1);
@@ -143,7 +188,6 @@ var AccidentVehiclePage = (function () {
             }
         });
         if (dataValuesArrayList.length == this.dataValuesArray.length) {
-            this.loadingData = false;
             this.fetchingDrivers();
         }
         else {
@@ -152,8 +196,8 @@ var AccidentVehiclePage = (function () {
     };
     AccidentVehiclePage.prototype.hasVehiclePlateNumberAndDriverLicence = function (dataValues, index) {
         var result = true;
-        var driverLicenceId = this.programNameRelationDataElementMapping[this.programDriver];
-        var vehiclePlateNumberId = this.programNameRelationDataElementMapping[this.programVehicle];
+        var driverLicenceId = this.programNameRelationDataElementMapping[this.programDriverName];
+        var vehiclePlateNumberId = this.programNameRelationDataElementMapping[this.programVehicleName];
         if (!dataValues[driverLicenceId]) {
             this.setToasterMessage('Please enter driver licence for vehicle ' + (index + 1));
             result = false;
@@ -165,31 +209,89 @@ var AccidentVehiclePage = (function () {
         return result;
     };
     AccidentVehiclePage.prototype.fetchingDrivers = function () {
-        var driverLicenceId = this.programNameRelationDataElementMapping[this.programDriver];
-        var driversObjectData = [];
+        var _this = this;
+        this.setLoadingMessages("Fetching driver's information");
+        var driverLicenceId = this.programNameRelationDataElementMapping[this.programDriverName];
+        this.driversObjectData = [];
         this.dataValuesArray.forEach(function (dataValues) {
             if (dataValues[driverLicenceId]) {
-                driversObjectData.push({
+                _this.driversObjectData.push({
+                    dataElementId: _this.eventProvider.getRelationDataElementIdForSqlView(_this.programDriver.programStages[0].programStageDataElements, _this.programDriverName),
+                    driverLicenceId: driverLicenceId,
                     value: dataValues[driverLicenceId],
-                    event: {}
+                    eventData: []
                 });
             }
         });
-        alert(JSON.stringify(driversObjectData));
-        this.fetchingVehicles();
+        this.eventProvider.findAndSetEventsToRelationDataValuesList(this.driversObjectData, this.programDriver.id, this.currentUser).then(function (RelationDataValuesList) {
+            _this.setLoadingMessages("Setting driver's information");
+            _this.setDrivers(RelationDataValuesList);
+        }, function (error) {
+            _this.loadingData = false;
+            _this.setToasterMessage("Fail to fetch driver's information ");
+        });
+    };
+    AccidentVehiclePage.prototype.setDrivers = function (RelationDataValuesList) {
+        var _this = this;
+        var shouldContinue = true;
+        RelationDataValuesList.forEach(function (dataValues, index) {
+            if (dataValues.eventData.length == 0) {
+                shouldContinue = false;
+                _this.setToasterMessage('Driver licence for vehicle ' + (index + 1) + ' has not found');
+            }
+        });
+        if (shouldContinue) {
+            this.driversObjectData = RelationDataValuesList;
+            this.fetchingVehicles();
+        }
+        else {
+            this.loadingData = false;
+        }
     };
     AccidentVehiclePage.prototype.fetchingVehicles = function () {
-        var vehiclePlateNumberId = this.programNameRelationDataElementMapping[this.programVehicle];
-        var vehiclesObjectData = [];
+        var _this = this;
+        this.setLoadingMessages("Fetching vehicle's information");
+        var vehiclePlateNumberId = this.programNameRelationDataElementMapping[this.programVehicleName];
+        this.vehiclesObjectData = [];
         this.dataValuesArray.forEach(function (dataValues) {
             if (dataValues[vehiclePlateNumberId]) {
-                vehiclesObjectData.push({
-                    value: dataValues[vehiclePlateNumberId],
-                    event: {}
+                var plateNumber = dataValues[vehiclePlateNumberId].toUpperCase();
+                if (plateNumber.length == 7) {
+                    plateNumber = plateNumber.substr(0, 4) + ' ' + plateNumber.substr(4);
+                }
+                _this.vehiclesObjectData.push({
+                    dataElementId: _this.eventProvider.getRelationDataElementIdForSqlView(_this.programVehicle.programStages[0].programStageDataElements, _this.programVehicleName),
+                    vehiclePlateNumberId: vehiclePlateNumberId,
+                    value: plateNumber,
+                    eventData: []
                 });
             }
         });
-        alert(JSON.stringify(vehiclesObjectData));
+        this.eventProvider.findAndSetEventsToRelationDataValuesList(this.vehiclesObjectData, this.programVehicle.id, this.currentUser).then(function (RelationDataValuesList) {
+            _this.setLoadingMessages('');
+            _this.setVehicles(RelationDataValuesList);
+        }, function (error) {
+            _this.setToasterMessage("Fail to fetch vehicle's information");
+            _this.loadingData = false;
+        });
+    };
+    AccidentVehiclePage.prototype.setVehicles = function (RelationDataValuesList) {
+        var _this = this;
+        var shouldContinue = true;
+        RelationDataValuesList.forEach(function (dataValues, index) {
+            if (dataValues.eventData == 0) {
+                shouldContinue = false;
+                _this.setToasterMessage('Vehicle plate number for vehicle ' + (index + 1) + ' has not found');
+            }
+        });
+        if (shouldContinue) {
+            this.vehiclesObjectData = RelationDataValuesList;
+            alert('Ready to save');
+            this.loadingData = false;
+        }
+        else {
+            this.loadingData = false;
+        }
     };
     AccidentVehiclePage.prototype.goToAccidentWitness = function () {
         var _this = this;
