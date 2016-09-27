@@ -140,14 +140,9 @@ export class AccidentVehiclePage {
         }
       }
     });
-    if(dataValuesArrayList.length > 0){
-      this.dataValuesArray = dataValuesArrayList;
-      this.eventProvider.getFormattedDataValuesArrayToEventObjectList(this.dataValuesArray,this.program,this.currentUser).then(eventList=>{
-        alert(JSON.stringify(eventList));
-        this.loadingData = false;
-      },error=>{
-        this.loadingData = false;
-      });
+    if(dataValuesArrayList.length == this.dataValuesArray.length ){
+      this.loadingData = false;
+      this.fetchingDrivers();
     }else{
       this.loadingData = false;
     }
@@ -168,8 +163,45 @@ export class AccidentVehiclePage {
     return result;
   }
 
+  fetchingDrivers(){
+    let driverLicenceId = this.programNameRelationDataElementMapping[this.programDriver];
+    let driversObjectData = [];
+    this.dataValuesArray.forEach(dataValues=>{
+      if(dataValues[driverLicenceId]){
+        driversObjectData.push({
+          value : dataValues[driverLicenceId],
+          event : {}
+        })
+      }
+    });
+    alert(JSON.stringify(driversObjectData));
+    this.fetchingVehicles();
+  }
+
+  fetchingVehicles(){
+    let vehiclePlateNumberId = this.programNameRelationDataElementMapping[this.programVehicle];
+    let vehiclesObjectData = [];
+    this.dataValuesArray.forEach(dataValues=>{
+      if(dataValues[vehiclePlateNumberId]){
+        vehiclesObjectData.push({
+          value : dataValues[vehiclePlateNumberId],
+          event : {}
+        })
+      }
+    });
+    alert(JSON.stringify(vehiclesObjectData));
+
+  }
 
   goToAccidentWitness(){
+
+    this.eventProvider.getFormattedDataValuesArrayToEventObjectList(this.dataValuesArray,this.program,this.currentUser).then(eventList=>{
+      alert(JSON.stringify(eventList));
+      this.loadingData = false;
+    },error=>{
+      this.loadingData = false;
+    });
+
     alert('dataValuesArray :: ' + JSON.stringify(this.dataValuesArray));
     let parameter = {
       accidentId : this.accidentId

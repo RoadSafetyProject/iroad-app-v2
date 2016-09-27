@@ -142,14 +142,9 @@ var AccidentVehiclePage = (function () {
                 }
             }
         });
-        if (dataValuesArrayList.length > 0) {
-            this.dataValuesArray = dataValuesArrayList;
-            this.eventProvider.getFormattedDataValuesArrayToEventObjectList(this.dataValuesArray, this.program, this.currentUser).then(function (eventList) {
-                alert(JSON.stringify(eventList));
-                _this.loadingData = false;
-            }, function (error) {
-                _this.loadingData = false;
-            });
+        if (dataValuesArrayList.length == this.dataValuesArray.length) {
+            this.loadingData = false;
+            this.fetchingDrivers();
         }
         else {
             this.loadingData = false;
@@ -169,7 +164,41 @@ var AccidentVehiclePage = (function () {
         }
         return result;
     };
+    AccidentVehiclePage.prototype.fetchingDrivers = function () {
+        var driverLicenceId = this.programNameRelationDataElementMapping[this.programDriver];
+        var driversObjectData = [];
+        this.dataValuesArray.forEach(function (dataValues) {
+            if (dataValues[driverLicenceId]) {
+                driversObjectData.push({
+                    value: dataValues[driverLicenceId],
+                    event: {}
+                });
+            }
+        });
+        alert(JSON.stringify(driversObjectData));
+        this.fetchingVehicles();
+    };
+    AccidentVehiclePage.prototype.fetchingVehicles = function () {
+        var vehiclePlateNumberId = this.programNameRelationDataElementMapping[this.programVehicle];
+        var vehiclesObjectData = [];
+        this.dataValuesArray.forEach(function (dataValues) {
+            if (dataValues[vehiclePlateNumberId]) {
+                vehiclesObjectData.push({
+                    value: dataValues[vehiclePlateNumberId],
+                    event: {}
+                });
+            }
+        });
+        alert(JSON.stringify(vehiclesObjectData));
+    };
     AccidentVehiclePage.prototype.goToAccidentWitness = function () {
+        var _this = this;
+        this.eventProvider.getFormattedDataValuesArrayToEventObjectList(this.dataValuesArray, this.program, this.currentUser).then(function (eventList) {
+            alert(JSON.stringify(eventList));
+            _this.loadingData = false;
+        }, function (error) {
+            _this.loadingData = false;
+        });
         alert('dataValuesArray :: ' + JSON.stringify(this.dataValuesArray));
         var parameter = {
             accidentId: this.accidentId

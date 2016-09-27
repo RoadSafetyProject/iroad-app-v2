@@ -6,11 +6,11 @@ import {HttpClient} from '../../providers/http-client/http-client';
 import {Observable} from 'rxjs/Rx';
 
 /*
-  Generated class for the EventProvider provider.
+ Generated class for the EventProvider provider.
 
-  See https://angular.io/docs/ts/latest/guide/dependency-injection.html
-  for more info on providers and Angular 2 DI.
-*/
+ See https://angular.io/docs/ts/latest/guide/dependency-injection.html
+ for more info on providers and Angular 2 DI.
+ */
 @Injectable()
 export class EventProvider {
 
@@ -120,6 +120,31 @@ export class EventProvider {
         }
       });
       resolve(event)
+    });
+  }
+
+  findAndSetEventsToRelationDataValuesList(dataValuesList,programId,user){
+    let self = this;
+    let promises = [];
+
+    return new Promise(function(resolve, reject){
+      dataValuesList.forEach((dataValue:any,index:any)=>{
+        promises.push(
+          self.findEventsByDataValue(dataValue.dataElementId,dataValue.value,programId,user).then(event=>{
+            dataValuesList[index].eventData = event;
+          },error=>{
+          })
+        );
+      });
+
+      Observable.forkJoin(promises).subscribe(() => {
+          resolve(dataValuesList);
+        },
+        error => {
+          reject(error);
+        }
+      );
+
     });
   }
 

@@ -13,11 +13,11 @@ require('rxjs/add/operator/map');
 var http_client_1 = require('../../providers/http-client/http-client');
 var Rx_1 = require('rxjs/Rx');
 /*
-  Generated class for the EventProvider provider.
+ Generated class for the EventProvider provider.
 
-  See https://angular.io/docs/ts/latest/guide/dependency-injection.html
-  for more info on providers and Angular 2 DI.
-*/
+ See https://angular.io/docs/ts/latest/guide/dependency-injection.html
+ for more info on providers and Angular 2 DI.
+ */
 var EventProvider = (function () {
     function EventProvider(http, httpClient) {
         this.http = http;
@@ -108,6 +108,23 @@ var EventProvider = (function () {
                 }
             });
             resolve(event);
+        });
+    };
+    EventProvider.prototype.findAndSetEventsToRelationDataValuesList = function (dataValuesList, programId, user) {
+        var self = this;
+        var promises = [];
+        return new Promise(function (resolve, reject) {
+            dataValuesList.forEach(function (dataValue, index) {
+                promises.push(self.findEventsByDataValue(dataValue.dataElementId, dataValue.value, programId, user).then(function (event) {
+                    dataValuesList[index].eventData = event;
+                }, function (error) {
+                }));
+            });
+            Rx_1.Observable.forkJoin(promises).subscribe(function () {
+                resolve(dataValuesList);
+            }, function (error) {
+                reject(error);
+            });
         });
     };
     EventProvider.prototype.findEventsByDataValue = function (dataElementId, value, programId, user) {
