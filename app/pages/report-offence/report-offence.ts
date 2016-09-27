@@ -259,6 +259,7 @@ export class ReportOffencePage {
     }
   }
 
+  //@todo checking for required fields
   setVehicleDataValue(events,programName){
     if(events.length > 0){
       let relationDataElementId  = this.relationDataElementProgramMapping[programName];

@@ -93,7 +93,7 @@ var LoginPage = (function () {
                                     });
                                 }, function (err) {
                                     _this.loadingData = false;
-                                    _this.setStickToasterMessage('Fail to login Fail to load System information, please checking your network connection');
+                                    _this.setStickToasterMessage('Fail to login Fail to load System information, please checking your network connection or username and password');
                                     console.log(err);
                                 });
                             }).catch(function (err) {

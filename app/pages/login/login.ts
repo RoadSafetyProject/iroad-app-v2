@@ -92,7 +92,7 @@ export class LoginPage {
                     },
                     err => {
                       this.loadingData = false;
-                      this.setStickToasterMessage('Fail to login Fail to load System information, please checking your network connection');
+                      this.setStickToasterMessage('Fail to login Fail to load System information, please checking your network connection or username and password');
                       console.log(err);
                     }
                   );

@@ -89,6 +89,7 @@ var OffencePaymentPage = (function () {
         });
         this.loadingData = false;
     };
+    //@todo checking for required fields
     OffencePaymentPage.prototype.savePayment = function () {
         var _this = this;
         this.loadingData = true;

@@ -44,6 +44,8 @@ export class AccidentVehiclePage {
   private programVehicle : any = {};
   private driversObjectData : any = [];
   private vehiclesObjectData : any = [];
+  private dataElementDriverId : string;
+  private dataElementVehicleId : string;
   private programVehicleName : string = 'Vehicle';
   private programAccident : string = 'Accident';
 
@@ -128,6 +130,7 @@ export class AccidentVehiclePage {
 
   setDriverMetadata(programs){
     this.programDriver = programs[0];
+    this.dataElementDriverId = this.eventProvider.getRelationDataElementIdForSqlView(this.programDriver.programStages[0].programStageDataElements,this.programDriverName);
     this.loadVehicleMetadata();
   }
 
@@ -150,10 +153,10 @@ export class AccidentVehiclePage {
 
   setVehicleMetadata(programs){
     this.programVehicle = programs[0];
+    this.dataElementVehicleId = this.eventProvider.getRelationDataElementIdForSqlView(this.programVehicle.programStages[0].programStageDataElements,this.programVehicleName);
     this.addVehicle();
     this.loadingData = false;
   }
-
 
   addVehicle(){
     let dataValue = {};
@@ -177,7 +180,6 @@ export class AccidentVehiclePage {
     this.currentVehicle = "" + vehicleIndex;
   }
 
-
   prepareToSaveAccidentVehicle(){
     this.loadingData = true;
     this.loadingMessages = [];
@@ -200,12 +202,10 @@ export class AccidentVehiclePage {
 
   hasVehiclePlateNumberAndDriverLicence(dataValues,index){
     let result = true;
-    let driverLicenceId = this.programNameRelationDataElementMapping[this.programDriverName];
-    let vehiclePlateNumberId = this.programNameRelationDataElementMapping[this.programVehicleName];
-    if(!dataValues[driverLicenceId]){
+    if(!dataValues[this.dataElementDriverId]){
       this.setToasterMessage('Please enter driver licence for vehicle ' + (index +1));
       result = false;
-    }else if(!dataValues[vehiclePlateNumberId]){
+    }else if(!dataValues[this.dataElementVehicleId]){
       this.setToasterMessage('Please enter vehicle plate number for vehicle ' + (index +1));
       result = false;
     }
@@ -217,11 +217,11 @@ export class AccidentVehiclePage {
     let driverLicenceId = this.programNameRelationDataElementMapping[this.programDriverName];
     this.driversObjectData = [];
     this.dataValuesArray.forEach(dataValues=>{
-      if(dataValues[driverLicenceId]){
+      if(dataValues[this.dataElementDriverId]){
         this.driversObjectData.push({
-          dataElementId : this.eventProvider.getRelationDataElementIdForSqlView(this.programDriver.programStages[0].programStageDataElements,this.programDriverName),
+          dataElementId : this.dataElementDriverId,
           driverLicenceId : driverLicenceId,
-          value : dataValues[driverLicenceId],
+          value : dataValues[this.dataElementDriverId],
           eventData : []
         })
       }
@@ -256,14 +256,14 @@ export class AccidentVehiclePage {
     let vehiclePlateNumberId = this.programNameRelationDataElementMapping[this.programVehicleName];
     this.vehiclesObjectData = [];
     this.dataValuesArray.forEach(dataValues=>{
-      if(dataValues[vehiclePlateNumberId]){
-        let plateNumber = dataValues[vehiclePlateNumberId].toUpperCase();
-
+      if(dataValues[this.dataElementVehicleId]){
+        let plateNumber = dataValues[this.dataElementVehicleId].toUpperCase();
         if(plateNumber.length == 7){
           plateNumber =  plateNumber.substr(0,4) + ' ' + plateNumber.substr(4);
         }
+        dataValues[this.dataElementVehicleId] = plateNumber;
         this.vehiclesObjectData.push({
-          dataElementId : this.eventProvider.getRelationDataElementIdForSqlView(this.programVehicle.programStages[0].programStageDataElements,this.programVehicleName),
+          dataElementId : this.dataElementVehicleId,
           vehiclePlateNumberId: vehiclePlateNumberId,
           value : plateNumber,
           eventData : []
@@ -272,7 +272,7 @@ export class AccidentVehiclePage {
     });
 
     this.eventProvider.findAndSetEventsToRelationDataValuesList(this.vehiclesObjectData,this.programVehicle.id,this.currentUser).then(RelationDataValuesList=>{
-      this.setLoadingMessages('');
+      this.setLoadingMessages("Setting vehicle's information");
       this.setVehicles(RelationDataValuesList);
     },error=>{
       this.setToasterMessage("Fail to fetch vehicle's information");
@@ -290,27 +290,42 @@ export class AccidentVehiclePage {
     });
     if(shouldContinue){
       this.vehiclesObjectData = RelationDataValuesList;
-      alert('Ready to save');
-      this.loadingData = false;
+      this.setAndSaveAccidentVehiclesInformation();
+
     }else{
       this.loadingData = false;
     }
   }
 
-  goToAccidentWitness(){
-
-    this.eventProvider.getFormattedDataValuesArrayToEventObjectList(this.dataValuesArray,this.program,this.currentUser).then(eventList=>{
-      alert(JSON.stringify(eventList));
-      this.loadingData = false;
-    },error=>{
-      this.loadingData = false;
+  //@todo checking for required fields
+  setAndSaveAccidentVehiclesInformation(){
+    let newDataValuesArray = [];
+    this.setLoadingMessages('Setting accident vehicle information');
+    let driverLicenceId = this.programNameRelationDataElementMapping[this.programDriverName];
+    let vehiclePlateNumberId = this.programNameRelationDataElementMapping[this.programVehicleName];
+    this.dataValuesArray.forEach((dataValues:any,index:any)=>{
+      newDataValuesArray.push(dataValues);
+      newDataValuesArray[index][driverLicenceId] = this.driversObjectData[index].eventData[0].event;
+      newDataValuesArray[index][vehiclePlateNumberId] = this.vehiclesObjectData[index].eventData[0].event;
     });
 
-    alert('dataValuesArray :: ' + JSON.stringify(this.dataValuesArray));
-    let parameter = {
-      accidentId : this.accidentId
-    };
-    this.navCtrl.push(AccidentWitnessPage,parameter);
+    this.eventProvider.getFormattedDataValuesArrayToEventObjectList(this.dataValuesArray,this.program,this.currentUser).then(eventList=>{
+      this.setLoadingMessages('Saving accident vehicle information');
+      this.eventProvider.saveEventList(eventList,this.currentUser).then(result=>{
+        let parameter = {
+          accidentId : this.accidentId
+        };
+        this.setToasterMessage('Accident Vehicles has been saved successfully');
+        this.loadingData = false;
+        this.navCtrl.push(AccidentWitnessPage,parameter);
+      },error=>{
+        this.setToasterMessage('Fail to save accident vehicle information');
+        this.loadingData = false;
+      });
+    },error=>{
+      this.setToasterMessage('Fail to set accident vehicle information');
+      this.loadingData = false;
+    });
   }
 
   setLoadingMessages(message){
@@ -347,7 +362,5 @@ export class AccidentVehiclePage {
     });
     toast.present();
   }
-
-
 
 }

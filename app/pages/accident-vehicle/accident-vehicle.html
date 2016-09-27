@@ -53,12 +53,12 @@
 
           <ion-item >
             <ion-label floating >Driver Licence Number</ion-label>
-            <ion-input type="text" required [(ngModel)]="dataValues[programNameRelationDataElementMapping[programDriverName]]" ></ion-input>
+            <ion-input type="text" required [(ngModel)]="dataValues[dataElementDriverId]" ></ion-input>
           </ion-item>
 
           <ion-item >
             <ion-label floating>Vehicle plate number</ion-label>
-            <ion-input type="text" required [(ngModel)]="dataValues[programNameRelationDataElementMapping[programVehicleName]]"></ion-input>
+            <ion-input type="text" required [(ngModel)]="dataValues[dataElementVehicleId]"></ion-input>
           </ion-item>
 
           <div *ngIf="program.programStages">

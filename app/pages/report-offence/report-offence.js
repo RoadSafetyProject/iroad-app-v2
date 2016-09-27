@@ -260,6 +260,7 @@ var ReportOffencePage = (function () {
             this.setToasterMessage('Please Enter Vehicle plate number');
         }
     };
+    //@todo checking for required fields
     ReportOffencePage.prototype.setVehicleDataValue = function (events, programName) {
         var _this = this;
         if (events.length > 0) {

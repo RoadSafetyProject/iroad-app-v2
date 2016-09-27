@@ -83,6 +83,7 @@ export class OffencePaymentPage {
     this.loadingData = false;
   }
 
+  //@todo checking for required fields
   savePayment(){
     this.loadingData = true;
     this.loadingMessages = [];
