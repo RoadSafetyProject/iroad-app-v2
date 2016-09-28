@@ -1,11 +1,12 @@
 # iROAD 2  Application
 
 ## Plugins
+com.cordova.plugins.sms
+cordova-plugin-app-version
 cordova-plugin-camera 
 cordova-plugin-compat 
 cordova-plugin-console 
 cordova-plugin-device 
-cordova-sms-plugin
 cordova-plugin-file 
 cordova-plugin-geolocation 
 cordova-plugin-media-capture 
