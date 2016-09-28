@@ -3,6 +3,9 @@ import { Storage, LocalStorage } from 'ionic-angular';
 import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
 
+import { AppVersion } from 'ionic-native';
+import {Observable} from 'rxjs/Rx';
+
 /*
   Generated class for the User provider.
 
@@ -49,6 +52,41 @@ export class User {
 
   getUserData(){
     return this.localStorage.get('userData');
+  }
+
+  getAppInformation(){
+    let appInformation = {};
+    let promises = [];
+
+    return new Promise(function(resolve, reject) {
+      promises.push(
+        AppVersion.getAppName().then(appName=>{
+          appInformation['appName'] = appName;
+        })
+      );
+      promises.push(
+        AppVersion.getPackageName().then(packageName=>{
+          appInformation['packageName'] = packageName;
+        })
+      );
+      promises.push(
+        AppVersion.getVersionCode().then(versionCode=>{
+          appInformation['versionCode'] = versionCode;
+        })
+      );
+      promises.push(
+        AppVersion.getVersionNumber().then(versionNumber=>{
+          appInformation['versionNumber'] = versionNumber;
+        })
+      );
+
+      Observable.forkJoin(promises).subscribe(() => {
+          resolve(appInformation);
+        },
+        (error) => {
+          reject();
+        })
+    });
   }
   getUserSystemInformation(){
     return this.localStorage.get('systemInformation');

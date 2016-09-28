@@ -202,6 +202,7 @@ export class SqlLite {
     return new Promise(function(resolve, reject) {
       db.openDatabase({name: databaseName,location: 'default'}).then(() => {
         db.executeSql(query, []).then((result) => {
+          alert(JSON.stringify(self.formatQueryReturnResult(result,columns)));
           resolve(self.formatQueryReturnResult(result,columns));
         },(error) => {
           reject(error.failure);

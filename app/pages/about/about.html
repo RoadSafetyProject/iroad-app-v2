@@ -15,5 +15,42 @@
 
 
 <ion-content padding class="about">
-  About page coming soon
+  <div *ngIf="loadingData">
+    <ion-list>
+      <ion-item *ngFor="let message of loadingMessages; let currentIndex = index">
+        {{ message }}
+        <ion-icon *ngIf="(currentIndex + 1) < loadingMessages.length" name="done-all" item-right></ion-icon>
+        <div style="text-align: center" item-right *ngIf="(currentIndex + 1) >= loadingMessages.length">
+          <ion-spinner name="crescent"></ion-spinner>
+        </div>
+      </ion-item>
+    </ion-list>
+  </div>
+
+  <div *ngIf="!loadingData">
+    <ion-item-group>
+      <ion-item-divider light>
+        App Information
+      </ion-item-divider>
+      <ion-item *ngFor="let entry of appInformation | keys">
+        <h2>{{ entry.key }}</h2>
+        <p>{{ entry.value }}</p>
+      </ion-item>
+
+      <!--<ion-item-divider light>-->
+        <!--Storage status-->
+      <!--</ion-item-divider>-->
+      <!--<ion-item>Angola</ion-item>-->
+
+      <ion-item-divider light>
+        System Information
+      </ion-item-divider>
+      <ion-item *ngFor="let entry of systemInformation | keys">
+        <h2>{{ entry.key }}</h2>
+        <p>{{ entry.value }}</p>
+      </ion-item>
+
+    </ion-item-group>
+  </div>
+
 </ion-content>

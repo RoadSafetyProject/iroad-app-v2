@@ -11,6 +11,8 @@ var core_1 = require('@angular/core');
 var ionic_angular_1 = require('ionic-angular');
 var http_1 = require('@angular/http');
 require('rxjs/add/operator/map');
+var ionic_native_1 = require('ionic-native');
+var Rx_1 = require('rxjs/Rx');
 /*
   Generated class for the User provider.
 
@@ -49,6 +51,29 @@ var User = (function () {
     };
     User.prototype.getUserData = function () {
         return this.localStorage.get('userData');
+    };
+    User.prototype.getAppInformation = function () {
+        var appInformation = {};
+        var promises = [];
+        return new Promise(function (resolve, reject) {
+            promises.push(ionic_native_1.AppVersion.getAppName().then(function (appName) {
+                appInformation['appName'] = appName;
+            }));
+            promises.push(ionic_native_1.AppVersion.getPackageName().then(function (packageName) {
+                appInformation['packageName'] = packageName;
+            }));
+            promises.push(ionic_native_1.AppVersion.getVersionCode().then(function (versionCode) {
+                appInformation['versionCode'] = versionCode;
+            }));
+            promises.push(ionic_native_1.AppVersion.getVersionNumber().then(function (versionNumber) {
+                appInformation['versionNumber'] = versionNumber;
+            }));
+            Rx_1.Observable.forkJoin(promises).subscribe(function () {
+                resolve(appInformation);
+            }, function (error) {
+                reject();
+            });
+        });
     };
     User.prototype.getUserSystemInformation = function () {
         return this.localStorage.get('systemInformation');

@@ -88,6 +88,29 @@ var App = (function () {
             });
         });
     };
+    App.prototype.getStorageStatus = function (databaseName) {
+        var self = this;
+        var promises = [];
+        var storageStatus;
+        return new Promise(function (resolve, reject) {
+            var dataBaseStructure = self.sqlLite.getDataBaseStructure();
+            for (var resource in dataBaseStructure) {
+                promises.push(self.sqlLite.getAllDataFromTable(resource, databaseName).then(function (data) {
+                    alert(resource);
+                    alert(JSON.stringify(data));
+                    storageStatus[resource] = data;
+                    alert(resource + ' :: success');
+                }, function (error) {
+                    alert(resource + ' :: fail');
+                }));
+            }
+            Rx_1.Observable.forkJoin(promises).subscribe(function () {
+                resolve(storageStatus);
+            }, function (error) {
+                reject();
+            });
+        });
+    };
     App = __decorate([
         core_1.Injectable(), 
         __metadata('design:paramtypes', [http_1.Http, ionic_angular_1.LoadingController, sql_lite_1.SqlLite])
