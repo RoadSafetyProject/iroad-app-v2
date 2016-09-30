@@ -11,6 +11,8 @@ import {SqlLite} from "../../providers/sql-lite/sql-lite";
 import {AccidentWitnessPage} from '../accident-witness/accident-witness'
 import {EventProvider} from "../../providers/event-provider/event-provider";
 
+declare var SignaturePad: any;
+
 /*
   Generated class for the AccidentVehiclePage page.
 
@@ -48,6 +50,14 @@ export class AccidentVehiclePage {
   private dataElementVehicleId : string;
   private programVehicleName : string = 'Vehicle';
   private programAccident : string = 'Accident';
+
+  private signaturePad : any;
+  private signatureDataElement : any = {
+    name : "Signature",
+    id : '"',
+    imageData : "",
+    value : ""
+  };
 
   constructor(private eventProvider : EventProvider,private params: NavParams,private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
     this.user.getCurrentUser().then(currentUser=>{
@@ -180,23 +190,45 @@ export class AccidentVehiclePage {
     this.currentVehicle = "" + vehicleIndex;
   }
 
+  initiateSignaturePad(){
+    let canvas = document.getElementById('signatureCanvas');
+    this.signaturePad = new SignaturePad(canvas);
+  }
+
+  saveSignaturePad(){
+    this.signatureDataElement.imageData= this.signaturePad.toDataURL();
+  }
+
+  uploadFIleServer(){
+    //@todo uploading signature
+    //this.formatDataValues();
+  }
+
   prepareToSaveAccidentVehicle(){
     this.loadingData = true;
     this.loadingMessages = [];
     this.setLoadingMessages('Preparing accident vehicle information');
-    let dataValuesArrayList = [];
-    this.dataValuesArray.forEach((dataValues:any,index : any)=>{
-      if(Object.keys(dataValues).length > 1){
-        if(this.hasVehiclePlateNumberAndDriverLicence(dataValues,index)){
-          dataValuesArrayList.push(dataValues);
-        }
-      }
-    });
-    if(dataValuesArrayList.length == this.dataValuesArray.length ){
-      this.fetchingDrivers();
-    }else{
-      this.loadingData = false;
-    }
+
+    let parameter = {
+      accidentId : this.accidentId
+    };
+    this.setToasterMessage('Accident Vehicles has been saved successfully');
+    this.loadingData = false;
+    this.navCtrl.push(AccidentWitnessPage,parameter);
+
+    //let dataValuesArrayList = [];
+    //this.dataValuesArray.forEach((dataValues:any,index : any)=>{
+    //  if(Object.keys(dataValues).length > 1){
+    //    if(this.hasVehiclePlateNumberAndDriverLicence(dataValues,index)){
+    //      dataValuesArrayList.push(dataValues);
+    //    }
+    //  }
+    //});
+    //if(dataValuesArrayList.length == this.dataValuesArray.length ){
+    //  this.fetchingDrivers();
+    //}else{
+    //  this.loadingData = false;
+    //}
 
   }
 

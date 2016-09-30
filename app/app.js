@@ -35,7 +35,8 @@ var MyApp = (function () {
     }
     MyApp.prototype.initializeApp = function () {
         this.platform.ready().then(function () {
-            ionic_native_1.StatusBar.styleDefault();
+            ionic_native_1.StatusBar.overlaysWebView(false);
+            //StatusBar.styleDefault();
             ionic_native_1.Splashscreen.hide();
         });
     };

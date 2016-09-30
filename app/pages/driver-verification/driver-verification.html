@@ -71,14 +71,17 @@
           Historical records
         </h3>
         <ion-list >
-          <ion-item>
-            <h3>Accident</h3>
-            <p>{{ accidentVehicleHistory.length }}</p>
-          </ion-item>
-          <ion-item>
-            <h3>Offence</h3>
-            <p>{{ offenceHistory.length}}</p>
-          </ion-item>
+          <button ion-item>
+            Number of Accidents
+            <ion-badge item-right>{{ accidentVehicleHistory.length }}</ion-badge>
+            <ion-icon name="ios-arrow-forward-outline" item-right></ion-icon>
+          </button>
+
+          <button ion-item>
+            Number of Offences
+            <ion-badge item-right>{{ offenceHistory.length }}</ion-badge>
+            <ion-icon name="ios-arrow-forward-outline" item-right></ion-icon>
+          </button>
         </ion-list>
       </div>
     </ion-col>

@@ -32,7 +32,7 @@
       <div *ngIf="program.programStages">
         <div *ngIf="program.programStages.length > 0">
           <div *ngFor="let programStageDataElement of program.programStages[0].programStageDataElements">
-            <div *ngIf="programStageDataElement.displayInReports">
+            <div *ngIf="programStageDataElement.displayInReports && !(signatureDataElement.id == programStageDataElement.dataElement.id)">
               <div *ngIf="!programStageDataElement.dataElement.optionSetValue">
 
                 <ion-item *ngIf="programStageDataElement.dataElement.valueType =='BOOLEAN' ">
@@ -92,10 +92,28 @@
         </div>
       </div>
 
+      <div *ngIf="!(signatureDataElement.id =='')">
+        <ion-row>
+          <ion-col  width-50 >
+            <button (click)="initiateSignaturePad()" full >
+              Edit/Clear
+              <ion-icon name="ios-create-outline"></ion-icon>
+            </button>
+          </ion-col>
+          <ion-col  width-50 >
+            <button (click)="saveSignaturePad()" full >
+              Save
+              <ion-icon name="done-all"></ion-icon>
+            </button>
+          </ion-col>
+        </ion-row>
+        <canvas id='signatureCanvas' class="" height='200'  style='border: 1px solid black;width:100%'></canvas>
+      </div>
+
     </ion-list>
 
     <button full (click)="prepareToSaveBasicInformation()">Next</button>
   </div>
 
-
+  {{ signatureDataElement|json}}
 </ion-content>

@@ -41,6 +41,10 @@ var AccidentBasicInformationPage = (function () {
         this.loadingMessages = [];
         this.user.getCurrentUser().then(function (currentUser) {
             _this.currentUser = JSON.parse(currentUser);
+            _this.signatureDataElement = {
+                name: "Signature",
+                id: '"'
+            };
             _this.loadingProgram();
         });
     }
@@ -67,6 +71,13 @@ var AccidentBasicInformationPage = (function () {
         }
         this.setGeoLocation();
         this.loadingData = false;
+    };
+    AccidentBasicInformationPage.prototype.initiateSignaturePad = function () {
+        var canvas = document.getElementById('signatureCanvas');
+        this.signaturePad = new SignaturePad(canvas);
+    };
+    AccidentBasicInformationPage.prototype.saveSignaturePad = function () {
+        this.signatureUrl = this.signaturePad.toDataURL();
     };
     AccidentBasicInformationPage.prototype.prepareToSaveBasicInformation = function () {
         var _this = this;

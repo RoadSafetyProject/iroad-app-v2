@@ -124,6 +124,23 @@
             </div>
           </div>
 
+          <div *ngIf="!(signatureDataElement.id =='')">
+            <ion-row>
+              <ion-col  width-50 >
+                <button (click)="initiateSignaturePad()" full >
+                  Edit/Clear
+                  <ion-icon name="ios-create-outline"></ion-icon>
+                </button>
+              </ion-col>
+              <ion-col  width-50 >
+                <button (click)="saveSignaturePad()" full >
+                  Save
+                  <ion-icon name="done-all"></ion-icon>
+                </button>
+              </ion-col>
+            </ion-row>
+            <canvas id='signatureCanvas' class="" height='200'  style='border: 1px solid black;width:100%'></canvas>
+          </div>
         </ion-list>
       </div>
     </div>
@@ -141,5 +158,5 @@
     </ion-grid>
 
   </div>
-
+  {{ signatureDataElement|json }}
 </ion-content>

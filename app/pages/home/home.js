@@ -46,6 +46,13 @@ var HomePage = (function () {
     HomePage.prototype.openPage = function (page) {
         this.navCtrl.setRoot(page.component);
     };
+    HomePage.prototype.initDrawing = function () {
+        var canvas = document.getElementById('signatureCanvas');
+        this.signaturePad = new SignaturePad(canvas);
+    };
+    HomePage.prototype.saveDrawing = function () {
+        this.signatureUrl = this.signaturePad.toDataURL();
+    };
     HomePage = __decorate([
         core_1.Component({
             templateUrl: 'build/pages/home/home.html',

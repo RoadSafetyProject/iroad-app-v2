@@ -11,6 +11,8 @@ import {SqlLite} from "../../providers/sql-lite/sql-lite";
 import {AccidentVehiclePage} from '../accident-vehicle/accident-vehicle';
 import {EventProvider} from "../../providers/event-provider/event-provider";
 
+declare var SignaturePad: any;
+
 /*
   Generated class for the AccidentBasicInformationPage page.
 
@@ -30,6 +32,14 @@ export class AccidentBasicInformationPage {
   private currentCoordinate : any = {};
   private loadingData : boolean = false;
   private loadingMessages : any = [];
+
+  private signaturePad : any;
+  private signatureDataElement : any = {
+    name : "Signature",
+    id : '"',
+    imageData : "",
+    value : ""
+  };
 
   constructor(private eventProvider : EventProvider,private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
     this.user.getCurrentUser().then(currentUser=>{
@@ -59,17 +69,52 @@ export class AccidentBasicInformationPage {
   setProgramMetadata(programs){
     if(programs.length > 0){
       this.program = programs[0];
+      this.program.programStages[0].programStageDataElements.forEach(programStageDataElement=>{
+        if(programStageDataElement.dataElement.name.toLowerCase() == this.signatureDataElement.name.toLocaleLowerCase()){
+          this.signatureDataElement.id = programStageDataElement.dataElement.id;
+        }
+      })
     }
     this.setGeoLocation();
     this.loadingData = false;
   }
 
+  initiateSignaturePad(){
+    let canvas = document.getElementById('signatureCanvas');
+    this.signaturePad = new SignaturePad(canvas);
+  }
+
+  saveSignaturePad(){
+    this.signatureDataElement.imageData= this.signaturePad.toDataURL();
+  }
+
+  uploadFIleServer(){
+    //@todo uploading signature
+    this.formatDataValues();
+  }
 
   prepareToSaveBasicInformation(){
-    //@todo checking for required fields
     this.loadingData = true;
     this.loadingMessages = [];
+    if(this.signatureDataElement.imageData){
+      this.setLoadingMessages('Uploading Signature');
+      this.uploadFIleServer();
+    }else {
+      this.formatDataValues();
+    }
+  }
+
+
+
+  formatDataValues(){
+    //@todo checking for required fields
     this.setLoadingMessages('Preparing accident basic information');
+    let parameter = {
+      accidentId : 'accidentId'
+    };
+    this.loadingData = false;
+    this.navCtrl.push(AccidentVehiclePage,parameter);
+    /*
     this.eventProvider.getFormattedDataValuesToEventObject(this.dataValues,this.program,this.currentUser,this.currentCoordinate).then(event=>{
       this.setLoadingMessages('Saving accident basic information');
       this.eventProvider.saveEvent(event,this.currentUser).then(result=>{
@@ -81,7 +126,12 @@ export class AccidentBasicInformationPage {
     },error=>{
       this.loadingData = false;
       this.setToasterMessage('Fail to prepare accident basic information');
-    });
+    });let parameter = {
+      accidentId : eventId
+    };
+    this.loadingData = false;
+    this.navCtrl.push(AccidentVehiclePage,parameter);
+    */
   }
 
   goToAccidentVehicle(result){

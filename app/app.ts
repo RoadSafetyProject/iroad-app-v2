@@ -37,7 +37,8 @@ class MyApp {
 
   initializeApp() {
     this.platform.ready().then(() => {
-      StatusBar.styleDefault();
+      StatusBar.overlaysWebView(false);
+      //StatusBar.styleDefault();
       Splashscreen.hide();
     });
   }

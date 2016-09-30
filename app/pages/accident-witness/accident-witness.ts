@@ -12,6 +12,8 @@ import {HomePage} from '../home/home'
 
 import {EventProvider} from "../../providers/event-provider/event-provider";
 
+declare var SignaturePad: any;
+
 /*
   Generated class for the AccidentWitnessPage page.
 
@@ -37,6 +39,14 @@ export class AccidentWitnessPage {
   private relationDataElementPrefix : string = "Program_";
   private programAccident : string = 'Accident';
   private programAccidentId :string ;
+
+  private signaturePad : any;
+  private signatureDataElement : any = {
+    name : "Signature",
+    id : '"',
+    imageData : "",
+    value : ""
+  };
 
   constructor(private eventProvider : EventProvider,private params: NavParams,private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
     this.user.getCurrentUser().then(currentUser=>{
@@ -124,6 +134,20 @@ export class AccidentWitnessPage {
         this.currentCoordinate.longitude = '0';
       }
     });
+  }
+
+  initiateSignaturePad(){
+    let canvas = document.getElementById('signatureCanvas');
+    this.signaturePad = new SignaturePad(canvas);
+  }
+
+  saveSignaturePad(){
+    this.signatureDataElement.imageData= this.signaturePad.toDataURL();
+  }
+
+  uploadFIleServer(){
+    //@todo uploading signature
+    //this.formatDataValues();
   }
 
   //@todo checking for required fields

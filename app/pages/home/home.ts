@@ -9,6 +9,7 @@ import { ReportOffencePage } from '../report-offence/report-offence';
 import { DriverVerificationPage } from '../driver-verification/driver-verification';
 import { VehicleVerificationPage } from '../vehicle-verification/vehicle-verification';
 
+declare var SignaturePad: any;
 /*
   Generated class for the HomePage page.
 
@@ -19,10 +20,15 @@ import { VehicleVerificationPage } from '../vehicle-verification/vehicle-verific
   templateUrl: 'build/pages/home/home.html',
   providers : [HttpClient,User]
 })
+
+
 export class HomePage {
 
   public currentUser : any;
   public userData : any;
+
+  private signaturePad : any;
+  private signatureUrl : any;
 
   public pages: Array<{title: string, component: any}>;
 
@@ -47,6 +53,16 @@ export class HomePage {
 
   openPage(page) {
     this.navCtrl.setRoot(page.component);
+  }
+
+
+  initDrawing(){
+    let canvas = document.getElementById('signatureCanvas');
+    this.signaturePad = new SignaturePad(canvas);
+  }
+
+  saveDrawing(){
+    this.signatureUrl= this.signaturePad.toDataURL();
   }
 
 }
