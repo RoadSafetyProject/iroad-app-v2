@@ -116,20 +116,22 @@
           <div *ngIf="!(signatureDataElement.id =='')">
             <ion-row>
               <ion-col  width-50 >
-                <button (click)="initiateSignaturePad()" full >
+                <button (click)="initiateSignaturePad(witnessIndex)" full >
                   Edit/Clear
                   <ion-icon name="ios-create-outline"></ion-icon>
                 </button>
               </ion-col>
               <ion-col  width-50 >
-                <button (click)="saveSignaturePad()" full >
+                <button (click)="saveSignaturePad(witnessIndex)" full >
                   Save
                   <ion-icon name="done-all"></ion-icon>
                 </button>
               </ion-col>
             </ion-row>
-            <canvas id='signatureCanvasWitness' class="" height='200'  style='border: 1px solid black;width:100%'></canvas>
-            <img *ngIf="signatureDataElement.imageData != ''" src="{{signatureDataElement.imageData}}"/>
+            <canvas id='signatureCanvasWitness_{{witnessIndex}}' class="" height='200'  style='border: 1px solid black;width:100%'></canvas>
+            <div style="text-align:center;">
+              <img height='100' *ngIf="signatureDataElement.imageData[witnessIndex] != ''" src="{{signatureDataElement.imageData[witnessIndex]}}"/>
+            </div>
           </div>
         </ion-list>
       </div>

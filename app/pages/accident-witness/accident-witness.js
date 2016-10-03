@@ -47,7 +47,7 @@ var AccidentWitnessPage = (function () {
         this.signatureDataElement = {
             name: "Signature",
             id: "",
-            imageData: "",
+            imageData: [],
             value: ""
         };
         this.user.getCurrentUser().then(function (currentUser) {
@@ -109,6 +109,7 @@ var AccidentWitnessPage = (function () {
     };
     AccidentWitnessPage.prototype.removeWitness = function (witnessIndex) {
         this.dataValuesArray.splice(witnessIndex, 1);
+        this.deleteSignature(witnessIndex);
         if (this.dataValuesArray.length == 1) {
             this.currentWitness = "0";
         }
@@ -139,12 +140,17 @@ var AccidentWitnessPage = (function () {
             }
         });
     };
-    AccidentWitnessPage.prototype.initiateSignaturePad = function () {
-        var canvas = document.getElementById('signatureCanvasWitness');
+    AccidentWitnessPage.prototype.initiateSignaturePad = function (witnessIndex) {
+        var canvas = document.getElementById('signatureCanvasWitness_' + witnessIndex);
         this.signaturePad = new SignaturePad(canvas);
     };
-    AccidentWitnessPage.prototype.saveSignaturePad = function () {
-        this.signatureDataElement.imageData = this.signaturePad.toDataURL();
+    AccidentWitnessPage.prototype.saveSignaturePad = function (witnessIndex) {
+        this.signatureDataElement.imageData[witnessIndex] = this.signaturePad.toDataURL();
+    };
+    AccidentWitnessPage.prototype.deleteSignature = function (witnessIndex) {
+        if (this.signatureDataElement.imageData[witnessIndex]) {
+            this.signatureDataElement.imageData.splice(witnessIndex, 1);
+        }
     };
     AccidentWitnessPage.prototype.uploadFIleServer = function () {
         //@todo uploading signature

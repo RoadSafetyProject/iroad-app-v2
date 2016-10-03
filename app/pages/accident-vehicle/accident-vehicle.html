@@ -140,7 +140,9 @@
               </ion-col>
             </ion-row>
             <canvas id='signatureCanvasAccidentVehicle_{{vehicleIndex}}' class="" height='200'  style='border: 1px solid black;width:100%'></canvas>
-            <img height='100' *ngIf="signatureDataElement.imageData[vehicleIndex] != ''" src="{{signatureDataElement.imageData[vehicleIndex]}}"/>
+            <div style="text-align:center;">
+              <img height='100' *ngIf="signatureDataElement.imageData[vehicleIndex] != ''" src="{{signatureDataElement.imageData[vehicleIndex]}}"/>
+            </div>
           </div>
         </ion-list>
 

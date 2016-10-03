@@ -44,7 +44,7 @@ export class AccidentWitnessPage {
   private signatureDataElement : any = {
     name : "Signature",
     id : "",
-    imageData : "",
+    imageData : [],
     value : ""
   };
 
@@ -111,6 +111,7 @@ export class AccidentWitnessPage {
 
   removeWitness(witnessIndex){
     this.dataValuesArray.splice(witnessIndex, 1);
+    this.deleteSignature(witnessIndex);
     if(this.dataValuesArray.length == 1){
       this.currentWitness = "0";
     }else if(parseInt(this.currentWitness) == this.dataValuesArray.length){
@@ -139,13 +140,19 @@ export class AccidentWitnessPage {
     });
   }
 
-  initiateSignaturePad(){
-    let canvas = document.getElementById('signatureCanvasWitness');
+  initiateSignaturePad(witnessIndex){
+    let canvas = document.getElementById('signatureCanvasWitness_'+witnessIndex);
     this.signaturePad = new SignaturePad(canvas);
   }
 
-  saveSignaturePad(){
-    this.signatureDataElement.imageData= this.signaturePad.toDataURL();
+  saveSignaturePad(witnessIndex){
+    this.signatureDataElement.imageData[witnessIndex]= this.signaturePad.toDataURL();
+  }
+
+  deleteSignature(witnessIndex){
+    if(this.signatureDataElement.imageData[witnessIndex]){
+      this.signatureDataElement.imageData.splice(witnessIndex, 1);
+    }
   }
 
   uploadFIleServer(){
