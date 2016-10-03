@@ -41,7 +41,8 @@
   <preference name="DisallowOverscroll" value="true"/>
   <preference name="android-minSdkVersion" value="16"/>
   <preference name="BackupWebStorage" value="none"/>
-  <preference name="SplashScreenDelay" value="10000"/>
+  <preference name="loadUrlTimeoutValue" value="700000"/>
+  <preference name="SplashScreenDelay" value="2000"/>
   <preference name="ShowSplashScreenSpinner" value="false"/>
   <preference name="SplashScreen" value="screen"/>
   <feature name="StatusBar">

@@ -36,7 +36,7 @@ export class AccidentBasicInformationPage {
   private signaturePad : any;
   private signatureDataElement : any = {
     name : "Signature",
-    id : '"',
+    id : "",
     imageData : "",
     value : ""
   };

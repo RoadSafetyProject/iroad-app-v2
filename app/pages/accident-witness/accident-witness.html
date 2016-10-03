@@ -128,7 +128,8 @@
                 </button>
               </ion-col>
             </ion-row>
-            <canvas id='signatureCanvas' class="" height='200'  style='border: 1px solid black;width:100%'></canvas>
+            <canvas id='signatureCanvasWitness' class="" height='200'  style='border: 1px solid black;width:100%'></canvas>
+            <img *ngIf="signatureDataElement.imageData != ''" src="{{signatureDataElement.imageData}}"/>
           </div>
         </ion-list>
       </div>
@@ -147,7 +148,5 @@
     </ion-grid>
 
   </div>
-
-  {{ signatureDataElement|json}}
 
 </ion-content>

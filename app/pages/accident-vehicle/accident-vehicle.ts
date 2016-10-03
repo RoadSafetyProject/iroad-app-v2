@@ -54,8 +54,8 @@ export class AccidentVehiclePage {
   private signaturePad : any;
   private signatureDataElement : any = {
     name : "Signature",
-    id : '"',
-    imageData : "",
+    id : "",
+    imageData : [],
     value : ""
   };
 
@@ -99,6 +99,9 @@ export class AccidentVehiclePage {
   setAndCheckingForRelationMetaData(){
     this.program.programStages[0].programStageDataElements.forEach(programStageDataElement=>{
       let dataElementName = programStageDataElement.dataElement.name;
+      if(dataElementName.toLowerCase() == this.signatureDataElement.name.toLocaleLowerCase()){
+        this.signatureDataElement.id = programStageDataElement.dataElement.id;
+      }
       if(dataElementName.toLowerCase() == (this.relationDataElementPrefix + this.programDriverName.replace(' ','_')).toLowerCase()){
         this.relationDataElements[programStageDataElement.dataElement.id] = {
           name : programStageDataElement.dataElement.name
@@ -177,6 +180,7 @@ export class AccidentVehiclePage {
 
   removeVehicle(vehicleIndex){
     this.dataValuesArray.splice(vehicleIndex, 1);
+    this.deleteSignature(vehicleIndex);
     if(this.dataValuesArray.length == 1){
       this.currentVehicle = "0";
     }else if(parseInt(this.currentVehicle) == this.dataValuesArray.length){
@@ -190,13 +194,19 @@ export class AccidentVehiclePage {
     this.currentVehicle = "" + vehicleIndex;
   }
 
-  initiateSignaturePad(){
-    let canvas = document.getElementById('signatureCanvas');
+  initiateSignaturePad(vehicleIndex){
+    let canvas = document.getElementById('signatureCanvasAccidentVehicle_'+vehicleIndex);
     this.signaturePad = new SignaturePad(canvas);
   }
 
-  saveSignaturePad(){
-    this.signatureDataElement.imageData= this.signaturePad.toDataURL();
+  saveSignaturePad(vehicleIndex){
+    this.signatureDataElement.imageData[vehicleIndex]= this.signaturePad.toDataURL();
+  }
+
+  deleteSignature(vehicleIndex){
+    if(this.signatureDataElement.imageData[vehicleIndex]){
+      this.signatureDataElement.imageData.splice(vehicleIndex, 1);
+    }
   }
 
   uploadFIleServer(){

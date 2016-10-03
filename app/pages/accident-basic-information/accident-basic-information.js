@@ -39,12 +39,14 @@ var AccidentBasicInformationPage = (function () {
         this.currentCoordinate = {};
         this.loadingData = false;
         this.loadingMessages = [];
+        this.signatureDataElement = {
+            name: "Signature",
+            id: "",
+            imageData: "",
+            value: ""
+        };
         this.user.getCurrentUser().then(function (currentUser) {
             _this.currentUser = JSON.parse(currentUser);
-            _this.signatureDataElement = {
-                name: "Signature",
-                id: '"'
-            };
             _this.loadingProgram();
         });
     }
@@ -66,8 +68,14 @@ var AccidentBasicInformationPage = (function () {
         });
     };
     AccidentBasicInformationPage.prototype.setProgramMetadata = function (programs) {
+        var _this = this;
         if (programs.length > 0) {
             this.program = programs[0];
+            this.program.programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
+                if (programStageDataElement.dataElement.name.toLowerCase() == _this.signatureDataElement.name.toLocaleLowerCase()) {
+                    _this.signatureDataElement.id = programStageDataElement.dataElement.id;
+                }
+            });
         }
         this.setGeoLocation();
         this.loadingData = false;
@@ -77,26 +85,49 @@ var AccidentBasicInformationPage = (function () {
         this.signaturePad = new SignaturePad(canvas);
     };
     AccidentBasicInformationPage.prototype.saveSignaturePad = function () {
-        this.signatureUrl = this.signaturePad.toDataURL();
+        this.signatureDataElement.imageData = this.signaturePad.toDataURL();
+    };
+    AccidentBasicInformationPage.prototype.uploadFIleServer = function () {
+        //@todo uploading signature
+        this.formatDataValues();
     };
     AccidentBasicInformationPage.prototype.prepareToSaveBasicInformation = function () {
-        var _this = this;
-        //@todo checking for required fields
         this.loadingData = true;
         this.loadingMessages = [];
+        if (this.signatureDataElement.imageData) {
+            this.setLoadingMessages('Uploading Signature');
+            this.uploadFIleServer();
+        }
+        else {
+            this.formatDataValues();
+        }
+    };
+    AccidentBasicInformationPage.prototype.formatDataValues = function () {
+        //@todo checking for required fields
         this.setLoadingMessages('Preparing accident basic information');
-        this.eventProvider.getFormattedDataValuesToEventObject(this.dataValues, this.program, this.currentUser, this.currentCoordinate).then(function (event) {
-            _this.setLoadingMessages('Saving accident basic information');
-            _this.eventProvider.saveEvent(event, _this.currentUser).then(function (result) {
-                _this.goToAccidentVehicle(result);
-            }, function (error) {
-                _this.loadingData = false;
-                _this.setToasterMessage('Fail to save accident basic information');
-            });
-        }, function (error) {
-            _this.loadingData = false;
-            _this.setToasterMessage('Fail to prepare accident basic information');
-        });
+        var parameter = {
+            accidentId: 'accidentId'
+        };
+        this.loadingData = false;
+        this.navCtrl.push(accident_vehicle_1.AccidentVehiclePage, parameter);
+        /*
+        this.eventProvider.getFormattedDataValuesToEventObject(this.dataValues,this.program,this.currentUser,this.currentCoordinate).then(event=>{
+          this.setLoadingMessages('Saving accident basic information');
+          this.eventProvider.saveEvent(event,this.currentUser).then(result=>{
+            this.goToAccidentVehicle(result);
+          },error=>{
+            this.loadingData = false;
+            this.setToasterMessage('Fail to save accident basic information');
+          });
+        },error=>{
+          this.loadingData = false;
+          this.setToasterMessage('Fail to prepare accident basic information');
+        });let parameter = {
+          accidentId : eventId
+        };
+        this.loadingData = false;
+        this.navCtrl.push(AccidentVehiclePage,parameter);
+        */
     };
     AccidentBasicInformationPage.prototype.goToAccidentVehicle = function (result) {
         var eventId = result.response.importSummaries[0].reference;

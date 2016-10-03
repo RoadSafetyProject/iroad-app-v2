@@ -44,6 +44,12 @@ var AccidentWitnessPage = (function () {
         this.relationDataElements = {};
         this.relationDataElementPrefix = "Program_";
         this.programAccident = 'Accident';
+        this.signatureDataElement = {
+            name: "Signature",
+            id: "",
+            imageData: "",
+            value: ""
+        };
         this.user.getCurrentUser().then(function (currentUser) {
             _this.currentUser = JSON.parse(currentUser);
             _this.accidentId = _this.params.get('accidentId');
@@ -82,6 +88,9 @@ var AccidentWitnessPage = (function () {
         var _this = this;
         this.program.programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
             var dataElementName = programStageDataElement.dataElement.name;
+            if (dataElementName.toLowerCase() == _this.signatureDataElement.name.toLocaleLowerCase()) {
+                _this.signatureDataElement.id = programStageDataElement.dataElement.id;
+            }
             if (dataElementName.toLowerCase() == (_this.relationDataElementPrefix + _this.programAccident.replace(' ', '_')).toLowerCase()) {
                 _this.relationDataElements[programStageDataElement.dataElement.id] = {
                     name: programStageDataElement.dataElement.name
@@ -129,6 +138,17 @@ var AccidentWitnessPage = (function () {
                 _this.currentCoordinate.longitude = '0';
             }
         });
+    };
+    AccidentWitnessPage.prototype.initiateSignaturePad = function () {
+        var canvas = document.getElementById('signatureCanvasWitness');
+        this.signaturePad = new SignaturePad(canvas);
+    };
+    AccidentWitnessPage.prototype.saveSignaturePad = function () {
+        this.signatureDataElement.imageData = this.signaturePad.toDataURL();
+    };
+    AccidentWitnessPage.prototype.uploadFIleServer = function () {
+        //@todo uploading signature
+        //this.formatDataValues();
     };
     //@todo checking for required fields
     AccidentWitnessPage.prototype.prepareToSaveAccidentWitness = function () {

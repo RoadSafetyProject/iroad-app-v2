@@ -43,7 +43,7 @@ export class AccidentWitnessPage {
   private signaturePad : any;
   private signatureDataElement : any = {
     name : "Signature",
-    id : '"',
+    id : "",
     imageData : "",
     value : ""
   };
@@ -88,6 +88,9 @@ export class AccidentWitnessPage {
   setAndCheckingForRelationMetaData(){
     this.program.programStages[0].programStageDataElements.forEach(programStageDataElement=>{
       let dataElementName = programStageDataElement.dataElement.name;
+      if(dataElementName.toLowerCase() == this.signatureDataElement.name.toLocaleLowerCase()){
+        this.signatureDataElement.id = programStageDataElement.dataElement.id;
+      }
       if(dataElementName.toLowerCase() == (this.relationDataElementPrefix + this.programAccident.replace(' ','_')).toLowerCase()){
         this.relationDataElements[programStageDataElement.dataElement.id] = {
           name : programStageDataElement.dataElement.name
@@ -137,7 +140,7 @@ export class AccidentWitnessPage {
   }
 
   initiateSignaturePad(){
-    let canvas = document.getElementById('signatureCanvas');
+    let canvas = document.getElementById('signatureCanvasWitness');
     this.signaturePad = new SignaturePad(canvas);
   }
 

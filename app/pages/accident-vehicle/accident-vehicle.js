@@ -53,6 +53,12 @@ var AccidentVehiclePage = (function () {
         this.vehiclesObjectData = [];
         this.programVehicleName = 'Vehicle';
         this.programAccident = 'Accident';
+        this.signatureDataElement = {
+            name: "Signature",
+            id: "",
+            imageData: [],
+            value: ""
+        };
         this.user.getCurrentUser().then(function (currentUser) {
             _this.currentUser = JSON.parse(currentUser);
             _this.accidentId = _this.params.get('accidentId');
@@ -91,6 +97,9 @@ var AccidentVehiclePage = (function () {
         var _this = this;
         this.program.programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
             var dataElementName = programStageDataElement.dataElement.name;
+            if (dataElementName.toLowerCase() == _this.signatureDataElement.name.toLocaleLowerCase()) {
+                _this.signatureDataElement.id = programStageDataElement.dataElement.id;
+            }
             if (dataElementName.toLowerCase() == (_this.relationDataElementPrefix + _this.programDriverName.replace(' ', '_')).toLowerCase()) {
                 _this.relationDataElements[programStageDataElement.dataElement.id] = {
                     name: programStageDataElement.dataElement.name
@@ -163,6 +172,7 @@ var AccidentVehiclePage = (function () {
     };
     AccidentVehiclePage.prototype.removeVehicle = function (vehicleIndex) {
         this.dataValuesArray.splice(vehicleIndex, 1);
+        this.deleteSignature(vehicleIndex);
         if (this.dataValuesArray.length == 1) {
             this.currentVehicle = "0";
         }
@@ -176,25 +186,45 @@ var AccidentVehiclePage = (function () {
     AccidentVehiclePage.prototype.showSegment = function (vehicleIndex) {
         this.currentVehicle = "" + vehicleIndex;
     };
+    AccidentVehiclePage.prototype.initiateSignaturePad = function (vehicleIndex) {
+        var canvas = document.getElementById('signatureCanvasAccidentVehicle_' + vehicleIndex);
+        this.signaturePad = new SignaturePad(canvas);
+    };
+    AccidentVehiclePage.prototype.saveSignaturePad = function (vehicleIndex) {
+        this.signatureDataElement.imageData[vehicleIndex] = this.signaturePad.toDataURL();
+    };
+    AccidentVehiclePage.prototype.deleteSignature = function (vehicleIndex) {
+        if (this.signatureDataElement.imageData[vehicleIndex]) {
+            this.signatureDataElement.imageData.splice(vehicleIndex, 1);
+        }
+    };
+    AccidentVehiclePage.prototype.uploadFIleServer = function () {
+        //@todo uploading signature
+        //this.formatDataValues();
+    };
     AccidentVehiclePage.prototype.prepareToSaveAccidentVehicle = function () {
-        var _this = this;
         this.loadingData = true;
         this.loadingMessages = [];
         this.setLoadingMessages('Preparing accident vehicle information');
-        var dataValuesArrayList = [];
-        this.dataValuesArray.forEach(function (dataValues, index) {
-            if (Object.keys(dataValues).length > 1) {
-                if (_this.hasVehiclePlateNumberAndDriverLicence(dataValues, index)) {
-                    dataValuesArrayList.push(dataValues);
-                }
-            }
-        });
-        if (dataValuesArrayList.length == this.dataValuesArray.length) {
-            this.fetchingDrivers();
-        }
-        else {
-            this.loadingData = false;
-        }
+        var parameter = {
+            accidentId: this.accidentId
+        };
+        this.setToasterMessage('Accident Vehicles has been saved successfully');
+        this.loadingData = false;
+        this.navCtrl.push(accident_witness_1.AccidentWitnessPage, parameter);
+        //let dataValuesArrayList = [];
+        //this.dataValuesArray.forEach((dataValues:any,index : any)=>{
+        //  if(Object.keys(dataValues).length > 1){
+        //    if(this.hasVehiclePlateNumberAndDriverLicence(dataValues,index)){
+        //      dataValuesArrayList.push(dataValues);
+        //    }
+        //  }
+        //});
+        //if(dataValuesArrayList.length == this.dataValuesArray.length ){
+        //  this.fetchingDrivers();
+        //}else{
+        //  this.loadingData = false;
+        //}
     };
     AccidentVehiclePage.prototype.hasVehiclePlateNumberAndDriverLicence = function (dataValues, index) {
         var result = true;
