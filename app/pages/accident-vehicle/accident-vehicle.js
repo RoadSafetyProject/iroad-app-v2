@@ -198,33 +198,25 @@ var AccidentVehiclePage = (function () {
             this.signatureDataElement.imageData.splice(vehicleIndex, 1);
         }
     };
-    AccidentVehiclePage.prototype.uploadFIleServer = function () {
-        //@todo uploading signature
-        //this.formatDataValues();
-    };
     AccidentVehiclePage.prototype.prepareToSaveAccidentVehicle = function () {
+        var _this = this;
         this.loadingData = true;
         this.loadingMessages = [];
         this.setLoadingMessages('Preparing accident vehicle information');
-        var parameter = {
-            accidentId: this.accidentId
-        };
-        this.setToasterMessage('Accident Vehicles has been saved successfully');
-        this.loadingData = false;
-        this.navCtrl.push(accident_witness_1.AccidentWitnessPage, parameter);
-        //let dataValuesArrayList = [];
-        //this.dataValuesArray.forEach((dataValues:any,index : any)=>{
-        //  if(Object.keys(dataValues).length > 1){
-        //    if(this.hasVehiclePlateNumberAndDriverLicence(dataValues,index)){
-        //      dataValuesArrayList.push(dataValues);
-        //    }
-        //  }
-        //});
-        //if(dataValuesArrayList.length == this.dataValuesArray.length ){
-        //  this.fetchingDrivers();
-        //}else{
-        //  this.loadingData = false;
-        //}
+        var dataValuesArrayList = [];
+        this.dataValuesArray.forEach(function (dataValues, index) {
+            if (Object.keys(dataValues).length > 1) {
+                if (_this.hasVehiclePlateNumberAndDriverLicence(dataValues, index)) {
+                    dataValuesArrayList.push(dataValues);
+                }
+            }
+        });
+        if (dataValuesArrayList.length == this.dataValuesArray.length) {
+            this.fetchingDrivers();
+        }
+        else {
+            this.loadingData = false;
+        }
     };
     AccidentVehiclePage.prototype.hasVehiclePlateNumberAndDriverLicence = function (dataValues, index) {
         var result = true;
@@ -324,6 +316,7 @@ var AccidentVehiclePage = (function () {
         }
     };
     //@todo checking for required fields
+    //@todo uploading signature
     AccidentVehiclePage.prototype.setAndSaveAccidentVehiclesInformation = function () {
         var _this = this;
         var newDataValuesArray = [];

@@ -109,12 +109,6 @@ export class AccidentBasicInformationPage {
   formatDataValues(){
     //@todo checking for required fields
     this.setLoadingMessages('Preparing accident basic information');
-    let parameter = {
-      accidentId : 'accidentId'
-    };
-    this.loadingData = false;
-    this.navCtrl.push(AccidentVehiclePage,parameter);
-    /*
     this.eventProvider.getFormattedDataValuesToEventObject(this.dataValues,this.program,this.currentUser,this.currentCoordinate).then(event=>{
       this.setLoadingMessages('Saving accident basic information');
       this.eventProvider.saveEvent(event,this.currentUser).then(result=>{
@@ -131,7 +125,6 @@ export class AccidentBasicInformationPage {
     };
     this.loadingData = false;
     this.navCtrl.push(AccidentVehiclePage,parameter);
-    */
   }
 
   goToAccidentVehicle(result){

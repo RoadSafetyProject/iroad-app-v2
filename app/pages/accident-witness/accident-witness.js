@@ -152,11 +152,8 @@ var AccidentWitnessPage = (function () {
             this.signatureDataElement.imageData.splice(witnessIndex, 1);
         }
     };
-    AccidentWitnessPage.prototype.uploadFIleServer = function () {
-        //@todo uploading signature
-        //this.formatDataValues();
-    };
     //@todo checking for required fields
+    //@todo uploading signature
     AccidentWitnessPage.prototype.prepareToSaveAccidentWitness = function () {
         var _this = this;
         this.loadingData = true;

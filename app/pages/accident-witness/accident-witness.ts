@@ -155,12 +155,8 @@ export class AccidentWitnessPage {
     }
   }
 
-  uploadFIleServer(){
-    //@todo uploading signature
-    //this.formatDataValues();
-  }
-
   //@todo checking for required fields
+  //@todo uploading signature
   prepareToSaveAccidentWitness(){
     this.loadingData = true;
     this.loadingMessages = [];

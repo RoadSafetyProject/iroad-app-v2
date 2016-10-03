@@ -103,31 +103,26 @@ var AccidentBasicInformationPage = (function () {
         }
     };
     AccidentBasicInformationPage.prototype.formatDataValues = function () {
+        var _this = this;
         //@todo checking for required fields
         this.setLoadingMessages('Preparing accident basic information');
+        this.eventProvider.getFormattedDataValuesToEventObject(this.dataValues, this.program, this.currentUser, this.currentCoordinate).then(function (event) {
+            _this.setLoadingMessages('Saving accident basic information');
+            _this.eventProvider.saveEvent(event, _this.currentUser).then(function (result) {
+                _this.goToAccidentVehicle(result);
+            }, function (error) {
+                _this.loadingData = false;
+                _this.setToasterMessage('Fail to save accident basic information');
+            });
+        }, function (error) {
+            _this.loadingData = false;
+            _this.setToasterMessage('Fail to prepare accident basic information');
+        });
         var parameter = {
-            accidentId: 'accidentId'
+            accidentId: eventId
         };
         this.loadingData = false;
         this.navCtrl.push(accident_vehicle_1.AccidentVehiclePage, parameter);
-        /*
-        this.eventProvider.getFormattedDataValuesToEventObject(this.dataValues,this.program,this.currentUser,this.currentCoordinate).then(event=>{
-          this.setLoadingMessages('Saving accident basic information');
-          this.eventProvider.saveEvent(event,this.currentUser).then(result=>{
-            this.goToAccidentVehicle(result);
-          },error=>{
-            this.loadingData = false;
-            this.setToasterMessage('Fail to save accident basic information');
-          });
-        },error=>{
-          this.loadingData = false;
-          this.setToasterMessage('Fail to prepare accident basic information');
-        });let parameter = {
-          accidentId : eventId
-        };
-        this.loadingData = false;
-        this.navCtrl.push(AccidentVehiclePage,parameter);
-        */
     };
     AccidentBasicInformationPage.prototype.goToAccidentVehicle = function (result) {
         var eventId = result.response.importSummaries[0].reference;

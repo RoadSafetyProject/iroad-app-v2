@@ -108,6 +108,9 @@
           </ion-col>
         </ion-row>
         <canvas id='signatureCanvas' class="" height='200'  style='border: 1px solid black;width:100%'></canvas>
+        <div style="text-align:center;" *ngIf="signatureDataElement.imageData !=''" >
+          <img height='100' src="{{signatureDataElement.imageData}}"/>
+        </div>
       </div>
 
     </ion-list>

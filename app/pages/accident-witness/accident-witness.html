@@ -129,8 +129,8 @@
               </ion-col>
             </ion-row>
             <canvas id='signatureCanvasWitness_{{witnessIndex}}' class="" height='200'  style='border: 1px solid black;width:100%'></canvas>
-            <div style="text-align:center;">
-              <img height='100' *ngIf="signatureDataElement.imageData[witnessIndex] != ''" src="{{signatureDataElement.imageData[witnessIndex]}}"/>
+            <div style="text-align:center;" *ngIf="signatureDataElement.imageData[witnessIndex]">
+              <img height='100'  src="{{signatureDataElement.imageData[witnessIndex]}}"/>
             </div>
           </div>
         </ion-list>

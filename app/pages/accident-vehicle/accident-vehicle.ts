@@ -209,36 +209,24 @@ export class AccidentVehiclePage {
     }
   }
 
-  uploadFIleServer(){
-    //@todo uploading signature
-    //this.formatDataValues();
-  }
-
   prepareToSaveAccidentVehicle(){
     this.loadingData = true;
     this.loadingMessages = [];
     this.setLoadingMessages('Preparing accident vehicle information');
 
-    let parameter = {
-      accidentId : this.accidentId
-    };
-    this.setToasterMessage('Accident Vehicles has been saved successfully');
-    this.loadingData = false;
-    this.navCtrl.push(AccidentWitnessPage,parameter);
-
-    //let dataValuesArrayList = [];
-    //this.dataValuesArray.forEach((dataValues:any,index : any)=>{
-    //  if(Object.keys(dataValues).length > 1){
-    //    if(this.hasVehiclePlateNumberAndDriverLicence(dataValues,index)){
-    //      dataValuesArrayList.push(dataValues);
-    //    }
-    //  }
-    //});
-    //if(dataValuesArrayList.length == this.dataValuesArray.length ){
-    //  this.fetchingDrivers();
-    //}else{
-    //  this.loadingData = false;
-    //}
+    let dataValuesArrayList = [];
+    this.dataValuesArray.forEach((dataValues:any,index : any)=>{
+      if(Object.keys(dataValues).length > 1){
+        if(this.hasVehiclePlateNumberAndDriverLicence(dataValues,index)){
+          dataValuesArrayList.push(dataValues);
+        }
+      }
+    });
+    if(dataValuesArrayList.length == this.dataValuesArray.length ){
+      this.fetchingDrivers();
+    }else{
+      this.loadingData = false;
+    }
 
   }
 
@@ -340,6 +328,7 @@ export class AccidentVehiclePage {
   }
 
   //@todo checking for required fields
+  //@todo uploading signature
   setAndSaveAccidentVehiclesInformation(){
     let newDataValuesArray = [];
     this.setLoadingMessages('Setting accident vehicle information');
