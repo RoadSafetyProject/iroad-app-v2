@@ -211,7 +211,7 @@ export class DriverVerificationPage {
   }
 
   loadingOffenceHistory(){
-    this.setLoadingMessages('Loading accident history');
+    this.setLoadingMessages('Loading offence history');
     let dataElementId = this.programNameDataElementMapping[this.programOffenceEvent];
     let value = this.driver.events.event;
     let programId = this.programNameProgramMapping[this.programOffenceEvent];

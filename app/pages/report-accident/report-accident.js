@@ -40,7 +40,7 @@ var ReportAccidentPage = (function () {
             _this.mediaData = imageData;
             _this.setToasterMessage('Photo has been taken successfully');
         }, function () {
-            _this.setStickToasterMessage('Fail to take a photo');
+            _this.setToasterMessage('Fail to take a photo');
         });
     };
     ReportAccidentPage.prototype.pickPhotoFromGallery = function () {
@@ -53,7 +53,7 @@ var ReportAccidentPage = (function () {
             _this.mediaData = imageData;
             _this.setToasterMessage('Photo has been selected successfully');
         }, function () {
-            _this.setStickToasterMessage('Fail to take a photo');
+            _this.setToasterMessage('Fail to pick a photo');
         });
     };
     ReportAccidentPage.prototype.takeVideo = function () {

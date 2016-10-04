@@ -201,7 +201,7 @@ export class VehicleVerificationPage {
   }
 
   loadingOffenceHistory(){
-    this.setLoadingMessages('Loading accident history');
+    this.setLoadingMessages('Loading offence history');
     let dataElementId = this.programNameDataElementMapping[this.programOffenceEvent];
     let value = this.vehicle.events.event;
     let programId = this.programNameProgramMapping[this.programOffenceEvent];

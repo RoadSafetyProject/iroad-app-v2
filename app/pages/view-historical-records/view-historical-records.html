@@ -15,30 +15,33 @@
 
 <ion-content  class="view-historical-records">
   <div *ngIf="loadingData">
-    <ion-list>
-      <ion-item *ngFor="let message of loadingMessages; let currentIndex = index">
-        {{ message }}
-        <ion-icon *ngIf="(currentIndex + 1) < loadingMessages.length" name="done-all" item-right></ion-icon>
-        <div style="text-align: center" item-right *ngIf="(currentIndex + 1) >= loadingMessages.length">
-          <ion-spinner name="crescent"></ion-spinner>
-        </div>
-      </ion-item>
-    </ion-list>
+    <ion-card>
+      <ion-card-content >
+        <ion-list>
+          <ion-item *ngFor="let message of loadingMessages; let currentIndex = index" >
+            {{ message }}
+            <ion-icon *ngIf="(currentIndex + 1) < loadingMessages.length" name="done-all" item-right></ion-icon>
+            <div style="text-align: center" item-right *ngIf="(currentIndex + 1) >= loadingMessages.length">
+              <ion-spinner name="crescent"></ion-spinner>
+            </div>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
   </div>
 
   <div *ngIf="!loadingData">
     <div *ngFor="let history of historicalRecords">
       <ion-card  *ngIf="history.dataValues.length>0">
         <ion-card-content >
-          <ion-list >
             <div *ngFor="let dataValue of history.dataValues">
-              <ion-item *ngIf="dataElementToDataElementNameMapping[dataValue.dataElement]">
+              <div *ngIf="dataElementToDataElementNameMapping[dataValue.dataElement]">
                 <h2>{{ dataElementToDataElementNameMapping[dataValue.dataElement] }}</h2>
                 <p>{{ dataValue.value }}</p>
-              </ion-item>
-            </div>
-          </ion-list>
+                <hr>
+              </div>
 
+            </div>
         </ion-card-content>
       </ion-card>
     </div>

@@ -215,7 +215,7 @@ var DriverVerificationPage = (function () {
     };
     DriverVerificationPage.prototype.loadingOffenceHistory = function () {
         var _this = this;
-        this.setLoadingMessages('Loading accident history');
+        this.setLoadingMessages('Loading offence history');
         var dataElementId = this.programNameDataElementMapping[this.programOffenceEvent];
         var value = this.driver.events.event;
         var programId = this.programNameProgramMapping[this.programOffenceEvent];

@@ -36,7 +36,7 @@ export class ReportAccidentPage {
       this.mediaData = imageData;
       this.setToasterMessage('Photo has been taken successfully');
     }, () => {
-      this.setStickToasterMessage('Fail to take a photo');
+      this.setToasterMessage('Fail to take a photo');
     });
 
   }
@@ -50,7 +50,7 @@ export class ReportAccidentPage {
       this.mediaData = imageData;
       this.setToasterMessage('Photo has been selected successfully');
     }, () => {
-      this.setStickToasterMessage('Fail to take a photo');
+      this.setToasterMessage('Fail to pick a photo');
     });
   }
 
