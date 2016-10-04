@@ -8,6 +8,8 @@ import {HttpClient} from '../../providers/http-client/http-client';
 import {SqlLite} from "../../providers/sql-lite/sql-lite";
 import {EventProvider} from "../../providers/event-provider/event-provider";
 
+import {ViewHistoricalRecordsPage} from '../view-historical-records/view-historical-records';
+
 /*
   Generated class for the DriverVerificationPage page.
 
@@ -23,6 +25,7 @@ export class DriverVerificationPage {
   private driver : any ={};
   private programName: string = "Driver";
   private programAccidentVehicle :string = "Accident Vehicle";
+  private programAccident : string = "Accident";
   private programOffenceEvent :string = "Offence Event";
   private programNameDataElementMapping : any = {};
   private relationDataElementPrefix : string = "Program_";
@@ -133,6 +136,8 @@ export class DriverVerificationPage {
     programs[0].programStages[0].programStageDataElements.forEach(programStageDataElement=>{
       if((this.relationDataElementPrefix+this.programName.replace(' ','_')).toLowerCase() == programStageDataElement.dataElement.name.toLowerCase()){
         this.programNameDataElementMapping[programName] = programStageDataElement.dataElement.id;
+      }if((this.relationDataElementPrefix+this.programAccident.replace(' ','_')).toLowerCase() == programStageDataElement.dataElement.name.toLowerCase()){
+        this.programNameDataElementMapping[this.programAccident] = programStageDataElement.dataElement.id;
       }
     })
   }
@@ -222,6 +227,34 @@ export class DriverVerificationPage {
   setOffenceHistory(events){
     this.offenceHistory = events;
     this.loadingData = false;
+  }
+
+
+  ViewHistoricalRecords(nameOfHistoricalRecords){
+    let  title= "";
+    let historicalRecordsIds = [];
+    if(nameOfHistoricalRecords == this.programAccident){
+      let dataElementId = this.programNameDataElementMapping[nameOfHistoricalRecords];
+      title = "List of Accidents";
+      this.accidentVehicleHistory.forEach(accidentVehicle=>{
+        accidentVehicle.dataValues.forEach(dataValue=>{
+          if(dataValue.dataElement == dataElementId){
+            historicalRecordsIds.push(dataValue.value);
+          }
+        });
+      })
+    }else if(nameOfHistoricalRecords == this.programOffenceEvent){
+      title = "List Of Offence";
+      this.offenceHistory.forEach(offence=>{
+        historicalRecordsIds.push(offence.event);
+      });
+    }
+    let parameter = {
+      programName : nameOfHistoricalRecords,
+      nameOfHistoricalRecords : title,
+      historicalRecordsIds : historicalRecordsIds
+    };
+    this.navCtrl.push(ViewHistoricalRecordsPage,parameter);
   }
 
   setLoadingMessages(message){

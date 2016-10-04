@@ -120,11 +120,7 @@ export class AccidentBasicInformationPage {
     },error=>{
       this.loadingData = false;
       this.setToasterMessage('Fail to prepare accident basic information');
-    });let parameter = {
-      accidentId : eventId
-    };
-    this.loadingData = false;
-    this.navCtrl.push(AccidentVehiclePage,parameter);
+    });
   }
 
   goToAccidentVehicle(result){

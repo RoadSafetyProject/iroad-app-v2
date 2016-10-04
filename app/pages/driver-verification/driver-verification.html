@@ -71,13 +71,13 @@
           Historical records
         </h3>
         <ion-list >
-          <button ion-item>
+          <button ion-item (click)="ViewHistoricalRecords(programAccident)">
             Number of Accidents
             <ion-badge item-right>{{ accidentVehicleHistory.length }}</ion-badge>
             <ion-icon name="ios-arrow-forward-outline" item-right></ion-icon>
           </button>
 
-          <button ion-item>
+          <button ion-item (click)="ViewHistoricalRecords(programOffenceEvent)">
             Number of Offences
             <ion-badge item-right>{{ offenceHistory.length }}</ion-badge>
             <ion-icon name="ios-arrow-forward-outline" item-right></ion-icon>

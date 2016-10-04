@@ -216,5 +216,23 @@ export class EventProvider {
     return eventListData.events;
   }
 
+  getEventByEventIds(eventIDs,programId,user){
+    let self = this;
+
+    return new Promise(function(resolve, reject){
+      if (eventIDs.length >0) {
+        let eventListUrl = "/api/events.json?program=" + programId + "&event=" + eventIDs.join(";");
+        self.httpClient.get(eventListUrl,user).subscribe(eventListData=>{
+          eventListData = eventListData.json();
+          resolve(self.getEventList(eventListData));
+        },error=>{
+          reject(error);
+        })
+      }else{
+        resolve();
+      }
+    });
+  }
+
 }
 

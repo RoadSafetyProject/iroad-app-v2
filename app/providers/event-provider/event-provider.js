@@ -186,6 +186,23 @@ var EventProvider = (function () {
     EventProvider.prototype.getEventList = function (eventListData) {
         return eventListData.events;
     };
+    EventProvider.prototype.getEventByEventIds = function (eventIDs, programId, user) {
+        var self = this;
+        return new Promise(function (resolve, reject) {
+            if (eventIDs.length > 0) {
+                var eventListUrl = "/api/events.json?program=" + programId + "&event=" + eventIDs.join(";");
+                self.httpClient.get(eventListUrl, user).subscribe(function (eventListData) {
+                    eventListData = eventListData.json();
+                    resolve(self.getEventList(eventListData));
+                }, function (error) {
+                    reject(error);
+                });
+            }
+            else {
+                resolve();
+            }
+        });
+    };
     EventProvider = __decorate([
         core_1.Injectable(), 
         __metadata('design:paramtypes', [http_1.Http, http_client_1.HttpClient])

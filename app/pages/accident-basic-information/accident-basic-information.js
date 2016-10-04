@@ -118,11 +118,6 @@ var AccidentBasicInformationPage = (function () {
             _this.loadingData = false;
             _this.setToasterMessage('Fail to prepare accident basic information');
         });
-        var parameter = {
-            accidentId: eventId
-        };
-        this.loadingData = false;
-        this.navCtrl.push(accident_vehicle_1.AccidentVehiclePage, parameter);
     };
     AccidentBasicInformationPage.prototype.goToAccidentVehicle = function (result) {
         var eventId = result.response.importSummaries[0].reference;

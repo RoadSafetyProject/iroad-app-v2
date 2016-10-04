@@ -14,6 +14,7 @@ var user_1 = require('../../providers/user/user');
 var http_client_1 = require('../../providers/http-client/http-client');
 var sql_lite_1 = require("../../providers/sql-lite/sql-lite");
 var event_provider_1 = require("../../providers/event-provider/event-provider");
+var view_historical_records_1 = require('../view-historical-records/view-historical-records');
 /*
   Generated class for the VehicleVerificationPage page.
 
@@ -33,6 +34,7 @@ var VehicleVerificationPage = (function () {
         this.vehicle = {};
         this.programName = "Vehicle";
         this.programAccidentVehicle = "Accident Vehicle";
+        this.programAccident = "Accident";
         this.programOffenceEvent = "Offence Event";
         this.programNameDataElementMapping = {};
         this.relationDataElementPrefix = "Program_";
@@ -136,6 +138,9 @@ var VehicleVerificationPage = (function () {
             if ((_this.relationDataElementPrefix + _this.programName.replace(' ', '_')).toLowerCase() == programStageDataElement.dataElement.name.toLowerCase()) {
                 _this.programNameDataElementMapping[programName] = programStageDataElement.dataElement.id;
             }
+            if ((_this.relationDataElementPrefix + _this.programAccident.replace(' ', '_')).toLowerCase() == programStageDataElement.dataElement.name.toLowerCase()) {
+                _this.programNameDataElementMapping[_this.programAccident] = programStageDataElement.dataElement.id;
+            }
         });
     };
     VehicleVerificationPage.prototype.verifyVehicle = function () {
@@ -212,6 +217,33 @@ var VehicleVerificationPage = (function () {
     VehicleVerificationPage.prototype.setOffenceHistory = function (events) {
         this.offenceHistory = events;
         this.loadingData = false;
+    };
+    VehicleVerificationPage.prototype.ViewHistoricalRecords = function (nameOfHistoricalRecords) {
+        var title = "";
+        var historicalRecordsIds = [];
+        if (nameOfHistoricalRecords == this.programAccident) {
+            var dataElementId = this.programNameDataElementMapping[nameOfHistoricalRecords];
+            title = "List of Accidents";
+            this.accidentVehicleHistory.forEach(function (accidentVehicle) {
+                accidentVehicle.dataValues.forEach(function (dataValue) {
+                    if (dataValue.dataElement == dataElementId) {
+                        historicalRecordsIds.push(dataValue.value);
+                    }
+                });
+            });
+        }
+        else if (nameOfHistoricalRecords == this.programOffenceEvent) {
+            title = "List Of Offence";
+            this.offenceHistory.forEach(function (offence) {
+                historicalRecordsIds.push(offence.event);
+            });
+        }
+        var parameter = {
+            programName: nameOfHistoricalRecords,
+            nameOfHistoricalRecords: title,
+            historicalRecordsIds: historicalRecordsIds
+        };
+        this.navCtrl.push(view_historical_records_1.ViewHistoricalRecordsPage, parameter);
     };
     VehicleVerificationPage.prototype.setLoadingMessages = function (message) {
         this.loadingMessages.push(message);
