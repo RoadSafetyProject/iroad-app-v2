@@ -25,6 +25,9 @@ var Keys = (function () {
         if (value) {
             for (var key in value) {
                 var newValue = value[key];
+                if (newValue instanceof Object) {
+                    newValue = JSON.stringify(newValue);
+                }
                 var newKey = (key.charAt(0).toUpperCase() + key.slice(1)).replace(/([A-Z])/g, ' $1').trim();
                 keys.push({ key: newKey, value: newValue });
             }

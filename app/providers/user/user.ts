@@ -31,7 +31,6 @@ export class User {
     return Promise.resolve(systemInformation);
   }
   setUserData(userDataResponse){
-    //userDataResponse= eval('('++')');
     let userData ={
       "Name": userDataResponse.name,
       "Employer": userDataResponse.employer,
@@ -88,6 +87,7 @@ export class User {
         })
     });
   }
+
   getUserSystemInformation(){
     return this.localStorage.get('systemInformation');
   }

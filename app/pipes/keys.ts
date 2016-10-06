@@ -19,6 +19,9 @@ export class Keys {
     if(value){
       for (let key in value) {
         let newValue = value[key];
+        if(newValue instanceof Object) {
+          newValue = JSON.stringify(newValue)
+        }
         let newKey = (key.charAt(0).toUpperCase() + key.slice(1)).replace(/([A-Z])/g, ' $1').trim();
         keys.push({key: newKey, value: newValue});
       }

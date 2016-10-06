@@ -33,7 +33,6 @@ var User = (function () {
         return Promise.resolve(systemInformation);
     };
     User.prototype.setUserData = function (userDataResponse) {
-        //userDataResponse= eval('('++')');
         var userData = {
             "Name": userDataResponse.name,
             "Employer": userDataResponse.employer,
