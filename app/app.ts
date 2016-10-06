@@ -21,17 +21,17 @@ class MyApp {
 
   rootPage:any = LoginPage;
 
-  pages: Array<{title: string, component: any}>;
+  pages: Array<{title: string, component: any,icon : any}>;
 
   constructor(public platform: Platform,private user:User) {
     this.initializeApp();
     this.pages = [
-      { title: 'Home', component: HomePage },
-      { title: 'Report Accident', component: ReportAccidentPage},
-      { title: 'Report Offence', component: ReportOffencePage },
-      { title: 'Driver Verification', component: DriverVerificationPage},
-      { title: 'Vehicle Verification', component: VehicleVerificationPage},
-      { title: 'About', component: AboutPage}
+      { title: 'Home', component: HomePage ,icon :"home"},
+      { title: 'Report Accident', component: ReportAccidentPage ,icon :"planet"},
+      { title: 'Report Offence', component: ReportOffencePage ,icon :"compass"},
+      { title: 'Driver Verification', component: DriverVerificationPage ,icon :"bicycle"},
+      { title: 'Vehicle Verification', component: VehicleVerificationPage ,icon :"car"},
+      { title: 'About', component: AboutPage ,icon :"help"}
     ];
   }
 

@@ -48,22 +48,10 @@ export class AboutPage {
     this.setLoadingMessages('Loading app information');
     this.user.getAppInformation().then(appInformation=>{
       this.appInformation = appInformation;
-      this.loadingStorageStatus();
+      this.loadingData = false;
     })
   }
 
-
-
-  loadingStorageStatus(){
-    this.loadingData = false;
-    //this.app.getStorageStatus(this.currentUser.currentDatabase).then(status=>{
-    //  alert(JSON.stringify(status));
-    //  this.loadingData = false;
-    //},error=>{
-    //  alert('Fails');
-    //  this.loadingData = false;
-    //});
-  }
 
   setLoadingMessages(message){
     this.loadingMessages.push(message);

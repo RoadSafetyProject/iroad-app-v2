@@ -25,12 +25,12 @@ var MyApp = (function () {
         this.rootPage = login_1.LoginPage;
         this.initializeApp();
         this.pages = [
-            { title: 'Home', component: home_1.HomePage },
-            { title: 'Report Accident', component: report_accident_1.ReportAccidentPage },
-            { title: 'Report Offence', component: report_offence_1.ReportOffencePage },
-            { title: 'Driver Verification', component: driver_verification_1.DriverVerificationPage },
-            { title: 'Vehicle Verification', component: vehicle_verification_1.VehicleVerificationPage },
-            { title: 'About', component: about_1.AboutPage }
+            { title: 'Home', component: home_1.HomePage, icon: "home" },
+            { title: 'Report Accident', component: report_accident_1.ReportAccidentPage, icon: "planet" },
+            { title: 'Report Offence', component: report_offence_1.ReportOffencePage, icon: "compass" },
+            { title: 'Driver Verification', component: driver_verification_1.DriverVerificationPage, icon: "bicycle" },
+            { title: 'Vehicle Verification', component: vehicle_verification_1.VehicleVerificationPage, icon: "car" },
+            { title: 'About', component: about_1.AboutPage, icon: "help" }
         ];
     }
     MyApp.prototype.initializeApp = function () {

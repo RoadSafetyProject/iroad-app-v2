@@ -51,18 +51,8 @@ var AboutPage = (function () {
         this.setLoadingMessages('Loading app information');
         this.user.getAppInformation().then(function (appInformation) {
             _this.appInformation = appInformation;
-            _this.loadingStorageStatus();
+            _this.loadingData = false;
         });
-    };
-    AboutPage.prototype.loadingStorageStatus = function () {
-        this.loadingData = false;
-        //this.app.getStorageStatus(this.currentUser.currentDatabase).then(status=>{
-        //  alert(JSON.stringify(status));
-        //  this.loadingData = false;
-        //},error=>{
-        //  alert('Fails');
-        //  this.loadingData = false;
-        //});
     };
     AboutPage.prototype.setLoadingMessages = function (message) {
         this.loadingMessages.push(message);

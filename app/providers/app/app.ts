@@ -20,7 +20,7 @@ import { SMS } from 'ionic-native';
 export class App {
 
   private formattedBaseUrl :string;
-  private loading : any;
+  private storageStatus :any = {};
 
   constructor(private http: Http,private loadingController : LoadingController,private sqlLite:SqlLite) {
   }
@@ -94,35 +94,6 @@ export class App {
         })
     });
 
-  }
-
-  getStorageStatus(databaseName){
-    let self = this;
-    let promises = [];
-    let storageStatus : {};
-
-    return new Promise(function(resolve, reject) {
-      let dataBaseStructure = self.sqlLite.getDataBaseStructure();
-      for(let resource in dataBaseStructure){
-        promises.push(
-          self.sqlLite.getAllDataFromTable(resource,databaseName).then(data=>{
-            alert(resource);
-            alert(JSON.stringify(data));
-            storageStatus[resource] = data;
-            alert(resource + ' :: success');
-          },error=>{
-            alert(resource + ' :: fail');
-          })
-        );
-      }
-
-      Observable.forkJoin(promises).subscribe(() => {
-          resolve(storageStatus);
-        },
-        (error) => {
-          reject();
-        })
-    });
   }
 
 }

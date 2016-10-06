@@ -54,7 +54,7 @@
         </h3>
         <ion-list >
           <div *ngFor="let dataValue of verificationData">
-            <ion-item *ngIf="dataElementListObject[dataValue.dataElement].displayInReports">
+            <ion-item *ngIf="dataElementListObject[dataValue.dataElement].displayInReports" text-wrap>
               <h2>{{ dataElementListObject[dataValue.dataElement].name }}</h2>
               <p>{{ dataValue.value }}</p>
             </ion-item>

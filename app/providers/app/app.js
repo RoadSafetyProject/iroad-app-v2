@@ -25,6 +25,7 @@ var App = (function () {
         this.http = http;
         this.loadingController = loadingController;
         this.sqlLite = sqlLite;
+        this.storageStatus = {};
     }
     App.prototype.sendSms = function (number, message) {
         var options = {
@@ -85,29 +86,6 @@ var App = (function () {
                 resolve();
             }, function (error) {
                 reject(error.failure);
-            });
-        });
-    };
-    App.prototype.getStorageStatus = function (databaseName) {
-        var self = this;
-        var promises = [];
-        var storageStatus;
-        return new Promise(function (resolve, reject) {
-            var dataBaseStructure = self.sqlLite.getDataBaseStructure();
-            for (var resource in dataBaseStructure) {
-                promises.push(self.sqlLite.getAllDataFromTable(resource, databaseName).then(function (data) {
-                    alert(resource);
-                    alert(JSON.stringify(data));
-                    storageStatus[resource] = data;
-                    alert(resource + ' :: success');
-                }, function (error) {
-                    alert(resource + ' :: fail');
-                }));
-            }
-            Rx_1.Observable.forkJoin(promises).subscribe(function () {
-                resolve(storageStatus);
-            }, function (error) {
-                reject();
             });
         });
     };
