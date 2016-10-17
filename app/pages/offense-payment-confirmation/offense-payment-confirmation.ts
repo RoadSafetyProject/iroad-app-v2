@@ -68,9 +68,6 @@ export class OffensePaymentConfirmationPage {
       }else if(programStageDataElement.dataElement.name.toLowerCase() == this.offenceListCost.toLowerCase()){
         this.offenceListDisplayNameToDataElement[this.offenceListCost] = programStageDataElement.dataElement.id;
       }
-      if(programStageDataElement.dataElement.valueType =='BOOLEAN'){
-        this.dataValues[programStageDataElement.dataElement.id] = "false";
-      }
     });
     this.loadSelectedOffences();
     }
@@ -144,7 +141,6 @@ export class OffensePaymentConfirmationPage {
     });
     message +='Total cost Tsh ' + total + '. \n';
     message +='Payment code is ' + this.offenceId;
-    message +="\nIt's just testing from mobile app";
     return message;
   }
 
