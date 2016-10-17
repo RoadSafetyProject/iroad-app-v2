@@ -78,6 +78,8 @@ export class OffencePaymentPage {
         this.relationDataElements[programStageDataElement.dataElement.id] = {
           program : this.programOffenceEvent
         }
+      }else if(programStageDataElement.dataElement.valueType =='BOOLEAN'){
+        this.dataValues[programStageDataElement.dataElement.id] = "false";
       }
     });
     this.loadingData = false;

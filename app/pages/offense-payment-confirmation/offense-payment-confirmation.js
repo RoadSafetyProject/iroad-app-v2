@@ -71,8 +71,11 @@ var OffensePaymentConfirmationPage = (function () {
             if (programStageDataElement.dataElement.name.toLowerCase() == _this.offenceListDisplayName.toLowerCase()) {
                 _this.offenceListDisplayNameToDataElement[_this.offenceListDisplayName] = programStageDataElement.dataElement.id;
             }
-            if (programStageDataElement.dataElement.name.toLowerCase() == _this.offenceListCost.toLowerCase()) {
+            else if (programStageDataElement.dataElement.name.toLowerCase() == _this.offenceListCost.toLowerCase()) {
                 _this.offenceListDisplayNameToDataElement[_this.offenceListCost] = programStageDataElement.dataElement.id;
+            }
+            if (programStageDataElement.dataElement.valueType == 'BOOLEAN') {
+                _this.dataValues[programStageDataElement.dataElement.id] = "false";
             }
         });
         this.loadSelectedOffences();

@@ -86,6 +86,9 @@ var OffencePaymentPage = (function () {
                     program: _this.programOffenceEvent
                 };
             }
+            else if (programStageDataElement.dataElement.valueType == 'BOOLEAN') {
+                _this.dataValues[programStageDataElement.dataElement.id] = "false";
+            }
         });
         this.loadingData = false;
     };

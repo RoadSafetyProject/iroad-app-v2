@@ -88,7 +88,8 @@ export class ReportOffencePage {
         this.relationDataElements[programStageDataElement.dataElement.id] = {
           program : programName,
         }
-
+      }else if(programStageDataElement.dataElement.valueType =='BOOLEAN'){
+        this.dataValues[programStageDataElement.dataElement.id] = "false";
       }
     });
     this.fetchingPrograms(programNames);

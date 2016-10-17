@@ -90,8 +90,7 @@ export class AccidentWitnessPage {
       let dataElementName = programStageDataElement.dataElement.name;
       if(dataElementName.toLowerCase() == this.signatureDataElement.name.toLocaleLowerCase()){
         this.signatureDataElement.id = programStageDataElement.dataElement.id;
-      }
-      if(dataElementName.toLowerCase() == (this.relationDataElementPrefix + this.programAccident.replace(' ','_')).toLowerCase()){
+      }else if(dataElementName.toLowerCase() == (this.relationDataElementPrefix + this.programAccident.replace(' ','_')).toLowerCase()){
         this.relationDataElements[programStageDataElement.dataElement.id] = {
           name : programStageDataElement.dataElement.name
         };

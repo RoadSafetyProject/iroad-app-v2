@@ -96,6 +96,9 @@ var ReportOffencePage = (function () {
                     program: programName,
                 };
             }
+            else if (programStageDataElement.dataElement.valueType == 'BOOLEAN') {
+                _this.dataValues[programStageDataElement.dataElement.id] = "false";
+            }
         });
         this.fetchingPrograms(programNames);
     };

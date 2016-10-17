@@ -91,7 +91,7 @@ var AccidentWitnessPage = (function () {
             if (dataElementName.toLowerCase() == _this.signatureDataElement.name.toLocaleLowerCase()) {
                 _this.signatureDataElement.id = programStageDataElement.dataElement.id;
             }
-            if (dataElementName.toLowerCase() == (_this.relationDataElementPrefix + _this.programAccident.replace(' ', '_')).toLowerCase()) {
+            else if (dataElementName.toLowerCase() == (_this.relationDataElementPrefix + _this.programAccident.replace(' ', '_')).toLowerCase()) {
                 _this.relationDataElements[programStageDataElement.dataElement.id] = {
                     name: programStageDataElement.dataElement.name
                 };

@@ -65,9 +65,11 @@ export class OffensePaymentConfirmationPage {
     programs[0].programStages[0].programStageDataElements.forEach(programStageDataElement=>{
       if(programStageDataElement.dataElement.name.toLowerCase() == this.offenceListDisplayName.toLowerCase()){
         this.offenceListDisplayNameToDataElement[this.offenceListDisplayName] = programStageDataElement.dataElement.id;
-      }
-      if(programStageDataElement.dataElement.name.toLowerCase() == this.offenceListCost.toLowerCase()){
+      }else if(programStageDataElement.dataElement.name.toLowerCase() == this.offenceListCost.toLowerCase()){
         this.offenceListDisplayNameToDataElement[this.offenceListCost] = programStageDataElement.dataElement.id;
+      }
+      if(programStageDataElement.dataElement.valueType =='BOOLEAN'){
+        this.dataValues[programStageDataElement.dataElement.id] = "false";
       }
     });
     this.loadSelectedOffences();
