@@ -57,6 +57,7 @@ var ReportOffencePage = (function () {
         this.driverFullName = "Full Name";
         this.user.getCurrentUser().then(function (currentUser) {
             _this.currentUser = JSON.parse(currentUser);
+            _this.programEventRelation = {};
             _this.mobileNumber = "";
             _this.loadingProgram();
         });
@@ -240,6 +241,8 @@ var ReportOffencePage = (function () {
     ReportOffencePage.prototype.setDriverDataValue = function (events, programName) {
         var _this = this;
         if (events.length > 0) {
+            //set set programs to eventId relation mapper
+            this.programEventRelation[programName] = { event: events[0].event, program: events[0].program };
             var relationDataElementId = this.relationDataElementProgramMapping[programName];
             this.dataValues[relationDataElementId] = events[0].event;
             events[0].dataValues.forEach(function (dataValue) {
@@ -250,14 +253,7 @@ var ReportOffencePage = (function () {
                     _this.driverName = dataValue.value;
                 }
             });
-            var parameters = {
-                offenceId: 'eventId',
-                mobileNumber: this.mobileNumber,
-                driverName: this.driverName,
-                offenceListId: this.selectedOffenses
-            };
-            this.loadingData = false;
-            this.navCtrl.push(offense_payment_confirmation_1.OffensePaymentConfirmationPage, parameters);
+            this.fetchingVehicle();
         }
         else {
             this.loadingData = false;
@@ -291,8 +287,21 @@ var ReportOffencePage = (function () {
     ReportOffencePage.prototype.setVehicleDataValue = function (events, programName) {
         var _this = this;
         if (events.length > 0) {
+            //set set programs to eventId relation mapper
+            this.programEventRelation[programName] = { event: events[0].event, program: events[0].program };
             var relationDataElementId = this.relationDataElementProgramMapping[programName];
             this.dataValues[relationDataElementId] = events[0].event;
+            /*
+            let parameters = {
+              offenceId: 'eventId',
+              mobileNumber: this.mobileNumber,
+              driverName: this.driverName,
+              programEventRelation : this.programEventRelation,
+              offenceListId: this.selectedOffenses
+            };
+            this.loadingData = false;
+            this.navCtrl.push(OffensePaymentConfirmationPage,parameters);
+            */
             this.setLoadingMessages('Prepare offence information to save');
             this.eventProvider.getFormattedDataValuesToEventObject(this.dataValues, this.program, this.currentUser, this.currentCoordinate).then(function (event) {
                 _this.setLoadingMessages('Saving offence information');
@@ -338,6 +347,7 @@ var ReportOffencePage = (function () {
             offenceId: eventId,
             mobileNumber: this.mobileNumber,
             driverName: this.driverName,
+            programEventRelation: this.programEventRelation,
             offenceListId: this.selectedOffenses
         };
         this.loadingData = false;

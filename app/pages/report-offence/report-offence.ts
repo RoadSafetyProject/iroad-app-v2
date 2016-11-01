@@ -41,6 +41,7 @@ export class ReportOffencePage {
   private relationDataElementPrefix : string = "Program_";
   private relationPrograms :any = {};
   private data : any = {};
+  private programEventRelation : any;
 
   //driver
   //todo checking other values to be captures
@@ -54,6 +55,7 @@ export class ReportOffencePage {
   constructor(private eventProvider : EventProvider,private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
     this.user.getCurrentUser().then(currentUser=>{
       this.currentUser = JSON.parse(currentUser);
+      this.programEventRelation = {};
       this.mobileNumber = "";
       this.loadingProgram();
     });
@@ -239,6 +241,9 @@ export class ReportOffencePage {
 
   setDriverDataValue(events,programName){
     if(events.length > 0){
+      //set set programs to eventId relation mapper
+      this.programEventRelation[programName] = {event : events[0].event,program : events[0].program};
+
       let relationDataElementId  = this.relationDataElementProgramMapping[programName];
       this.dataValues[relationDataElementId] = events[0].event;
       events[0].dataValues.forEach((dataValue:any)=>{
@@ -248,16 +253,7 @@ export class ReportOffencePage {
           this.driverName = dataValue.value;
         }
       });
-      let parameters = {
-        offenceId: 'eventId',
-        mobileNumber: this.mobileNumber,
-        driverName: this.driverName,
-        offenceListId: this.selectedOffenses
-      };
-      this.loadingData = false;
-      this.navCtrl.push(OffensePaymentConfirmationPage,parameters);
-
-      //this.fetchingVehicle();
+      this.fetchingVehicle();
     }else{
       this.loadingData = false;
       this.setToasterMessage('Driver has not found');
@@ -290,8 +286,23 @@ export class ReportOffencePage {
   //@todo checking for required fields
   setVehicleDataValue(events,programName){
     if(events.length > 0){
+      //set set programs to eventId relation mapper
+      this.programEventRelation[programName] = {event : events[0].event,program : events[0].program};
+
       let relationDataElementId  = this.relationDataElementProgramMapping[programName];
       this.dataValues[relationDataElementId] = events[0].event;
+      /*
+      let parameters = {
+        offenceId: 'eventId',
+        mobileNumber: this.mobileNumber,
+        driverName: this.driverName,
+        programEventRelation : this.programEventRelation,
+        offenceListId: this.selectedOffenses
+      };
+      this.loadingData = false;
+      this.navCtrl.push(OffensePaymentConfirmationPage,parameters);
+      */
+
       this.setLoadingMessages('Prepare offence information to save');
       this.eventProvider.getFormattedDataValuesToEventObject(this.dataValues,this.program,this.currentUser,this.currentCoordinate).then(event=>{
         this.setLoadingMessages('Saving offence information');
@@ -340,6 +351,7 @@ export class ReportOffencePage {
       offenceId : eventId,
       mobileNumber : this.mobileNumber,
       driverName: this.driverName,
+      programEventRelation : this.programEventRelation,
       offenceListId : this.selectedOffenses
     };
     this.loadingData = false;

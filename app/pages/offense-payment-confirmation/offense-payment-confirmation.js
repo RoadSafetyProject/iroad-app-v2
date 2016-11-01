@@ -35,17 +35,19 @@ var OffensePaymentConfirmationPage = (function () {
         this.programOffenceRegistry = 'Offence Registry';
         this.offenceListDisplayName = "Nature";
         this.offenceListCost = "Amount";
-        this.offenceListCodesName = "offense code";
-        this.offenceListCodes = [];
         this.offenceListDisplayNameToDataElement = {};
         this.currentUser = {};
         this.program = {};
         this.loadingData = false;
         this.loadingMessages = [];
+        //@todo customization of offence notifications
+        this.offenceListCodesName = "offense code";
+        this.offenceListCodes = [];
         this.user.getCurrentUser().then(function (currentUser) {
             _this.currentUser = JSON.parse(currentUser);
             _this.offenceId = _this.params.get('offenceId');
             _this.offenceListIds = _this.params.get('offenceListId');
+            _this.programEventRelation = _this.params.get('programEventRelation');
             _this.driverNumber = _this.params.get('mobileNumber');
             _this.driverName = _this.params.get('driverName');
             _this.loadingOffenceRegistryProgram();
@@ -94,6 +96,8 @@ var OffensePaymentConfirmationPage = (function () {
             _this.loadingData = false;
         });
     };
+    //todo get driver information as well as vehicle information
+    //@todo user programEventRelation = {programName ={event:eventId,program:programId}
     OffensePaymentConfirmationPage.prototype.setSelectedOffences = function (events) {
         var _this = this;
         this.selectedOffences = [];
@@ -128,12 +132,11 @@ var OffensePaymentConfirmationPage = (function () {
         this.loadingData = true;
         this.loadingMessages = [];
         var message = this.getOffenseNotificationMessage();
-        //let number = '+255718922311';
-        var number = "+255764010449";
+        var number = '+255718922311';
+        //let number = "+255764010449";
         if (this.driverNumber != "") {
             number = this.driverNumber;
         }
-        //let number = '+255717154006';
         this.setLoadingMessages('Sending message');
         this.app.sendSms(number, message).then(function () {
             _this.setToasterMessage('Payment details has been sent');

@@ -21,23 +21,25 @@ import {OffencePaymentPage} from '../offence-payment/offence-payment';
 })
 export class OffensePaymentConfirmationPage {
 
-  private offenceId : string;
-  private offenceListIds : any = [];
-  private programOffenceRegistry :string = 'Offence Registry';
-  private offenceListDisplayName :string = "Nature";
+  private offenceId:string;
+  private offenceListIds:any = [];
+  private programOffenceRegistry:string = 'Offence Registry';
+  private offenceListDisplayName:string = "Nature";
   private offenceListCost:string = "Amount";
-  private offenceListCodesName : string =  "offense code";
-  private offenceListCodes : any = [];
-  private offenceListDisplayNameToDataElement : any = {};
-  private selectedOffences :any;
-  private selectedOffencesTotal : number;
-  private currentUser :any = {};
-  private program : any = {};
-  private loadingData : boolean = false;
-  private loadingMessages : any = [];
-
+  private offenceListDisplayNameToDataElement:any = {};
+  private selectedOffences:any;
+  private selectedOffencesTotal:number;
+  private currentUser:any = {};
+  private program:any = {};
+  private loadingData:boolean = false;
+  private loadingMessages:any = [];
   //@todo customization of offence notifications
+  private offenceListCodesName:string = "offense code";
+  private offenceListCodes:any = [];
+
+
   //@todo send sms to driver or vehicle's owner mobile number
+  private programEventRelation : any;
   private driverNumber : string;
   private driverName : string;
   constructor(private params: NavParams,private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
@@ -45,6 +47,7 @@ export class OffensePaymentConfirmationPage {
       this.currentUser = JSON.parse(currentUser);
       this.offenceId = this.params.get('offenceId');
       this.offenceListIds = this.params.get('offenceListId');
+      this.programEventRelation = this.params.get('programEventRelation');
       this.driverNumber = this.params.get('mobileNumber');
       this.driverName = this.params.get('driverName');
       this.loadingOffenceRegistryProgram();
@@ -92,6 +95,8 @@ export class OffensePaymentConfirmationPage {
     })
   }
 
+  //todo get driver information as well as vehicle information
+  //@todo user programEventRelation = {programName ={event:eventId,program:programId}
   setSelectedOffences(events){
     this.selectedOffences = [];
     this.offenceListCodes = [];
@@ -115,7 +120,6 @@ export class OffensePaymentConfirmationPage {
         offence : offence,
         cost : cost
       });
-
     });
     this.loadingData = false;
   }
@@ -124,13 +128,11 @@ export class OffensePaymentConfirmationPage {
     this.loadingData = true;
     this.loadingMessages = [];
     let message = this.getOffenseNotificationMessage();
-    //let number = '+255718922311';
-    let number = "+255764010449";
+    let number = '+255718922311';
+    //let number = "+255764010449";
     if(this.driverNumber !=""){
       number = this.driverNumber;
     }
-
-    //let number = '+255717154006';
     this.setLoadingMessages('Sending message');
     this.app.sendSms(number,message).then(()=>{
       this.setToasterMessage('Payment details has been sent');
@@ -158,7 +160,6 @@ export class OffensePaymentConfirmationPage {
     this.offenceListCodes.forEach((code : any,index:any)=>{
       message += (index + 1) + ". "+code + ", ";
     });
-
     let total = 0;
     this.selectedOffences.forEach(selectedOffence=>{
       total += parseInt(selectedOffence.cost);
