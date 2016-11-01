@@ -1,0 +1,17 @@
+com.cordova.plugins.sms 0.1.10 "Cordova SMS Plugin"
+cordova-plugin-app-version 0.1.9 "AppVersion"
+cordova-plugin-camera 2.2.0 "Camera"
+cordova-plugin-compat 1.0.0 "Compat"
+cordova-plugin-console 1.0.3 "Console"
+cordova-plugin-device 1.1.2 "Device"
+cordova-plugin-file 4.3.0 "File"
+cordova-plugin-geolocation 2.3.0 "Geolocation"
+cordova-plugin-media-capture 1.4.0 "Capture"
+cordova-plugin-splashscreen 3.2.2 "Splashscreen"
+cordova-plugin-statusbar 2.1.3 "StatusBar"
+cordova-plugin-whitelist 1.2.2 "Whitelist"
+cordova-sqlite-storage 1.4.7 "Cordova sqlite storage plugin"
+ionic-plugin-keyboard 2.2.1 "Keyboard"
+phonegap-plugin-barcodescanner 6.0.1 "BarcodeScanner"
+
+

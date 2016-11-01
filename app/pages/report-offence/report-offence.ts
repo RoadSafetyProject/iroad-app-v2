@@ -42,9 +42,19 @@ export class ReportOffencePage {
   private relationPrograms :any = {};
   private data : any = {};
 
+  //driver
+  //todo checking other values to be captures
+  private mobileNumberDataElementName:any = "Phone Number";
+  private driverFullName : string = "Full Name";
+  private mobileNumberDataElement : any;
+  private driverFullNameDataElement : any;
+  private mobileNumber : string;
+  private driverName : string;
+
   constructor(private eventProvider : EventProvider,private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
     this.user.getCurrentUser().then(currentUser=>{
       this.currentUser = JSON.parse(currentUser);
+      this.mobileNumber = "";
       this.loadingProgram();
     });
   }
@@ -113,6 +123,13 @@ export class ReportOffencePage {
 
   setRelationProgramMetadata(programs,programName){
     this.relationPrograms[programName] = programs[0];
+    programs[0].programStages[0].programStageDataElements.forEach(programStageDataElement=>{
+      if(programStageDataElement.dataElement.name.toLowerCase() == this.mobileNumberDataElementName.toLowerCase() ){
+        this.mobileNumberDataElement = programStageDataElement.dataElement;
+      }else if(programStageDataElement.dataElement.name.toLowerCase() == this.driverFullName.toLowerCase() ){
+        this.driverFullNameDataElement = programStageDataElement.dataElement;
+      }
+    });
   }
 
   loadingOffenseRegistryProgram(){
@@ -196,12 +213,6 @@ export class ReportOffencePage {
     if(this.selectedOffenses.length > 0){
       this.loadingData = true;
       this.loadingMessages = [];
-      //let parameters = {
-      //  offenceId : 'eventId',
-      //  offenceListId : this.selectedOffenses
-      //};
-      //this.loadingData = false;
-      //this.navCtrl.push(OffensePaymentConfirmationPage,parameters);
       this.fetchingDriver();
     }else{
       this.setToasterMessage('Please select at least one offence from offence list');
@@ -230,7 +241,23 @@ export class ReportOffencePage {
     if(events.length > 0){
       let relationDataElementId  = this.relationDataElementProgramMapping[programName];
       this.dataValues[relationDataElementId] = events[0].event;
-      this.fetchingVehicle();
+      events[0].dataValues.forEach((dataValue:any)=>{
+        if(dataValue.dataElement == this.mobileNumberDataElement.id){
+          this.mobileNumber = dataValue.value;
+        }else if(dataValue.dataElement == this.driverFullNameDataElement.id){
+          this.driverName = dataValue.value;
+        }
+      });
+      let parameters = {
+        offenceId: 'eventId',
+        mobileNumber: this.mobileNumber,
+        driverName: this.driverName,
+        offenceListId: this.selectedOffenses
+      };
+      this.loadingData = false;
+      this.navCtrl.push(OffensePaymentConfirmationPage,parameters);
+
+      //this.fetchingVehicle();
     }else{
       this.loadingData = false;
       this.setToasterMessage('Driver has not found');
@@ -311,6 +338,8 @@ export class ReportOffencePage {
   goToOffensePaymentConfirmation(eventId){
     let parameters = {
       offenceId : eventId,
+      mobileNumber : this.mobileNumber,
+      driverName: this.driverName,
       offenceListId : this.selectedOffenses
     };
     this.loadingData = false;

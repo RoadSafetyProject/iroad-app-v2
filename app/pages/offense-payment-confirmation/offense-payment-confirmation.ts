@@ -24,8 +24,10 @@ export class OffensePaymentConfirmationPage {
   private offenceId : string;
   private offenceListIds : any = [];
   private programOffenceRegistry :string = 'Offence Registry';
-  private offenceListDisplayName = "Nature";
-  private offenceListCost = "Amount";
+  private offenceListDisplayName :string = "Nature";
+  private offenceListCost:string = "Amount";
+  private offenceListCodesName : string =  "offense code";
+  private offenceListCodes : any = [];
   private offenceListDisplayNameToDataElement : any = {};
   private selectedOffences :any;
   private selectedOffencesTotal : number;
@@ -36,11 +38,15 @@ export class OffensePaymentConfirmationPage {
 
   //@todo customization of offence notifications
   //@todo send sms to driver or vehicle's owner mobile number
+  private driverNumber : string;
+  private driverName : string;
   constructor(private params: NavParams,private navCtrl: NavController,private toastCtrl: ToastController,private sqlLite : SqlLite,private user: User,private httpClient: HttpClient,private app : App) {
     this.user.getCurrentUser().then(currentUser=>{
       this.currentUser = JSON.parse(currentUser);
       this.offenceId = this.params.get('offenceId');
       this.offenceListIds = this.params.get('offenceListId');
+      this.driverNumber = this.params.get('mobileNumber');
+      this.driverName = this.params.get('driverName');
       this.loadingOffenceRegistryProgram();
     });
   }
@@ -67,6 +73,8 @@ export class OffensePaymentConfirmationPage {
         this.offenceListDisplayNameToDataElement[this.offenceListDisplayName] = programStageDataElement.dataElement.id;
       }else if(programStageDataElement.dataElement.name.toLowerCase() == this.offenceListCost.toLowerCase()){
         this.offenceListDisplayNameToDataElement[this.offenceListCost] = programStageDataElement.dataElement.id;
+      }else if(programStageDataElement.dataElement.name.toLowerCase() == this.offenceListCodesName.toLowerCase()){
+        this.offenceListDisplayNameToDataElement[this.offenceListCodesName] = programStageDataElement.dataElement.id;
       }
     });
     this.loadSelectedOffences();
@@ -86,6 +94,7 @@ export class OffensePaymentConfirmationPage {
 
   setSelectedOffences(events){
     this.selectedOffences = [];
+    this.offenceListCodes = [];
     this.selectedOffencesTotal = 0;
     events.forEach(event=>{
       let offence = "";
@@ -96,12 +105,17 @@ export class OffensePaymentConfirmationPage {
           this.selectedOffencesTotal += parseInt(cost);
         }else if(dataValue.dataElement == this.offenceListDisplayNameToDataElement[this.offenceListDisplayName]){
           offence = dataValue.value;
+        }else if (dataValue.dataElement == this.offenceListDisplayNameToDataElement[this.offenceListCodesName]){
+          if(this.offenceListCodes.indexOf(dataValue.value) == -1){
+            this.offenceListCodes.push(dataValue.value);
+          }
         }
       });
       this.selectedOffences.push({
         offence : offence,
         cost : cost
       });
+
     });
     this.loadingData = false;
   }
@@ -110,7 +124,12 @@ export class OffensePaymentConfirmationPage {
     this.loadingData = true;
     this.loadingMessages = [];
     let message = this.getOffenseNotificationMessage();
-    let number = '+255718922311';
+    //let number = '+255718922311';
+    let number = "+255764010449";
+    if(this.driverNumber !=""){
+      number = this.driverNumber;
+    }
+
     //let number = '+255717154006';
     this.setLoadingMessages('Sending message');
     this.app.sendSms(number,message).then(()=>{
@@ -134,12 +153,17 @@ export class OffensePaymentConfirmationPage {
 
   getOffenseNotificationMessage(){
     this.setLoadingMessages('Composing message');
-    let message = "OFFENCE NOTIFICATION\n Dear Joseph Chingalo,you have committed "+this.selectedOffences.length +" offences .\n";
+    let message = "OFFENCE NOTIFICATION\n Dear "+this.driverName+",you have committed "+this.selectedOffences.length +" offences in ";
+    //add codes
+    this.offenceListCodes.forEach((code : any,index:any)=>{
+      message += (index + 1) + ". "+code + ", ";
+    });
+
     let total = 0;
     this.selectedOffences.forEach(selectedOffence=>{
       total += parseInt(selectedOffence.cost);
     });
-    message +='Total cost Tsh ' + total + '. \n';
+    message +='Total cost Tsh ' + total + '. ';
     message +='Payment code is ' + this.offenceId;
     return message;
   }

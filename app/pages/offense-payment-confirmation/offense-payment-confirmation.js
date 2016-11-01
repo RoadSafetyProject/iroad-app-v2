@@ -22,8 +22,6 @@ var offence_payment_1 = require('../offence-payment/offence-payment');
   Ionic pages and navigation.
 */
 var OffensePaymentConfirmationPage = (function () {
-    //@todo customization of offence notifications
-    //@todo send sms to driver or vehicle's owner mobile number
     function OffensePaymentConfirmationPage(params, navCtrl, toastCtrl, sqlLite, user, httpClient, app) {
         var _this = this;
         this.params = params;
@@ -37,6 +35,8 @@ var OffensePaymentConfirmationPage = (function () {
         this.programOffenceRegistry = 'Offence Registry';
         this.offenceListDisplayName = "Nature";
         this.offenceListCost = "Amount";
+        this.offenceListCodesName = "offense code";
+        this.offenceListCodes = [];
         this.offenceListDisplayNameToDataElement = {};
         this.currentUser = {};
         this.program = {};
@@ -46,6 +46,8 @@ var OffensePaymentConfirmationPage = (function () {
             _this.currentUser = JSON.parse(currentUser);
             _this.offenceId = _this.params.get('offenceId');
             _this.offenceListIds = _this.params.get('offenceListId');
+            _this.driverNumber = _this.params.get('mobileNumber');
+            _this.driverName = _this.params.get('driverName');
             _this.loadingOffenceRegistryProgram();
         });
     }
@@ -74,6 +76,9 @@ var OffensePaymentConfirmationPage = (function () {
             else if (programStageDataElement.dataElement.name.toLowerCase() == _this.offenceListCost.toLowerCase()) {
                 _this.offenceListDisplayNameToDataElement[_this.offenceListCost] = programStageDataElement.dataElement.id;
             }
+            else if (programStageDataElement.dataElement.name.toLowerCase() == _this.offenceListCodesName.toLowerCase()) {
+                _this.offenceListDisplayNameToDataElement[_this.offenceListCodesName] = programStageDataElement.dataElement.id;
+            }
         });
         this.loadSelectedOffences();
     };
@@ -92,6 +97,7 @@ var OffensePaymentConfirmationPage = (function () {
     OffensePaymentConfirmationPage.prototype.setSelectedOffences = function (events) {
         var _this = this;
         this.selectedOffences = [];
+        this.offenceListCodes = [];
         this.selectedOffencesTotal = 0;
         events.forEach(function (event) {
             var offence = "";
@@ -103,6 +109,11 @@ var OffensePaymentConfirmationPage = (function () {
                 }
                 else if (dataValue.dataElement == _this.offenceListDisplayNameToDataElement[_this.offenceListDisplayName]) {
                     offence = dataValue.value;
+                }
+                else if (dataValue.dataElement == _this.offenceListDisplayNameToDataElement[_this.offenceListCodesName]) {
+                    if (_this.offenceListCodes.indexOf(dataValue.value) == -1) {
+                        _this.offenceListCodes.push(dataValue.value);
+                    }
                 }
             });
             _this.selectedOffences.push({
@@ -117,7 +128,11 @@ var OffensePaymentConfirmationPage = (function () {
         this.loadingData = true;
         this.loadingMessages = [];
         var message = this.getOffenseNotificationMessage();
-        var number = '+255718922311';
+        //let number = '+255718922311';
+        var number = "+255764010449";
+        if (this.driverNumber != "") {
+            number = this.driverNumber;
+        }
         //let number = '+255717154006';
         this.setLoadingMessages('Sending message');
         this.app.sendSms(number, message).then(function () {
@@ -138,12 +153,16 @@ var OffensePaymentConfirmationPage = (function () {
     };
     OffensePaymentConfirmationPage.prototype.getOffenseNotificationMessage = function () {
         this.setLoadingMessages('Composing message');
-        var message = "OFFENCE NOTIFICATION\n Dear Joseph Chingalo,you have committed " + this.selectedOffences.length + " offences .\n";
+        var message = "OFFENCE NOTIFICATION\n Dear " + this.driverName + ",you have committed " + this.selectedOffences.length + " offences in ";
+        //add codes
+        this.offenceListCodes.forEach(function (code, index) {
+            message += (index + 1) + ". " + code + ", ";
+        });
         var total = 0;
         this.selectedOffences.forEach(function (selectedOffence) {
             total += parseInt(selectedOffence.cost);
         });
-        message += 'Total cost Tsh ' + total + '. \n';
+        message += 'Total cost Tsh ' + total + '. ';
         message += 'Payment code is ' + this.offenceId;
         return message;
     };

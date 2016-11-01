@@ -51,8 +51,13 @@ var ReportOffencePage = (function () {
         this.relationDataElementPrefix = "Program_";
         this.relationPrograms = {};
         this.data = {};
+        //driver
+        //todo checking other values to be captures
+        this.mobileNumberDataElementName = "Phone Number";
+        this.driverFullName = "Full Name";
         this.user.getCurrentUser().then(function (currentUser) {
             _this.currentUser = JSON.parse(currentUser);
+            _this.mobileNumber = "";
             _this.loadingProgram();
         });
     }
@@ -118,7 +123,16 @@ var ReportOffencePage = (function () {
         });
     };
     ReportOffencePage.prototype.setRelationProgramMetadata = function (programs, programName) {
+        var _this = this;
         this.relationPrograms[programName] = programs[0];
+        programs[0].programStages[0].programStageDataElements.forEach(function (programStageDataElement) {
+            if (programStageDataElement.dataElement.name.toLowerCase() == _this.mobileNumberDataElementName.toLowerCase()) {
+                _this.mobileNumberDataElement = programStageDataElement.dataElement;
+            }
+            else if (programStageDataElement.dataElement.name.toLowerCase() == _this.driverFullName.toLowerCase()) {
+                _this.driverFullNameDataElement = programStageDataElement.dataElement;
+            }
+        });
     };
     ReportOffencePage.prototype.loadingOffenseRegistryProgram = function () {
         var _this = this;
@@ -198,12 +212,6 @@ var ReportOffencePage = (function () {
         if (this.selectedOffenses.length > 0) {
             this.loadingData = true;
             this.loadingMessages = [];
-            //let parameters = {
-            //  offenceId : 'eventId',
-            //  offenceListId : this.selectedOffenses
-            //};
-            //this.loadingData = false;
-            //this.navCtrl.push(OffensePaymentConfirmationPage,parameters);
             this.fetchingDriver();
         }
         else {
@@ -230,10 +238,26 @@ var ReportOffencePage = (function () {
         }
     };
     ReportOffencePage.prototype.setDriverDataValue = function (events, programName) {
+        var _this = this;
         if (events.length > 0) {
             var relationDataElementId = this.relationDataElementProgramMapping[programName];
             this.dataValues[relationDataElementId] = events[0].event;
-            this.fetchingVehicle();
+            events[0].dataValues.forEach(function (dataValue) {
+                if (dataValue.dataElement == _this.mobileNumberDataElement.id) {
+                    _this.mobileNumber = dataValue.value;
+                }
+                else if (dataValue.dataElement == _this.driverFullNameDataElement.id) {
+                    _this.driverName = dataValue.value;
+                }
+            });
+            var parameters = {
+                offenceId: 'eventId',
+                mobileNumber: this.mobileNumber,
+                driverName: this.driverName,
+                offenceListId: this.selectedOffenses
+            };
+            this.loadingData = false;
+            this.navCtrl.push(offense_payment_confirmation_1.OffensePaymentConfirmationPage, parameters);
         }
         else {
             this.loadingData = false;
@@ -312,6 +336,8 @@ var ReportOffencePage = (function () {
     ReportOffencePage.prototype.goToOffensePaymentConfirmation = function (eventId) {
         var parameters = {
             offenceId: eventId,
+            mobileNumber: this.mobileNumber,
+            driverName: this.driverName,
             offenceListId: this.selectedOffenses
         };
         this.loadingData = false;
