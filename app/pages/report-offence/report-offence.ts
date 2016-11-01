@@ -42,7 +42,6 @@ export class ReportOffencePage {
   private relationPrograms :any = {};
   private data : any = {};
   private programEventRelation : any;
-
   //driver
   //todo checking other values to be captures
   private mobileNumberDataElementName:any = "Phone Number";
@@ -288,9 +287,9 @@ export class ReportOffencePage {
     if(events.length > 0){
       //set set programs to eventId relation mapper
       this.programEventRelation[programName] = {event : events[0].event,program : events[0].program};
-
       let relationDataElementId  = this.relationDataElementProgramMapping[programName];
       this.dataValues[relationDataElementId] = events[0].event;
+
       /*
       let parameters = {
         offenceId: 'eventId',

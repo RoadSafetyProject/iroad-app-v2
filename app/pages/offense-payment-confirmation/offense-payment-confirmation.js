@@ -43,6 +43,7 @@ var OffensePaymentConfirmationPage = (function () {
         //@todo customization of offence notifications
         this.offenceListCodesName = "offense code";
         this.offenceListCodes = [];
+        this.offensePoints = { id: "", name: "Points", points: 0 };
         this.user.getCurrentUser().then(function (currentUser) {
             _this.currentUser = JSON.parse(currentUser);
             _this.offenceId = _this.params.get('offenceId');
@@ -81,6 +82,9 @@ var OffensePaymentConfirmationPage = (function () {
             else if (programStageDataElement.dataElement.name.toLowerCase() == _this.offenceListCodesName.toLowerCase()) {
                 _this.offenceListDisplayNameToDataElement[_this.offenceListCodesName] = programStageDataElement.dataElement.id;
             }
+            else if (programStageDataElement.dataElement.name.toLowerCase() == _this.offensePoints.name.toLowerCase()) {
+                _this.offensePoints.id = programStageDataElement.dataElement.id;
+            }
         });
         this.loadSelectedOffences();
     };
@@ -118,6 +122,9 @@ var OffensePaymentConfirmationPage = (function () {
                     if (_this.offenceListCodes.indexOf(dataValue.value) == -1) {
                         _this.offenceListCodes.push(dataValue.value);
                     }
+                }
+                else if (dataValue.dataElement == _this.offensePoints.id) {
+                    _this.offensePoints.points += parseInt(dataValue.value);
                 }
             });
             _this.selectedOffences.push({

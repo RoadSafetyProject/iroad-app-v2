@@ -36,6 +36,7 @@ export class OffensePaymentConfirmationPage {
   //@todo customization of offence notifications
   private offenceListCodesName:string = "offense code";
   private offenceListCodes:any = [];
+  private offensePoints : any = {id : "",name : "Points",points : 0};
 
 
   //@todo send sms to driver or vehicle's owner mobile number
@@ -78,6 +79,8 @@ export class OffensePaymentConfirmationPage {
         this.offenceListDisplayNameToDataElement[this.offenceListCost] = programStageDataElement.dataElement.id;
       }else if(programStageDataElement.dataElement.name.toLowerCase() == this.offenceListCodesName.toLowerCase()){
         this.offenceListDisplayNameToDataElement[this.offenceListCodesName] = programStageDataElement.dataElement.id;
+      }else if(programStageDataElement.dataElement.name.toLowerCase() == this.offensePoints.name.toLowerCase() ){
+        this.offensePoints.id = programStageDataElement.dataElement.id;
       }
     });
     this.loadSelectedOffences();
@@ -114,6 +117,8 @@ export class OffensePaymentConfirmationPage {
           if(this.offenceListCodes.indexOf(dataValue.value) == -1){
             this.offenceListCodes.push(dataValue.value);
           }
+        }else if(dataValue.dataElement == this.offensePoints.id){
+          this.offensePoints.points += parseInt(dataValue.value);
         }
       });
       this.selectedOffences.push({
