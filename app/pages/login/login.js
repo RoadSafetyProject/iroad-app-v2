@@ -73,16 +73,16 @@ var LoginPage = (function () {
                             _this.setLoadingMessages('Authenticating user');
                             _this.user.setCurrentUser(_this.loginData).then(function (user) {
                                 var fields = "fields=[:all],userCredentials[userRoles[name,programs[id,name]]";
-                                _this.httpClient.get('/api/me.json?' + fields, user).subscribe(function (data) {
+                                _this.httpClient.get('/api/me.json?' + fields, _this.loginData).subscribe(function (data) {
                                     data = data.json();
                                     _this.user.setUserData(data).then(function (userData) {
                                         _this.loginData.orgUnit = userData.organisationUnits[0].id;
                                         _this.setLoadingMessages('Loading server information');
-                                        _this.httpClient.get('/api/system/info', user).subscribe(function (data) {
+                                        _this.httpClient.get('/api/system/info', _this.loginData).subscribe(function (data) {
                                             data = data.json();
                                             _this.setLoadingMessages('Saving system information');
                                             _this.user.setUserSystemInformation(data).then(function (systemInformation) {
-                                                _this.downloadingPrograms(user, databaseName);
+                                                _this.downloadingPrograms(_this.loginData, databaseName);
                                             }, function (error) {
                                                 _this.setToasterMessage('Fail to save system information');
                                             });

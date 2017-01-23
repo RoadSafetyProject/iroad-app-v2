@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-ionic plugin add com.cordova.plugins.sms
+ionic plugin add cordova-sms-plugin
 ionic plugin add cordova-plugin-app-version
 ionic plugin add cordova-plugin-camera
 ionic plugin add cordova-plugin-compat

@@ -66,18 +66,18 @@ export class LoginPage {
                 this.setLoadingMessages('Authenticating user');
                 this.user.setCurrentUser(this.loginData).then(user=>{
                   let fields = "fields=[:all],userCredentials[userRoles[name,programs[id,name]]";
-                  this.httpClient.get('/api/me.json?'+fields,user).subscribe(
+                  this.httpClient.get('/api/me.json?'+fields,this.loginData).subscribe(
                     data => {
                       data = data.json();
                       this.user.setUserData(data).then(userData=>{
                         this.loginData.orgUnit = userData.organisationUnits[0].id;
                         this.setLoadingMessages('Loading server information');
-                        this.httpClient.get('/api/system/info',user).subscribe(
+                        this.httpClient.get('/api/system/info',this.loginData).subscribe(
                           data =>{
                             data = data.json();
                             this.setLoadingMessages('Saving system information');
                             this.user.setUserSystemInformation(data).then(systemInformation=>{
-                              this.downloadingPrograms(user,databaseName);
+                              this.downloadingPrograms(this.loginData,databaseName);
                             },error=>{
                               this.setToasterMessage('Fail to save system information');
                             })
